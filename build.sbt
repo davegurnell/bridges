@@ -1,6 +1,6 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
-version      in ThisBuild := "0.1"
+version      in ThisBuild := "0.2.0-SNAPSHOT"
 
 scalaOrganization := "org.typelevel"
 scalaVersion      := "2.12.1"
