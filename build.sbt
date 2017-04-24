@@ -15,9 +15,10 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai"     %% "shapeless" % "2.3.2",
-  "com.davegurnell" %% "unindent"  % "1.1.0",
-  "org.scalatest"   %% "scalatest" % "3.0.1" % Test
+  "com.chuusai"       %% "shapeless"     % "2.3.2",
+  "com.davegurnell"   %% "unindent"      % "1.1.0",
+  "org.apache.commons" % "commons-lang3" % "3.5",
+  "org.scalatest"     %% "scalatest"     % "3.0.1" % Test
 )
 
 pomExtra in Global := {

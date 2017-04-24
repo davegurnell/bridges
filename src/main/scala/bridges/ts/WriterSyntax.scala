@@ -5,7 +5,7 @@ import java.io.{File, FileWriter, PrintWriter, Writer}
 trait WriterSyntax {
   self: RendererSyntax =>
 
-  import TsType._
+  import Type._
 
   implicit class BindingListWriteOps(bindings: List[Binding]) {
     def writeTo(file: File): Unit = {

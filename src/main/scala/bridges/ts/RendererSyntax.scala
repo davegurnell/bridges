@@ -1,7 +1,7 @@
 package bridges.ts
 
 trait RendererSyntax {
-  import TsType._
+  import Type._
 
   implicit class BindingListRenderOps(bindings: List[Binding]) {
     def render: String =
