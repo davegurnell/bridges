@@ -2,8 +2,8 @@ name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
 version      in ThisBuild := "0.2.0-SNAPSHOT"
 
-scalaOrganization := "org.typelevel"
-scalaVersion      := "2.12.1"
+scalaVersion       in ThisBuild := "2.12.1"
+crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
 
 licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
 
