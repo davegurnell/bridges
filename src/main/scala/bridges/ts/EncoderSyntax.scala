@@ -1,9 +1,9 @@
 package bridges.ts
 
 trait EncoderSyntax {
-  import TsType._
+  import Type._
 
-  def encode[A: Encoder]: TsType =
+  def encode[A: Encoder]: Type =
     Encoder[A].encode
 
   def bindings[A: Encoder]: List[Binding] =

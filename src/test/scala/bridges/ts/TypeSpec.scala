@@ -2,7 +2,7 @@ package bridges.ts
 
 import org.scalatest._
 
-object TsTypeSpec {
+object TypeSpec {
   final case class Color(red: Int, green: Int, blue: Int)
 
   sealed abstract class Shape extends Product with Serializable
@@ -10,9 +10,9 @@ object TsTypeSpec {
   case class Circle(radius: Double, color: Color) extends Shape
 }
 
-class TsTypeSpec extends FreeSpec with Matchers {
-  import TsType._
-  import TsTypeSpec._
+class TypeSpec extends FreeSpec with Matchers {
+  import Type._
+  import TypeSpec._
 
   "flatten" in {
     val actual   = encode[Shape].flatten
@@ -29,11 +29,13 @@ class TsTypeSpec extends FreeSpec with Matchers {
     ))
 
     val circle = Binding("Circle", Struct(
+      "type"   -> StrLiteral("Circle"),
       "radius" -> Num,
       "color"  -> Ref("Color")
     ))
 
     val rectangle = Binding("Rectangle", Struct(
+      "type"   -> StrLiteral("Rectangle"),
       "width"  -> Num,
       "height" -> Num,
       "color"  -> Ref("Color")

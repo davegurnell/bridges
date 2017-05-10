@@ -20,24 +20,26 @@ class RendererSpec extends FreeSpec with Matchers {
 
     val expected: String =
       i"""
-      type Color = {
+      export type Color = {
         red: number,
         green: number,
         blue: number
       }
 
-      type Circle = {
+      export type Circle = {
+        type: "Circle",
         radius: number,
         color: Color
       }
 
-      type Rectangle = {
+      export type Rectangle = {
+        type: "Rectangle",
         width: number,
         height: number,
         color: Color
       }
 
-      type Shape =
+      export type Shape =
         Circle |
         Rectangle
       """

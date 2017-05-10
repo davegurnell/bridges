@@ -1,9 +1,9 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
-version      in ThisBuild := "0.1"
+version      in ThisBuild := "0.2.0"
 
-scalaOrganization := "org.typelevel"
-scalaVersion      := "2.12.1"
+scalaVersion       in ThisBuild := "2.12.1"
+crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
 
 licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
 
@@ -15,9 +15,10 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai"     %% "shapeless" % "2.3.2",
-  "com.davegurnell" %% "unindent"  % "1.1.0",
-  "org.scalatest"   %% "scalatest" % "3.0.1" % Test
+  "com.chuusai"       %% "shapeless"     % "2.3.2",
+  "com.davegurnell"   %% "unindent"      % "1.1.0",
+  "org.apache.commons" % "commons-lang3" % "3.5",
+  "org.scalatest"     %% "scalatest"     % "3.0.1" % Test
 )
 
 pomExtra in Global := {
