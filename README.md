@@ -18,7 +18,7 @@ libraryDependencies += "com.davegurnell" %% "bridges" % "<<VERSION>>"
 
 ## Synopsis
 
-### Render Typescript Bindings for Scala ADTs
+### Render Typescript/Flow Declarations for Scala ADTs
 
 Create a simple data model:
 
@@ -30,43 +30,41 @@ final case class Circle(radius: Double, color: Color) extends Shape
 final case class Rectangle(width: Double, height: Double, color: Color) extends Shape
 ~~~
 
-Call `bindings[Foo].render` to render a type and all its dependendents
-to a `String` representing a Typescript definition:
+Call `declaration[Foo]` to generate a type-declaration for `Foo`.
+Call `render[Typescript](...)` to convert a list of declarations as Typescript,
+or `render[Flow](...)` to render them as Flow types.
 
 ~~~ scala
-import bridges.ts._
+import bridges._
+import bridges.syntax._
 
-bindings[Shape].render
+render(List(
+  declaration[Color],
+  declaration[Circle],
+  declaration[Rectangle],
+  declaration[Shape]
+))
 // res1: String =
-// type Color = {
+// export type Color = {
 //   red: number,
 //   green: number,
 //   blue: number
-// }
+// };
 //
-// type Circle = {
+// export type Circle = {
 //   radius: number,
 //   color: Color
-// }
+// };
 //
-// type Rectangle = {
+// export type Rectangle = {
 //   width: number,
 //   height: number,
 //   color: Color
-// }
+// };
 //
-// type Shape =
-//   Circle |
-//   Rectangle
-~~~
-
-Call `bindings[Foo].writeTo(file)` to write the definitions to a file:
-
-~~~ scala
-import java.io.File
-
-bindings[Shape].writeTo(new File("/tmp/shape.ts"))
-// Unit
+// export type Shape =
+//   ({ type: "Circle" } & Circle) |
+//   ({ type: "Rectangle" } & Rectangle);
 ~~~
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0
