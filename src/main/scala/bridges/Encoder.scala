@@ -43,8 +43,8 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit def setEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Set[A]] =
     pure(Array(enc.encode))
 
-  implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: Lazy[BasicEncoder[B]]): BasicEncoder[A] =
-    pure(encoder.value.encode)
+  implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =
+    pure(encoder.encode)
 }
 
 trait EncoderInstances1 extends EncoderInstances0 {
