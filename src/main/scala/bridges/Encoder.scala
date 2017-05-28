@@ -1,5 +1,6 @@
 package bridges
 
+import scala.language.higherKinds
 import shapeless.labelled.FieldType
 import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, LabelledGeneric, Lazy, Typeable, Unwrapped, Witness}
 
@@ -37,10 +38,7 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
     pure(enc.encode | Null)
 
-  implicit def seqEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Seq[A]] =
-    pure(Array(enc.encode))
-
-  implicit def setEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Set[A]] =
+  implicit def traversableEncoder[F[_] <: Traversable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
     pure(Array(enc.encode))
 
   implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =

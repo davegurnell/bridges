@@ -41,7 +41,8 @@ class EncoderSpec extends FreeSpec with Matchers {
 
     "sequences" in {
       encode[Seq[String]] should be(Array(Str))
-      encode[Set[Set[Int]]] should be(Array(Array(Num)))
+      encode[List[Boolean]] should be(Array(Bool))
+      encode[Set[Int]] should be(Array(Num))
     }
 
     "value classes" in {
