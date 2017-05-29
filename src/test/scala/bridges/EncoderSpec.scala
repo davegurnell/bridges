@@ -41,8 +41,7 @@ class EncoderSpec extends FreeSpec with Matchers {
 
     "sequences" in {
       encode[Seq[String]] should be(Array(Str))
-      encode[List[Boolean]] should be(Array(Bool))
-      encode[Set[Int]] should be(Array(Num))
+      encode[Set[Set[Int]]] should be(Array(Array(Num)))
     }
 
     "value classes" in {
@@ -54,7 +53,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      encode[OneOrOther] should be(DiscUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      encode[OneOrOther] should be(discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+    }
+
+    "overridden defaults" in {
+      implicit val oneEncoder: BasicEncoder[One] =
+        Encoder.pure(Str)
+
+      encode[One] should be(Str)
+      encode[OneOrOther] should be(discUnion("One" -> Str, "Other" -> Ref("Other")))
     }
   }
 
@@ -68,7 +75,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      declaration[OneOrOther] should be("OneOrOther" := DiscUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+    }
+
+    "overridden defaults" in {
+      implicit val oneEncoder: BasicEncoder[One] =
+        Encoder.pure(Str)
+
+      encode[One] should be(Str)
+      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Str, "Other" -> Ref("Other")))
     }
   }
 }
