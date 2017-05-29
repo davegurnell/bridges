@@ -8,14 +8,14 @@ object syntax {
   def encode[A: Encoder]: Type =
     Encoder[A].encode
 
-  def declaration[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): Declaration[A] =
+  def declaration[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): Declaration =
     Declaration(typeable.describe, encoder.value.encode)
 
-  def render[A](decls: List[Declaration[_]])(implicit renderer: Renderer[A]): String =
+  def render[A](decls: List[Declaration])(implicit renderer: Renderer[A]): String =
     renderer.render(decls)
 
   implicit class StringOps(str: String) {
-    def := [A](tpe: Type): Declaration[A] =
+    def := [A](tpe: Type): Declaration =
       Declaration(str, tpe)
   }
 

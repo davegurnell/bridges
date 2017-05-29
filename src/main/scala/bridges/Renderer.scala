@@ -3,16 +3,16 @@ package bridges
 import org.apache.commons.lang3.StringEscapeUtils.{escapeJava => escape}
 
 trait Renderer[A] {
-  def render(decls: List[Declaration[_]]): String
+  def render(decls: List[Declaration]): String
 }
 
 trait BaseRenderer[A] extends Renderer[A] {
   import Type._
 
-  def render(decls: List[Declaration[_]]): String =
+  def render(decls: List[Declaration]): String =
     decls.map(render).mkString("\n\n")
 
-  def render(decl: Declaration[_]): String =
+  def render(decl: Declaration): String =
     s"export type ${decl.id} = ${renderType(decl.tpe)};"
 
   def renderType(tpe: Type): String =
