@@ -4,11 +4,19 @@ import org.scalatest._
 import unindent._
 
 object RendererSpec {
+  import syntax._
+
   final case class Color(red: Int, green: Int, blue: Int)
 
   sealed abstract class Shape extends Product with Serializable
   case class Rectangle(width: Double, height: Double, color: Color) extends Shape
   case class Circle(radius: Double, color: Color) extends Shape
+
+  val customDeclaration =
+    "Message" := Type.discUnion("level")(
+      "error"   -> Type.Ref("ErrorMessage"),
+      "warning" -> Type.Ref("WarningMessage")
+    )
 }
 
 class RendererSpec extends FreeSpec with Matchers {
@@ -22,7 +30,8 @@ class RendererSpec extends FreeSpec with Matchers {
           declaration[Color],
           declaration[Circle],
           declaration[Rectangle],
-          declaration[Shape]
+          declaration[Shape],
+          customDeclaration
         ))
 
       val expected: String =
@@ -33,7 +42,9 @@ class RendererSpec extends FreeSpec with Matchers {
 
         export type Rectangle = { width: number, height: number, color: Color };
 
-        export type Shape = ({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle);
+        export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle));
+
+        export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));
         """
 
       actual should be(expected)
@@ -56,7 +67,7 @@ class RendererSpec extends FreeSpec with Matchers {
 
         export type Rectangle = { width: number, height: number, color: Color };
 
-        export type Shape = ({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle);
+        export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle));
         """
 
       actual should be(expected)

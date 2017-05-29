@@ -1,7 +1,8 @@
 package bridges
 
+import scala.language.higherKinds
 import shapeless.labelled.FieldType
-import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, LabelledGeneric, Lazy, Typeable, Unwrapped, Witness}
+import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, LabelledGeneric, Lazy, LowPriority, Typeable, Unwrapped, Witness}
 
 trait Encoder[A] {
   def encode: Type
@@ -12,7 +13,7 @@ trait StructEncoder[A] extends Encoder[A] {
 }
 
 trait UnionEncoder[A] extends Encoder[A] {
-  override def encode: Type.DiscUnion
+  override def encode: Type.Union
 }
 
 trait BasicEncoder[A] extends Encoder[A]
@@ -37,10 +38,7 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
     pure(enc.encode | Null)
 
-  implicit def seqEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Seq[A]] =
-    pure(Array(enc.encode))
-
-  implicit def setEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Set[A]] =
+  implicit def traversableEncoder[F[_] <: Traversable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
     pure(Array(enc.encode))
 
   implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =
@@ -66,7 +64,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
   }
 
   implicit def cnilUnionEncoder: UnionEncoder[CNil] =
-    pureUnion(DiscUnion(Nil))
+    pureUnion(Union(Nil))
 
   implicit def cconsUnionEncoder[K <: Symbol, H, T <: Coproduct](
     implicit
@@ -78,7 +76,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
     val head = hEnc.value.encode
     val tail = tEnc.encode
 
-    pureUnion((name, head) +: tail)
+    pureUnion(disc(name, head) +: tail)
   }
 
   implicit def genericStructEncoder[A, L](implicit gen: LabelledGeneric.Aux[A, L], enc: Lazy[StructEncoder[L]]): StructEncoder[A] =
@@ -91,7 +89,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
 trait EncoderInstances0 extends EncoderConstructors {
   import Type._
 
-  implicit def genericBasicEncoder[A](implicit typeable: Typeable[A]): BasicEncoder[A] =
+  implicit def genericBasicEncoder[A](implicit typeable: Typeable[A], low: LowPriority): BasicEncoder[A] =
     pure(Ref(typeable.describe))
 }
 
@@ -107,6 +105,6 @@ trait EncoderConstructors {
   def pureStruct[A](tpe: Struct): StructEncoder[A] =
     new StructEncoder[A] { def encode: Struct = tpe }
 
-  def pureUnion[A](tpe: DiscUnion): UnionEncoder[A] =
-    new UnionEncoder[A] { def encode: DiscUnion = tpe }
+  def pureUnion[A](tpe: Union): UnionEncoder[A] =
+    new UnionEncoder[A] { def encode: Union = tpe }
 }

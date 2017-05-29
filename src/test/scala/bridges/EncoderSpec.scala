@@ -53,7 +53,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      encode[OneOrOther] should be(DiscUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      encode[OneOrOther] should be(discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+    }
+
+    "overridden defaults" in {
+      implicit val oneEncoder: BasicEncoder[One] =
+        Encoder.pure(Str)
+
+      encode[One] should be(Str)
+      encode[OneOrOther] should be(discUnion("One" -> Str, "Other" -> Ref("Other")))
     }
   }
 
@@ -67,7 +75,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      declaration[OneOrOther] should be("OneOrOther" := DiscUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+    }
+
+    "overridden defaults" in {
+      implicit val oneEncoder: BasicEncoder[One] =
+        Encoder.pure(Str)
+
+      encode[One] should be(Str)
+      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Str, "Other" -> Ref("Other")))
     }
   }
 }

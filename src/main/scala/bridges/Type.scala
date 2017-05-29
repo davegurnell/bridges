@@ -51,13 +51,25 @@ object Type {
       Union(types.toList)
   }
 
-  final case class DiscUnion(types: List[(String, Type)]) extends Type {
-    def +:(pair: (String, Type)): DiscUnion =
-      DiscUnion(pair +: types)
+  final case class Intersection(types: List[Type]) extends Type {
+    def +:(tpe: Type): Intersection =
+      Intersection(tpe +: types)
   }
 
-  object DiscUnion {
-    def apply(types: (String, Type) *): DiscUnion =
-      DiscUnion(types.toList)
+  object Intersection {
+    def apply(types: Type *): Intersection =
+      Intersection(types.toList)
   }
+
+  def disc(name: String, tpe: Type): Intersection =
+    disc("type")(name, tpe)
+
+  def disc(key: String)(name: String, tpe: Type): Intersection =
+    Intersection(Struct(key -> StrLiteral(name)), tpe)
+
+  def discUnion(types: (String, Type) *): Union =
+    discUnion("type")(types : _*)
+
+  def discUnion(key: String)(types: (String, Type) *): Union =
+    Union(types.map { case (name, tpe) => disc(key)(name, tpe) }.toList)
 }
