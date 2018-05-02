@@ -1,5 +1,7 @@
 package bridges
 
+import bridges.syntax.typeName
+
 import scala.language.higherKinds
 import shapeless.labelled.FieldType
 import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, LabelledGeneric, Lazy, LowPriority, Typeable, Unwrapped, Witness}
@@ -90,7 +92,7 @@ trait EncoderInstances0 extends EncoderConstructors {
   import Type._
 
   implicit def genericBasicEncoder[A](implicit typeable: Typeable[A], low: LowPriority): BasicEncoder[A] =
-    pure(Ref(typeable.describe))
+    pure(Ref(typeName[A]))
 }
 
 trait EncoderConstructors {
