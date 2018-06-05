@@ -19,16 +19,23 @@ object Type {
   final case class StrLiteral(value: String) extends Str
   final case object Str extends Str
 
+  sealed abstract class Character extends Type with Product with Serializable
+  final case class CharLiteral(value: Char) extends Character
+  final case object Character extends Character
+
   sealed abstract class Num extends Type with Product with Serializable
   final case class NumLiteral(value: Num) extends Num
   final case object Num extends Num
+
+  sealed abstract class Floating extends Type with Product with Serializable
+  final case class FloatingLiteral(value: Floating) extends Floating
+  final case object Floating extends Floating
 
   sealed abstract class Bool extends Type with Product with Serializable
   final case class BoolLiteral(value: Boolean) extends Bool
   final case object Bool extends Bool
 
-  final case object Null extends Type
-
+  final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type) extends Type
 
   final case class Struct(fields: List[(String, Type)]) extends Type {

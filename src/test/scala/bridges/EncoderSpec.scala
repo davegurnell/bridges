@@ -35,14 +35,16 @@ class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
+      encode[Char] should be(Character)
       encode[Int] should be(Num)
-      encode[Double] should be(Num)
+      encode[Float] should be(Floating)
+      encode[Double] should be(Floating)
       encode[Boolean] should be(Bool)
     }
 
     "options" in {
-      encode[Option[String]] should be(Str | Null)
-      encode[Option[Int]] should be(Num | Null)
+      encode[Option[String]] should be(Optional(Str))
+      encode[Option[Int]] should be(Optional(Num))
     }
 
     "sequences" in {
@@ -72,8 +74,8 @@ class EncoderSpec extends FreeSpec with Matchers {
 
     "sealed types with intermediate types and indirect recursion" in {
       encode[Shape] should be(discUnion("Circle" -> Ref("Circle"), "Rectangle" -> Ref("Rectangle"), "ShapeGroup" -> Ref("ShapeGroup")))
-      encode[Circle] should be(Struct("radius" -> Num, "color" -> Ref("Color")))
-      encode[Rectangle] should be(Struct("width" -> Num, "height" -> Num, "color" -> Ref("Color")))
+      encode[Circle] should be(Struct("radius" -> Floating, "color" -> Ref("Color")))
+      encode[Rectangle] should be(Struct("width" -> Floating, "height" -> Floating, "color" -> Ref("Color")))
       encode[ShapeGroup] should be(Struct("leftShape" ->  Ref("Shape"), "rightShape" -> Ref("Shape")))
     }
 

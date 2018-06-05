@@ -28,17 +28,23 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit val stringEncoder: BasicEncoder[String] =
     pure(Str)
 
+  implicit val charEncoder: BasicEncoder[Char] =
+    pure(Character)
+
   implicit val intEncoder: BasicEncoder[Int] =
     pure(Num)
 
   implicit val doubleEncoder: BasicEncoder[Double] =
-    pure(Num)
+    pure(Floating)
+
+  implicit val floatEncoder: BasicEncoder[Float] =
+    pure(Floating)
 
   implicit val booleanEncoder: BasicEncoder[Boolean] =
     pure(Bool)
 
   implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
-    pure(enc.encode | Null)
+  pure(Optional(enc.encode))
 
   implicit def traversableEncoder[F[_] <: Traversable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
     pure(Array(enc.encode))
