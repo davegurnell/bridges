@@ -12,14 +12,19 @@ object syntax {
   def typeName[A](implicit typeable: Typeable[A]): String =
     typeable.describe.takeWhile(_ != '[').mkString
 
-  def declaration[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): Declaration =
+  def declaration[A](
+      implicit typeable: Typeable[A],
+      encoder: Lazy[Encoder[A]]
+  ): Declaration =
     Declaration(typeName[A], encoder.value.encode)
 
-  def render[A](decls: List[Declaration])(implicit renderer: Renderer[A]): String =
+  def render[A](
+      decls: List[Declaration]
+  )(implicit renderer: Renderer[A]): String =
     renderer.render(decls)
 
   implicit class StringOps(str: String) {
-    def := [A](tpe: Type): Declaration =
+    def :=[A](tpe: Type): Declaration =
       Declaration(str, tpe)
   }
 

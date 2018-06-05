@@ -32,7 +32,8 @@ trait TypescriptStyleRenderer[A] extends Renderer[A] {
       case Array(arrTpe)       => "Array<" + renderType(arrTpe) + ">"
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
       case Union(types)        => types.map(renderType).mkString("(", " | ", ")")
-      case Intersection(types) => types.map(renderType).mkString("(", " & ", ")")
+      case Intersection(types) =>
+        types.map(renderType).mkString("(", " & ", ")")
     }
 
   def renderField(field: (String, Type)): String =
@@ -47,7 +48,8 @@ trait ElmStyleRenderer[A] extends Renderer[A] {
 
   def render(decl: Declaration): String =
     decl.tpe match {
-      case Union(types) ⇒ s"type ${decl.id} = ${types.map(renderType).mkString(" | ")}"
+      case Union(types) ⇒
+        s"type ${decl.id} = ${types.map(renderType).mkString(" | ")}"
       case other ⇒ s"type alias ${decl.id} = ${renderType(other)}"
     }
 
@@ -69,8 +71,8 @@ trait ElmStyleRenderer[A] extends Renderer[A] {
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
       case Union(types)        => types.map(renderType).mkString(" | ")
       case Intersection(types) =>
-          // Elm doesn't support intersection types. To support compatibility with Typescript we just ignore the Struct part of the Intersection and treat it as union
-          types.collect{ case c: Ref ⇒ c }.map(renderType).mkString(" | ")
+        // Elm doesn't support intersection types. To support compatibility with Typescript we just ignore the Struct part of the Intersection and treat it as union
+        types.collect { case c: Ref ⇒ c }.map(renderType).mkString(" | ")
     }
 
   def renderField(field: (String, Type)): String =

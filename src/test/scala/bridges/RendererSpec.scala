@@ -9,7 +9,8 @@ object RendererSpec {
   final case class Color(red: Int, green: Int, blue: Int)
 
   sealed abstract class Shape extends Product with Serializable
-  case class Rectangle(width: Double, height: Double, color: Color) extends Shape
+  case class Rectangle(width: Double, height: Double, color: Color)
+      extends Shape
   case class Circle(radius: Double, color: Color) extends Shape
 
   final case class Alpha(name: String, char: Char, bool: Boolean)
@@ -18,7 +19,7 @@ object RendererSpec {
 
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(
-      "error"   -> Type.Ref("ErrorMessage"),
+      "error" -> Type.Ref("ErrorMessage"),
       "warning" -> Type.Ref("WarningMessage")
     )
 }
@@ -30,16 +31,18 @@ class RendererSpec extends FreeSpec with Matchers {
   "render" - {
     "typescript" in {
       val actual: String =
-        render[Typescript](List(
-          declaration[Color],
-          declaration[Circle],
-          declaration[Rectangle],
-          declaration[Shape],
-          declaration[Alpha],
-          declaration[ArrayClass],
-          declaration[Numeric],
-          customDeclaration
-        ))
+        render[Typescript](
+          List(
+            declaration[Color],
+            declaration[Circle],
+            declaration[Rectangle],
+            declaration[Shape],
+            declaration[Alpha],
+            declaration[ArrayClass],
+            declaration[Numeric],
+            customDeclaration
+          )
+        )
 
       val expected: String =
         i"""
@@ -65,15 +68,17 @@ class RendererSpec extends FreeSpec with Matchers {
 
     "flow" in {
       val actual: String =
-        render[Flow](List(
-          declaration[Color],
-          declaration[Circle],
-          declaration[Rectangle],
-          declaration[Shape],
-          declaration[Alpha],
-          declaration[ArrayClass],
-          declaration[Numeric]
-        ))
+        render[Flow](
+          List(
+            declaration[Color],
+            declaration[Circle],
+            declaration[Rectangle],
+            declaration[Shape],
+            declaration[Alpha],
+            declaration[ArrayClass],
+            declaration[Numeric]
+          )
+        )
 
       val expected: String =
         i"""
@@ -97,15 +102,17 @@ class RendererSpec extends FreeSpec with Matchers {
 
     "elm" in {
       val actual: String =
-        render[Elm](List(
-          declaration[Color],
-          declaration[Circle],
-          declaration[Rectangle],
-          declaration[Shape],
-          declaration[Alpha],
-          declaration[ArrayClass],
-          declaration[Numeric]
-        ))
+        render[Elm](
+          List(
+            declaration[Color],
+            declaration[Circle],
+            declaration[Rectangle],
+            declaration[Shape],
+            declaration[Alpha],
+            declaration[ArrayClass],
+            declaration[Numeric]
+          )
+        )
 
       val expected: String =
         i"""

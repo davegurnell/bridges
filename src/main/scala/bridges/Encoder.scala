@@ -4,7 +4,20 @@ import bridges.syntax.typeName
 
 import scala.language.higherKinds
 import shapeless.labelled.FieldType
-import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, LabelledGeneric, Lazy, LowPriority, Typeable, Unwrapped, Witness}
+import shapeless.{
+  :+:,
+  ::,
+  CNil,
+  Coproduct,
+  HList,
+  HNil,
+  LabelledGeneric,
+  Lazy,
+  LowPriority,
+  Typeable,
+  Unwrapped,
+  Witness
+}
 
 trait Encoder[A] {
   def encode: Type
@@ -43,13 +56,20 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit val booleanEncoder: BasicEncoder[Boolean] =
     pure(Bool)
 
-  implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
-  pure(Optional(enc.encode))
+  implicit def optionEncoder[A](
+      implicit enc: BasicEncoder[A]
+  ): BasicEncoder[Option[A]] =
+    pure(Optional(enc.encode))
 
-  implicit def traversableEncoder[F[_] <: Traversable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
+  implicit def traversableEncoder[F[_] <: Traversable[_], A](
+      implicit enc: BasicEncoder[A]
+  ): BasicEncoder[F[A]] =
     pure(Array(enc.encode))
 
-  implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =
+  implicit def valueClassEncoder[A <: AnyVal, B](
+      implicit unwrapped: Unwrapped.Aux[A, B],
+      encoder: BasicEncoder[B]
+  ): BasicEncoder[A] =
     pure(encoder.encode)
 }
 
@@ -60,10 +80,10 @@ trait EncoderInstances1 extends EncoderInstances0 {
     pureStruct(Struct(Nil))
 
   implicit def hconsEncoder[K <: Symbol, H, T <: HList](
-    implicit
-    witness: Witness.Aux[K],
-    hEnc: Lazy[BasicEncoder[H]],
-    tEnc   : StructEncoder[T]
+      implicit
+      witness: Witness.Aux[K],
+      hEnc: Lazy[BasicEncoder[H]],
+      tEnc: StructEncoder[T]
   ): StructEncoder[FieldType[K, H] :: T] = {
     val name = witness.value.name
     val head = hEnc.value.encode
@@ -75,10 +95,10 @@ trait EncoderInstances1 extends EncoderInstances0 {
     pureUnion(Union(Nil))
 
   implicit def cconsUnionEncoder[K <: Symbol, H, T <: Coproduct](
-    implicit
-    witness: Witness.Aux[K],
-    hEnc   : Lazy[BasicEncoder[H]],
-    tEnc   : UnionEncoder[T]
+      implicit
+      witness: Witness.Aux[K],
+      hEnc: Lazy[BasicEncoder[H]],
+      tEnc: UnionEncoder[T]
   ): UnionEncoder[FieldType[K, H] :+: T] = {
     val name = witness.value.name
     val head = hEnc.value.encode
@@ -87,17 +107,26 @@ trait EncoderInstances1 extends EncoderInstances0 {
     pureUnion(disc(name, head) +: tail)
   }
 
-  implicit def genericStructEncoder[A, L](implicit gen: LabelledGeneric.Aux[A, L], enc: Lazy[StructEncoder[L]]): StructEncoder[A] =
+  implicit def genericStructEncoder[A, L](
+      implicit gen: LabelledGeneric.Aux[A, L],
+      enc: Lazy[StructEncoder[L]]
+  ): StructEncoder[A] =
     pureStruct(enc.value.encode)
 
-  implicit def genericUnionEncoder[A, L](implicit gen: LabelledGeneric.Aux[A, L], enc: Lazy[UnionEncoder[L]]): UnionEncoder[A] =
+  implicit def genericUnionEncoder[A, L](
+      implicit gen: LabelledGeneric.Aux[A, L],
+      enc: Lazy[UnionEncoder[L]]
+  ): UnionEncoder[A] =
     pureUnion(enc.value.encode)
 }
 
 trait EncoderInstances0 extends EncoderConstructors {
   import Type._
 
-  implicit def genericBasicEncoder[A](implicit typeable: Typeable[A], low: LowPriority): BasicEncoder[A] =
+  implicit def genericBasicEncoder[A](
+      implicit typeable: Typeable[A],
+      low: LowPriority
+  ): BasicEncoder[A] =
     pure(Ref(typeName[A]))
 }
 
