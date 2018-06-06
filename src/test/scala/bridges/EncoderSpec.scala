@@ -11,6 +11,11 @@ object EncoderSpec {
   case class One(value: String) extends OneOrOther
   case class Other(value: Int) extends OneOrOther
 
+  // Coproduct with Object
+  sealed abstract class ClassOrObject extends Product with Serializable
+  case class MyClass(value: Int) extends ClassOrObject
+  case object MyObject extends ClassOrObject
+
   // Sample value class
   case class Value(value: String) extends AnyVal
 
@@ -18,7 +23,15 @@ object EncoderSpec {
   final case class Color(red: Int, green: Int, blue: Int)
   sealed abstract class Shape extends Product with Serializable
   final case class Circle(radius: Double, color: Color) extends Shape
-  final case class Rectangle(width: Double, height: Double, color: Color) extends Shape
+  final case class Rectangle(width: Double, height: Double, color: Color)
+      extends Shape
+  final case class ShapeGroup(leftShape: Shape, rightShape: Shape) extends Shape
+
+  // Recursive structure
+  sealed trait Navigation
+  final case class NodeList(all: List[Navigation]) extends Navigation
+  final case class Node(name: String, children: List[Navigation])
+      extends Navigation
 }
 
 class EncoderSpec extends FreeSpec with Matchers {
@@ -29,14 +42,16 @@ class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
+      encode[Char] should be(Character)
       encode[Int] should be(Num)
-      encode[Double] should be(Num)
+      encode[Float] should be(Floating)
+      encode[Double] should be(Floating)
       encode[Boolean] should be(Bool)
     }
 
     "options" in {
-      encode[Option[String]] should be(Str | Null)
-      encode[Option[Int]] should be(Num | Null)
+      encode[Option[String]] should be(Optional(Str))
+      encode[Option[Int]] should be(Optional(Num))
     }
 
     "sequences" in {
@@ -53,7 +68,21 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      encode[OneOrOther] should be(discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      encode[OneOrOther] should be(
+        discUnion(
+          ("One", Ref("One"), Struct("value" -> Str)),
+          ("Other", Ref("Other"), Struct("value" -> Num))
+        )
+      )
+    }
+
+    "sealed types with objects" in {
+      encode[ClassOrObject] should be(
+        discUnion(
+          ("MyClass", Ref("MyClass"), Struct("value" → Num)),
+          ("MyObject", Ref("MyObject"), Struct(Nil))
+        )
+      )
     }
 
     "overridden defaults" in {
@@ -61,7 +90,72 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[One] should be(Str)
-      encode[OneOrOther] should be(discUnion("One" -> Str, "Other" -> Ref("Other")))
+      encode[OneOrOther] should be(
+        discUnion(
+          ("One", Str, Struct("value" → Str)),
+          ("Other", Ref("Other"), Struct("value" → Num))
+        )
+      )
+    }
+
+    "sealed types with intermediate types and indirect recursion" in {
+      encode[Shape] should be(
+        discUnion(
+          (
+            "Circle",
+            Ref("Circle"),
+            Struct("radius" -> Floating, "color" -> Ref("Color"))
+          ),
+          (
+            "Rectangle",
+            Ref("Rectangle"),
+            Struct(
+              "width" -> Floating,
+              "height" -> Floating,
+              "color" -> Ref("Color")
+            )
+          ),
+          (
+            "ShapeGroup",
+            Ref("ShapeGroup"),
+            Struct("leftShape" -> Ref("Shape"), "rightShape" -> Ref("Shape"))
+          )
+        )
+      )
+      encode[Circle] should be(
+        Struct("radius" -> Floating, "color" -> Ref("Color"))
+      )
+      encode[Rectangle] should be(
+        Struct(
+          "width" -> Floating,
+          "height" -> Floating,
+          "color" -> Ref("Color")
+        )
+      )
+      encode[ShapeGroup] should be(
+        Struct("leftShape" -> Ref("Shape"), "rightShape" -> Ref("Shape"))
+      )
+    }
+
+    "recursive types with direct recursion on same type" in {
+      encode[Navigation] should be(
+        discUnion(
+          (
+            "Node",
+            Ref("Node"),
+            Struct("name" -> Str, "children" -> Array(Ref("Navigation")))
+          ),
+          (
+            "NodeList",
+            Ref("NodeList"),
+            Struct("all" -> Array(Ref("Navigation")))
+          )
+        )
+      )
+      encode[NodeList] should be(Struct("all" -> Array(Ref("Navigation"))))
+      encode[Node] should be(
+        Struct("name" -> Str, "children" -> Array(Ref("Navigation")))
+      )
     }
   }
 
@@ -75,7 +169,12 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "sealed types" in {
-      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Ref("One"), "Other" -> Ref("Other")))
+      declaration[OneOrOther] should be(
+        "OneOrOther" := discUnion(
+          ("One", Ref("One"), Struct("value" → Str)),
+          ("Other", Ref("Other"), Struct("value" → Num))
+        )
+      )
     }
 
     "overridden defaults" in {
@@ -83,7 +182,12 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[One] should be(Str)
-      declaration[OneOrOther] should be("OneOrOther" := discUnion("One" -> Str, "Other" -> Ref("Other")))
+      declaration[OneOrOther] should be(
+        "OneOrOther" := discUnion(
+          ("One", Str, Struct("value" → Str)),
+          ("Other", Ref("Other"), Struct("value" → Num))
+        )
+      )
     }
   }
 }
