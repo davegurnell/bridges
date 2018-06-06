@@ -19,16 +19,23 @@ object Type {
   final case class StrLiteral(value: String) extends Str
   final case object Str extends Str
 
+  sealed abstract class Character extends Type with Product with Serializable
+  final case class CharLiteral(value: Char) extends Character
+  final case object Character extends Character
+
   sealed abstract class Num extends Type with Product with Serializable
   final case class NumLiteral(value: Num) extends Num
   final case object Num extends Num
+
+  sealed abstract class Floating extends Type with Product with Serializable
+  final case class FloatingLiteral(value: Floating) extends Floating
+  final case object Floating extends Floating
 
   sealed abstract class Bool extends Type with Product with Serializable
   final case class BoolLiteral(value: Boolean) extends Bool
   final case object Bool extends Bool
 
-  final case object Null extends Type
-
+  final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type) extends Type
 
   final case class Struct(fields: List[(String, Type)]) extends Type {
@@ -37,7 +44,7 @@ object Type {
   }
 
   object Struct {
-    def apply(fields: (String, Type) *): Struct =
+    def apply(fields: (String, Type)*): Struct =
       Struct(fields.toList)
   }
 
@@ -47,7 +54,7 @@ object Type {
   }
 
   object Union {
-    def apply(types: Type *): Union =
+    def apply(types: Type*): Union =
       Union(types.toList)
   }
 
@@ -57,19 +64,21 @@ object Type {
   }
 
   object Intersection {
-    def apply(types: Type *): Intersection =
+    def apply(types: Type*): Intersection =
       Intersection(types.toList)
   }
 
-  def disc(name: String, tpe: Type): Intersection =
-    disc("type")(name, tpe)
+  def disc(name: String, tpe: Type, fields: Struct): Intersection =
+    disc("type")(name, tpe, fields)
 
-  def disc(key: String)(name: String, tpe: Type): Intersection =
-    Intersection(Struct(key -> StrLiteral(name)), tpe)
+  def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
+    Intersection(Struct(key -> StrLiteral(name), "fields" -> fields), tpe)
 
-  def discUnion(types: (String, Type) *): Union =
-    discUnion("type")(types : _*)
+  def discUnion(types: (String, Type, Struct)*): Union =
+    discUnion("type")(types: _*)
 
-  def discUnion(key: String)(types: (String, Type) *): Union =
-    Union(types.map { case (name, tpe) => disc(key)(name, tpe) }.toList)
+  def discUnion(key: String)(types: (String, Type, Struct)*): Union =
+    Union(
+      types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList
+    )
 }
