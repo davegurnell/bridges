@@ -68,15 +68,17 @@ object Type {
       Intersection(types.toList)
   }
 
-  def disc(name: String, tpe: Type): Intersection =
-    disc("type")(name, tpe)
+  def disc(name: String, tpe: Type, fields: Struct): Intersection =
+    disc("type")(name, tpe, fields)
 
-  def disc(key: String)(name: String, tpe: Type): Intersection =
-    Intersection(Struct(key -> StrLiteral(name)), tpe)
+  def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
+    Intersection(Struct(key -> StrLiteral(name), "fields" -> fields), tpe)
 
-  def discUnion(types: (String, Type)*): Union =
+  def discUnion(types: (String, Type, Struct)*): Union =
     discUnion("type")(types: _*)
 
-  def discUnion(key: String)(types: (String, Type)*): Union =
-    Union(types.map { case (name, tpe) => disc(key)(name, tpe) }.toList)
+  def discUnion(key: String)(types: (String, Type, Struct)*): Union =
+    Union(
+      types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList
+    )
 }

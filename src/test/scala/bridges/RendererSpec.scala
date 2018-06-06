@@ -1,5 +1,6 @@
 package bridges
 
+import bridges.Type.Struct
 import org.scalatest._
 import unindent._
 
@@ -17,10 +18,14 @@ object RendererSpec {
   final case class ArrayClass(aList: List[String], optField: Option[Float])
   final case class Numeric(double: Double, float: Float, int: Int)
 
+  sealed abstract class ClassOrObject extends Product with Serializable
+  case class MyClass(value: Int) extends ClassOrObject
+  case object MyObject extends ClassOrObject
+
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(
-      "error" -> Type.Ref("ErrorMessage"),
-      "warning" -> Type.Ref("WarningMessage")
+      ("error", Type.Ref("ErrorMessage"), Struct(Nil)),
+      ("warning", Type.Ref("WarningMessage"), Struct(Nil))
     )
 }
 
@@ -40,6 +45,7 @@ class RendererSpec extends FreeSpec with Matchers {
             declaration[Alpha],
             declaration[ArrayClass],
             declaration[Numeric],
+            declaration[ClassOrObject],
             customDeclaration
           )
         )
@@ -60,6 +66,8 @@ class RendererSpec extends FreeSpec with Matchers {
 
         export type Numeric = { double: number, float: number, int: number };
 
+        export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));
+
         export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));
         """
 
@@ -76,7 +84,8 @@ class RendererSpec extends FreeSpec with Matchers {
             declaration[Shape],
             declaration[Alpha],
             declaration[ArrayClass],
-            declaration[Numeric]
+            declaration[Numeric],
+            declaration[ClassOrObject]
           )
         )
 
@@ -95,6 +104,8 @@ class RendererSpec extends FreeSpec with Matchers {
         export type ArrayClass = { aList: Array<string>, optField: (number | null) };
 
         export type Numeric = { double: number, float: number, int: number };
+
+        export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));
         """
 
       actual should be(expected)
@@ -110,7 +121,8 @@ class RendererSpec extends FreeSpec with Matchers {
             declaration[Shape],
             declaration[Alpha],
             declaration[ArrayClass],
-            declaration[Numeric]
+            declaration[Numeric],
+            declaration[ClassOrObject]
           )
         )
 
@@ -122,13 +134,15 @@ class RendererSpec extends FreeSpec with Matchers {
 
         type alias Rectangle = { width: Float, height: Float, color: Color }
 
-        type Shape = Circle | Rectangle
+        type Shape = Circle Float Color | Rectangle Float Float Color
 
         type alias Alpha = { name: String, char: Char, bool: Bool }
 
         type alias ArrayClass = { aList: List String, optField: Maybe Float }
 
         type alias Numeric = { double: Float, float: Float, int: Int }
+
+        type ClassOrObject = MyClass Int | MyObject
         """
 
       actual should be(expected)

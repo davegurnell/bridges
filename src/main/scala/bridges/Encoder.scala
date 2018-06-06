@@ -94,17 +94,20 @@ trait EncoderInstances1 extends EncoderInstances0 {
   implicit def cnilUnionEncoder: UnionEncoder[CNil] =
     pureUnion(Union(Nil))
 
+  // we should always have a StructEncoder for H as on a Coproduct
   implicit def cconsUnionEncoder[K <: Symbol, H, T <: Coproduct](
       implicit
       witness: Witness.Aux[K],
       hEnc: Lazy[BasicEncoder[H]],
+      hEncFields: Lazy[StructEncoder[H]],
       tEnc: UnionEncoder[T]
   ): UnionEncoder[FieldType[K, H] :+: T] = {
     val name = witness.value.name
     val head = hEnc.value.encode
+    val headFields = hEncFields.value.encode
     val tail = tEnc.encode
 
-    pureUnion(disc(name, head) +: tail)
+    pureUnion(disc(name, head, headFields) +: tail)
   }
 
   implicit def genericStructEncoder[A, L](

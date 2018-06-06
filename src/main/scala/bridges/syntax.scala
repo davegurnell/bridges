@@ -28,8 +28,8 @@ object syntax {
       Declaration(str, tpe)
   }
 
-  implicit class StringPairOps(a: (String, Type)) {
-    def |(b: (String, Type)): Union =
+  implicit class StringPairOps(a: (String, Type, Struct)) {
+    def |(b: (String, Type, Struct)): Union =
       discUnion(a, b)
   }
 }

@@ -33,7 +33,17 @@ trait TypescriptStyleRenderer[A] extends Renderer[A] {
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
       case Union(types)        => types.map(renderType).mkString("(", " | ", ")")
       case Intersection(types) =>
-        types.map(renderType).mkString("(", " & ", ")")
+        //Typescript languages don't care about the fields when building Union types as they act as references to a type defined somewhere else
+        types
+          .map {
+            case Struct(fields) ⇒
+              val relevantFields = fields.filterNot {
+                case (key, _) ⇒ key == "fields"
+              }
+              renderType(Struct(relevantFields))
+            case other ⇒ renderType(other)
+          }
+          .mkString("(", " & ", ")")
     }
 
   def renderField(field: (String, Type)): String =
@@ -71,8 +81,23 @@ trait ElmStyleRenderer[A] extends Renderer[A] {
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
       case Union(types)        => types.map(renderType).mkString(" | ")
       case Intersection(types) =>
-        // Elm doesn't support intersection types. To support compatibility with Typescript we just ignore the Struct part of the Intersection and treat it as union
-        types.collect { case c: Ref ⇒ c }.map(renderType).mkString(" | ")
+        // Elm has pure union types, which means we use all information in the intersection to build the type, no need to 'go deeper'
+        val mainType = types.collect { case Ref(tpeId) ⇒ tpeId }.mkString
+        val params = types
+          .collect {
+            case Struct(fields) ⇒
+              fields
+                .collect {
+                  case (key, Struct(flds)) if key == "fields" ⇒ flds
+                }
+                .flatten
+                .map { case (_, vTpe) ⇒ renderType(vTpe) }
+          }
+          .flatten
+          .mkString(" ")
+
+        // we trim in case we have no params (case object) as tests don't like extra spaces
+        s"$mainType $params".trim
     }
 
   def renderField(field: (String, Type)): String =
