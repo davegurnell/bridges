@@ -7,17 +7,9 @@ trait JsonDecoder[A] {
   def decoder(decl: Declaration): String
   def decoder(decls: List[Declaration]): String =
     decls.map(decoder).mkString("\n\n")
-
-  def requiredImports: String
 }
 
 trait ElmJsonDecoder extends JsonDecoder[Elm] {
-  def requiredImports: String =
-    i"""
-    import Json.Decode as Decode
-    import Json.Decode.Pipeline exposing (..)
-    import Json.Encode as Encode
-    """.stripMargin
 
   def decoder(decl: Declaration): String = {
     decl.tpe match {

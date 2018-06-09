@@ -46,6 +46,16 @@ object syntax {
   )(implicit jEncoder: JsonEncoder[A]): String =
     jEncoder.encoder(decl)
 
+  def buildFile[A](module: String, decls: List[Declaration])(
+      implicit fBuilder: FileBuilder[A]
+  ): Map[String, String] =
+    fBuilder.buildFile(module, decls)
+
+  def buildFile[A](module: String, decl: Declaration)(
+      implicit fBuilder: FileBuilder[A]
+  ): Map[String, String] =
+    fBuilder.buildFile(module, decl)
+
   implicit class StringOps(str: String) {
     def :=[A](tpe: Type): Declaration =
       Declaration(str, tpe)
