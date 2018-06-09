@@ -3,14 +3,13 @@ package bridges
 import org.apache.commons.lang3.StringEscapeUtils.{escapeJava => escape}
 
 trait Renderer[A] {
-  def render(decls: List[Declaration]): String
+  def render(decls: List[Declaration]): String =
+    decls.map(render).mkString("\n\n")
+  def render(decl: Declaration): String
 }
 
 trait TypescriptStyleRenderer[A] extends Renderer[A] {
   import Type._
-
-  def render(decls: List[Declaration]): String =
-    decls.map(render).mkString("\n\n")
 
   def render(decl: Declaration): String =
     s"export type ${decl.id} = ${renderType(decl.tpe)};"
@@ -52,9 +51,6 @@ trait TypescriptStyleRenderer[A] extends Renderer[A] {
 
 trait ElmStyleRenderer[A] extends Renderer[A] {
   import Type._
-
-  def render(decls: List[Declaration]): String =
-    decls.map(render).mkString("\n\n")
 
   def render(decl: Declaration): String =
     decl.tpe match {
