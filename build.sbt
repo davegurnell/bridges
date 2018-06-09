@@ -1,6 +1,6 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
-version      in ThisBuild := "0.4.0"
+version      in ThisBuild := "0.5.0"
 
 scalaVersion       in ThisBuild := "2.12.6"
 crossScalaVersions in ThisBuild := Seq("2.11.9", "2.12.6")
