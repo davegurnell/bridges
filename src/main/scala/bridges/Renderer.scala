@@ -72,8 +72,8 @@ trait ElmStyleRenderer[A] extends Renderer[A] {
       case Num                 => "Int"
       case Floating            => "Float"
       case Bool                => "Bool"
-      case Optional(optTpe)    => "Maybe " + renderType(optTpe)
-      case Array(arrTpe)       => "List " + renderType(arrTpe)
+      case Optional(optTpe)    => "(Maybe " + renderType(optTpe) + ")"
+      case Array(arrTpe)       => "(List " + renderType(arrTpe) + ")"
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
       case Union(types)        => types.map(renderType).mkString(" | ")
       case Intersection(types) =>

@@ -18,6 +18,9 @@ object syntax {
   ): Declaration =
     Declaration(typeName[A], encoder.value.encode)
 
+  def render[A](decl: Declaration)(implicit renderer: Renderer[A]): String =
+    renderer.render(decl)
+
   def render[A](
       decls: List[Declaration]
   )(implicit renderer: Renderer[A]): String =

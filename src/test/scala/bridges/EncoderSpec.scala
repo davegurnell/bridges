@@ -1,43 +1,11 @@
 package bridges
 
 import org.scalatest._
-
-object EncoderSpec {
-  // Sample product
-  case class Pair(a: String, b: Int)
-
-  // Sample coproduct
-  sealed abstract class OneOrOther extends Product with Serializable
-  case class One(value: String) extends OneOrOther
-  case class Other(value: Int) extends OneOrOther
-
-  // Coproduct with Object
-  sealed abstract class ClassOrObject extends Product with Serializable
-  case class MyClass(value: Int) extends ClassOrObject
-  case object MyObject extends ClassOrObject
-
-  // Sample value class
-  case class Value(value: String) extends AnyVal
-
-  // ADT with intermediate type appearing more than once:
-  final case class Color(red: Int, green: Int, blue: Int)
-  sealed abstract class Shape extends Product with Serializable
-  final case class Circle(radius: Double, color: Color) extends Shape
-  final case class Rectangle(width: Double, height: Double, color: Color)
-      extends Shape
-  final case class ShapeGroup(leftShape: Shape, rightShape: Shape) extends Shape
-
-  // Recursive structure
-  sealed trait Navigation
-  final case class NodeList(all: List[Navigation]) extends Navigation
-  final case class Node(name: String, children: List[Navigation])
-      extends Navigation
-}
+import SampleTypes._
+import syntax._
+import Type._
 
 class EncoderSpec extends FreeSpec with Matchers {
-  import syntax._
-  import EncoderSpec._
-  import Type._
 
   "encode[A]" - {
     "primitive types" in {
@@ -155,6 +123,18 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[NodeList] should be(Struct("all" -> Array(Ref("Navigation"))))
       encode[Node] should be(
         Struct("name" -> Str, "children" -> Array(Ref("Navigation")))
+      )
+    }
+
+    "types with specific parameters" in {
+      encode[Alpha] should be(
+        Struct("name" -> Str, "char" -> Character, "bool" → Bool)
+      )
+      encode[ArrayClass] should be(
+        Struct("aList" -> Array(Str), "optField" -> Optional(Floating))
+      )
+      encode[Numeric] should be(
+        Struct("double" -> Floating, "float" -> Floating, "int" → Num)
       )
     }
   }
