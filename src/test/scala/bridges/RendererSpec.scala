@@ -1,9 +1,9 @@
 package bridges
 
 import org.scalatest._
-import unindent._
 import syntax._
 import SampleTypes._
+import bridges.Type.Str
 
 class RendererSpec extends FreeSpec with Matchers {
 
@@ -125,6 +125,14 @@ class RendererSpec extends FreeSpec with Matchers {
 
       "Navigation" in {
         render[Elm](declaration[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
+      }
+
+      "MyUUID" in {
+        // we want to treat UUID as string, using an override
+        implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
+          Encoder.pure(Str)
+
+        render[Elm](declaration[MyUUID]) shouldBe """type alias MyUUID = { uuid: String }"""
       }
 
     }

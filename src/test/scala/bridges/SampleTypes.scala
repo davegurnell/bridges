@@ -1,5 +1,7 @@
 package bridges
 
+import java.util.UUID
+
 import bridges.Type.Struct
 import org.scalatest._
 import unindent._
@@ -31,7 +33,7 @@ object SampleTypes {
       extends Shape
   final case class ShapeGroup(leftShape: Shape, rightShape: Shape) extends Shape
 
-  // Recursive structure //TODO: add this to renderer
+  // Recursive structure
   sealed trait Navigation
   final case class NodeList(all: List[Navigation]) extends Navigation
   final case class Node(name: String, children: List[Navigation])
@@ -41,6 +43,7 @@ object SampleTypes {
   final case class Alpha(name: String, char: Char, bool: Boolean)
   final case class ArrayClass(aList: List[String], optField: Option[Float])
   final case class Numeric(double: Double, float: Float, int: Int)
+  final case class MyUUID(uuid: UUID)
 
   // Custom declaration of a intermediate structure
   val customDeclaration: Declaration =

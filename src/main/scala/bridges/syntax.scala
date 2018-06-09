@@ -26,6 +26,26 @@ object syntax {
   )(implicit renderer: Renderer[A]): String =
     renderer.render(decls)
 
+  def jsonDecoder[A](
+      decls: List[Declaration]
+  )(implicit jDecoder: JsonDecoder[A]): String =
+    jDecoder.decoder(decls)
+
+  def jsonDecoder[A](
+      decl: Declaration
+  )(implicit jDecoder: JsonDecoder[A]): String =
+    jDecoder.decoder(decl)
+
+  def jsonEncoder[A](
+      decls: List[Declaration]
+  )(implicit jEncoder: JsonEncoder[A]): String =
+    jEncoder.encoder(decls)
+
+  def jsonEncoder[A](
+      decl: Declaration
+  )(implicit jEncoder: JsonEncoder[A]): String =
+    jEncoder.encoder(decl)
+
   implicit class StringOps(str: String) {
     def :=[A](tpe: Type): Declaration =
       Declaration(str, tpe)

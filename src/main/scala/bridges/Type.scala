@@ -48,6 +48,7 @@ object Type {
       Struct(fields.toList)
   }
 
+  //TODO: does union only contain intersections?
   final case class Union(types: List[Type]) extends Type {
     def +:(tpe: Type): Union =
       Union(tpe +: types)
@@ -71,6 +72,7 @@ object Type {
   def disc(name: String, tpe: Type, fields: Struct): Intersection =
     disc("type")(name, tpe, fields)
 
+  //TODO: make fields explicit on intersection
   def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
     Intersection(Struct(key -> StrLiteral(name), "fields" -> fields), tpe)
 

@@ -137,6 +137,15 @@ class EncoderSpec extends FreeSpec with Matchers {
         Struct("double" -> Floating, "float" -> Floating, "int" → Num)
       )
     }
+
+    "we can override uuid as string" in {
+      implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
+        Encoder.pure(Str)
+
+      encode[MyUUID] should be(
+        Struct("uuid" -> Str)
+      )
+    }
   }
 
   "declaration[A]" - {
