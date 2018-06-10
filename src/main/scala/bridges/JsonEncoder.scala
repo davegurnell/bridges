@@ -59,30 +59,13 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
           .map(encodeField(_, objectName))
           .mkString("Encode.object [ ", ", ", " ]")
       case Union(_) => ""
-      case Intersection(types) =>
-        val mainType = types.collect { case Ref(tpeId) ⇒ tpeId }.mkString
-        val params = types
-          .collect {
-            case Struct(fields) ⇒
-              fields
-                .collect {
-                  case (key, Struct(flds)) if key == "fields" ⇒ flds
-                }
-                .flatten
-                .map { case (name, _) ⇒ name }
-          }
-          .flatten
-          .mkString(" ")
-
-        val paramsEncoder = types.collect {
-          case Struct(fields) ⇒
-            fields
-              .collect {
-                case (key, Struct(flds)) if key == "fields" ⇒ flds
-              }
-              .flatten
-              .map(encodeField(_, ""))
-        }.flatten
+      case Intersection(key, _, fields) =>
+        val mainType =
+          key.fields
+            .collectFirst { case (_, StrLiteral(name)) ⇒ name }
+            .getOrElse("<Missing main type>")
+        val params = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
+        val paramsEncoder = fields.fields.map(encodeField(_, ""))
 
         val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"
         val bodyEncoder =

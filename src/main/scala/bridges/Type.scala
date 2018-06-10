@@ -59,22 +59,19 @@ object Type {
       Union(types.toList)
   }
 
-  final case class Intersection(types: List[Type]) extends Type {
-    def +:(tpe: Type): Intersection =
-      Intersection(tpe +: types)
-  }
-
-  object Intersection {
-    def apply(types: Type*): Intersection =
-      Intersection(types.toList)
-  }
+  /*
+    - key : contains a Struct (key -> StrLiteral(name)) that identifies the type. Can probably be done better...
+    - tpe: the type in this intersection
+    - fields: a Struct that contains all the fields associated to the Type of the Intersection, so we can derive on these values
+   */
+  final case class Intersection(key: Struct, tpe: Type, fields: Struct)
+      extends Type
 
   def disc(name: String, tpe: Type, fields: Struct): Intersection =
     disc("type")(name, tpe, fields)
 
-  //TODO: make fields explicit on intersection
   def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
-    Intersection(Struct(key -> StrLiteral(name), "fields" -> fields), tpe)
+    Intersection(Struct(key -> StrLiteral(name)), tpe, fields)
 
   def discUnion(types: (String, Type, Struct)*): Union =
     discUnion("type")(types: _*)

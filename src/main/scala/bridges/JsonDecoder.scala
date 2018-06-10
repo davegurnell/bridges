@@ -54,21 +54,12 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
       case Struct(fields) =>
         fields.map(decodeField).mkString("|> ", " |> ", "")
       case Union(_) => ""
-      case Intersection(types) =>
-        println(types)
-        val mainType = types.collect { case Ref(tpeId) ⇒ tpeId }.mkString
-        val paramsDecoder = types
-          .collect {
-            case Struct(fields) ⇒
-              fields
-                .collect {
-                  case (key, Struct(flds)) if key == "fields" ⇒ flds
-                }
-                .flatten
-                .map(decodeField)
-          }
-          .flatten
-          .mkString(" |> ")
+      case Intersection(key, _, fields) =>
+        val mainType =
+          key.fields
+            .collectFirst { case (_, StrLiteral(name)) ⇒ name }
+            .getOrElse("<Missing main type>")
+        val paramsDecoder = fields.fields.map(decodeField).mkString(" |> ")
 
         // consider case objects vs case classes
         val bodyDecoder =
