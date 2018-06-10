@@ -20,6 +20,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
 
+
            type alias Color = { red: Int, green: Int, blue: Int }
 
            decoder : Decode.Decoder Color
@@ -41,6 +42,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import CustomModule.Color as Color
 
            type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape
 
@@ -67,6 +69,39 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         buildFile[Elm]("CustomModule", declaration[Shape]) shouldBe expected
       }
 
+      "for a recursive trait" in {
+        val fileContent =
+          i"""
+           module CustomModule.Navigation exposing (Navigation, decoder, encoder)
+
+           import Json.Decode as Decode
+           import Json.Decode.Pipeline exposing (..)
+           import Json.Encode as Encode
+
+
+           type Navigation = Node String (List Navigation) | NodeList (List Navigation)
+
+           decoder : Decode.Decoder Navigation
+           decoder = field "type" string |> Decode.andThen decoderNavigation
+
+           decoderNavigation : String -> Decode.Decoder Navigation
+           decoderNavigation tpe =
+              case tpe of
+                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list Navigation.decoder)
+                 "NodeList" -> decode NodeList |> required "all" (Decode.list Navigation.decoder)
+                 _ -> Decode.fail ("Unexpected type for Navigation")
+
+           encoder : Navigation -> Encode.Value
+           encoder tpe =
+              case tpe of
+                 Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map Navigation.encoder children)), ("type", Encode.string "Node") ]
+                 NodeList all -> Encode.object [ ("all", Encode.list (List.map Navigation.encoder all)), ("type", Encode.string "NodeList") ]
+           """
+        val expected = Map("Navigation.elm" → fileContent)
+
+        buildFile[Elm]("CustomModule", declaration[Navigation]) shouldBe expected
+      }
+
       "with overrides" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
@@ -79,6 +114,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+
 
            type alias MyUUID = { uuid: String }
 
@@ -106,6 +142,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
 
+
            type alias Color = { red: Int, green: Int, blue: Int }
 
            decoder : Decode.Decoder Color
@@ -122,6 +159,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+
 
            type alias MyUUID = { uuid: String }
 
