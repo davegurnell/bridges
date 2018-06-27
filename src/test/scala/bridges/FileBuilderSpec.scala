@@ -42,7 +42,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import CustomModule.Color as Color
+           import CustomModule.Color as Color exposing (Color)
 
            type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape
 

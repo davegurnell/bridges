@@ -17,7 +17,7 @@ trait ElmFileBuilder extends FileBuilder[Elm] {
     val tpeName = decl.id
 
     val referencedTypes = getDeclarationTypes(decl.tpe, tpeName)
-      .map(r ⇒ s"import $module.${r.id} as ${r.id}")
+      .map(r ⇒ s"import $module.${r.id} as ${r.id} exposing (${r.id})")
       .mkString("\n")
 
     val content =
