@@ -47,7 +47,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape
 
            decoder : Decode.Decoder Shape
-           decoder = field "type" string |> Decode.andThen decoderShape
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoderShape
 
            decoderShape : String -> Decode.Decoder Shape
            decoderShape tpe =
@@ -82,7 +82,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            type Navigation = Node String (List Navigation) | NodeList (List Navigation)
 
            decoder : Decode.Decoder Navigation
-           decoder = field "type" string |> Decode.andThen decoderNavigation
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoderNavigation
 
            decoderNavigation : String -> Decode.Decoder Navigation
            decoderNavigation tpe =

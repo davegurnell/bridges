@@ -18,7 +18,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
         val body = types.map(decodeType).mkString("\n      ")
         i"""
            decoder : Decode.Decoder ${decl.id}
-           decoder = field "type" string |> Decode.andThen decoder${decl.id}
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoder${decl.id}
 
            decoder${decl.id} : String -> Decode.Decoder ${decl.id}
            decoder${decl.id} tpe =
@@ -63,7 +63,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
 
         // consider case objects vs case classes
         val bodyDecoder =
-          if (paramsDecoder.isEmpty) s"Decode.success $mainType"
+          if (paramsDecoder.isEmpty) s"Decode.succeed $mainType"
           else s"decode $mainType |> $paramsDecoder"
 
         s""""$mainType" -> $bodyDecoder"""

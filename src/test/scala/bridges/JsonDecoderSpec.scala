@@ -38,7 +38,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[Shape]) shouldBe
           i"""
            decoder : Decode.Decoder Shape
-           decoder = field "type" string |> Decode.andThen decoderShape
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoderShape
 
            decoderShape : String -> Decode.Decoder Shape
            decoderShape tpe =
@@ -78,13 +78,13 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[ClassOrObject]) shouldBe
           i"""
            decoder : Decode.Decoder ClassOrObject
-           decoder = field "type" string |> Decode.andThen decoderClassOrObject
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoderClassOrObject
 
            decoderClassOrObject : String -> Decode.Decoder ClassOrObject
            decoderClassOrObject tpe =
               case tpe of
                  "MyClass" -> decode MyClass |> required "value" Decode.int
-                 "MyObject" -> Decode.success MyObject
+                 "MyObject" -> Decode.succeed MyObject
                  _ -> Decode.fail ("Unexpected type for ClassOrObject")
            """
       }
@@ -93,7 +93,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[Navigation]) shouldBe
           i"""
            decoder : Decode.Decoder Navigation
-           decoder = field "type" string |> Decode.andThen decoderNavigation
+           decoder = Decode.field "type" Decode.string |> Decode.andThen decoderNavigation
 
            decoderNavigation : String -> Decode.Decoder Navigation
            decoderNavigation tpe =
