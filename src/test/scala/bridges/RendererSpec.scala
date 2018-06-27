@@ -42,6 +42,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Typescript](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
       }
 
+      "NestedClassOrObject" in {
+        render[Typescript](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
+
       "Navigation" in {
         render[Typescript](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
       }
@@ -84,6 +88,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Flow](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
       }
 
+      "NestedClassOrObject" in {
+        render[Flow](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
+
       "Navigation" in {
         render[Flow](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
       }
@@ -121,6 +129,10 @@ class RendererSpec extends FreeSpec with Matchers {
 
       "ClassOrObject" in {
         render[Elm](declaration[ClassOrObject]) shouldBe """type ClassOrObject = MyClass Int | MyObject"""
+      }
+
+      "NestedClassOrObject" in {
+        render[Elm](declaration[NestedClassOrObject]) shouldBe """type NestedClassOrObject = MyClass Int | MyObject"""
       }
 
       "Navigation" in {

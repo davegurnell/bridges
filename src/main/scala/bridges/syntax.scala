@@ -8,9 +8,9 @@ object syntax {
   def encode[A: Encoder]: Type =
     Encoder[A].encode
 
-  // TODO latest Shapeless version adds typeable information of members to case classes, which we don't want. Filtering that out while I discover a better fix
+  // TODO latest Shapeless version adds typeable information of members to case classes, as well as to objects, which we don't want. Filtering that out while I discover a better fix
   def typeName[A](implicit typeable: Typeable[A]): String =
-    typeable.describe.takeWhile(_ != '[').mkString
+    typeable.describe.takeWhile(c ⇒ c != '[' && c != '.').mkString
 
   def declaration[A](
       implicit typeable: Typeable[A],

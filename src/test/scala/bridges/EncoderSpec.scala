@@ -53,6 +53,15 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "sealed types with objects in nested objects" in {
+      encode[NestedClassOrObject] should be(
+        discUnion(
+          ("MyClass", Ref("MyClass"), Struct("value" → Num)),
+          ("MyObject", Ref("MyObject"), Struct(Nil))
+        )
+      )
+    }
+
     "overridden defaults" in {
       implicit val oneEncoder: BasicEncoder[One] =
         Encoder.pure(Str)

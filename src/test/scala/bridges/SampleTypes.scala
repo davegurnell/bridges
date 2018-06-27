@@ -18,9 +18,16 @@ object SampleTypes {
   case class Other(value: Int) extends OneOrOther
 
   // Coproduct with Object
-  sealed abstract class ClassOrObject extends Product with Serializable
+  sealed trait ClassOrObject extends Product with Serializable
   case class MyClass(value: Int) extends ClassOrObject
   case object MyObject extends ClassOrObject
+
+  // Coproduct with Object in a nested object
+  sealed abstract class NestedClassOrObject extends Product with Serializable
+  object NestedClassOrObject {
+    case class MyClass(value: Int) extends NestedClassOrObject
+    case object MyObject extends NestedClassOrObject
+  }
 
   // Sample value class
   case class Value(value: String) extends AnyVal
