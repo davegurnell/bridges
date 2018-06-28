@@ -50,6 +50,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Typescript](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
       }
 
+      "ClassUUID" in {
+        render[Typescript](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+      }
+
       "Custom" in {
         render[Typescript](customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
       }
@@ -96,6 +100,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Flow](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
       }
 
+      "ClassUUID" in {
+        render[Flow](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+      }
+
     }
 
     "elm" - {
@@ -137,6 +145,10 @@ class RendererSpec extends FreeSpec with Matchers {
 
       "Navigation" in {
         render[Elm](declaration[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
+      }
+
+      "ClassUUID" in {
+        render[Elm](declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: Uuid }"""
       }
 
       "MyUUID" in {

@@ -93,6 +93,14 @@ class JsonEncoderSpec extends FreeSpec with Matchers {
            """
       }
 
+      "ClassUUID" in {
+        jsonEncoder[Elm](declaration[ClassUUID]) shouldBe
+          i"""
+           encoder : ClassUUID -> Encode.Value
+           encoder obj = Encode.object [ ("a", Uuid.encode obj.a) ]
+           """
+      }
+
       "MyUUID" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =

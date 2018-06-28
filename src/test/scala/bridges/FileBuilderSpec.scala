@@ -19,6 +19,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
 
 
            type alias Color = { red: Int, green: Int, blue: Int }
@@ -42,6 +43,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
            import CustomModule.Color as Color exposing (Color)
 
            type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape
@@ -77,6 +79,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
 
 
            type Navigation = Node String (List Navigation) | NodeList (List Navigation)
@@ -114,6 +117,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
 
 
            type alias MyUUID = { uuid: String }
@@ -141,6 +145,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
 
 
            type alias Color = { red: Int, green: Int, blue: Int }
@@ -159,6 +164,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
+           import Uuid exposing (Uuid)
 
 
            type alias MyUUID = { uuid: String }

@@ -3,10 +3,7 @@ package bridges
 import java.util.UUID
 
 import bridges.Type.Struct
-import org.scalatest._
-import unindent._
 import syntax._
-import SampleTypes._
 
 object SampleTypes {
   // Sample product
@@ -31,6 +28,9 @@ object SampleTypes {
 
   // Sample value class
   case class Value(value: String) extends AnyVal
+
+  // Sample UUID
+  case class ClassUUID(a: UUID)
 
   // ADT with intermediate type appearing more than once:
   final case class Color(red: Int, green: Int, blue: Int)

@@ -15,6 +15,7 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[Float] should be(Floating)
       encode[Double] should be(Floating)
       encode[Boolean] should be(Bool)
+      encode[java.util.UUID] should be(UUIDType)
     }
 
     "options" in {
@@ -29,6 +30,10 @@ class EncoderSpec extends FreeSpec with Matchers {
 
     "value classes" in {
       encode[Value] should be(Str)
+    }
+
+    "a class with UUID member" in {
+      encode[ClassUUID] should be(Struct("a" -> UUIDType))
     }
 
     "case classes" in {

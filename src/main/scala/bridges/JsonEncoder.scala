@@ -41,11 +41,13 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
       case NumLiteral(_)      => ""
       case FloatingLiteral(_) => ""
       case BoolLiteral(_)     => ""
+      case UUIDLiteral(_)     => ""
       case Str                => s"Encode.string $fieldName"
       case Character          => s"Encode.string $fieldName"
       case Num                => s"Encode.int $fieldName"
       case Floating           => s"Encode.float $fieldName"
       case Bool               => s"Encode.bool $fieldName"
+      case UUIDType           => s"Uuid.encode $fieldName"
       case Optional(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " + encodeType(
           optTpe,

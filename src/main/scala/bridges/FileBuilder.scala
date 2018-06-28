@@ -27,6 +27,7 @@ trait ElmFileBuilder extends FileBuilder[Elm] {
        import Json.Decode as Decode
        import Json.Decode.Pipeline exposing (..)
        import Json.Encode as Encode
+       import Uuid exposing (Uuid)
        $referencedTypes
 
        ${render[Elm](decl)}

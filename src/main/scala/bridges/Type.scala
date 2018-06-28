@@ -35,6 +35,10 @@ object Type {
   final case class BoolLiteral(value: Boolean) extends Bool
   final case object Bool extends Bool
 
+  sealed abstract class UUIDType extends Type with Product with Serializable
+  final case class UUIDLiteral(value: java.util.UUID) extends UUIDType
+  final case object UUIDType extends UUIDType
+
   final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type) extends Type
 

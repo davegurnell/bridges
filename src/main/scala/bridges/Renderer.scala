@@ -16,17 +16,21 @@ trait TypescriptStyleRenderer[A] extends Renderer[A] {
 
   def renderType(tpe: Type): String =
     tpe match {
-      case Ref(id)                    => id
-      case StrLiteral(str)            => "\"" + escape(str) + "\""
-      case CharLiteral(ch)            => "\"" + ch + "\""
-      case NumLiteral(num)            => num.toString
-      case FloatingLiteral(fl)        => fl.toString
-      case BoolLiteral(bool)          => bool.toString
-      case Str                        => "string"
-      case Character                  => "string"
-      case Num                        => "number"
-      case Floating                   => "number"
-      case Bool                       => "boolean"
+      case Ref(id)             => id
+      case StrLiteral(str)     => "\"" + escape(str) + "\""
+      case CharLiteral(ch)     => "\"" + ch + "\""
+      case NumLiteral(num)     => num.toString
+      case FloatingLiteral(fl) => fl.toString
+      case BoolLiteral(bool)   => bool.toString
+      case UUIDLiteral(uuid) =>
+        uuid.toString //TODO: Typescript doesn't have native uuid type... TBD
+      case Str       => "string"
+      case Character => "string"
+      case Num       => "number"
+      case Floating  => "number"
+      case Bool      => "boolean"
+      case UUIDType =>
+        "string" //TODO: Typescript doesn't have native uuid type... TBD
       case Optional(optTpe)           => "(" + renderType(optTpe) + " | null)"
       case Array(arrTpe)              => "Array<" + renderType(arrTpe) + ">"
       case Struct(fields)             => fields.map(renderField).mkString("{ ", ", ", " }")
@@ -58,11 +62,13 @@ trait ElmStyleRenderer[A] extends Renderer[A] {
       case NumLiteral(num)     => num.toString
       case FloatingLiteral(fl) => fl.toString
       case BoolLiteral(bool)   => bool.toString
+      case UUIDLiteral(uuid)   => uuid.toString
       case Str                 => "String"
       case Character           => "Char"
       case Num                 => "Int"
       case Floating            => "Float"
       case Bool                => "Bool"
+      case UUIDType            => "Uuid"
       case Optional(optTpe)    => "(Maybe " + renderType(optTpe) + ")"
       case Array(arrTpe)       => "(List " + renderType(arrTpe) + ")"
       case Struct(fields)      => fields.map(renderField).mkString("{ ", ", ", " }")
