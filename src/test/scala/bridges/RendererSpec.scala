@@ -54,6 +54,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Typescript](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
       }
 
+      "ExternalReferences" in {
+        render[Typescript](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
+      }
+
       "Custom" in {
         render[Typescript](customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
       }
@@ -104,6 +108,10 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Flow](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
       }
 
+      "ExternalReferences" in {
+        render[Flow](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
+      }
+
     }
 
     "elm" - {
@@ -149,6 +157,10 @@ class RendererSpec extends FreeSpec with Matchers {
 
       "ClassUUID" in {
         render[Elm](declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: Uuid }"""
+      }
+
+      "ExternalReferences" in {
+        render[Elm](declaration[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
       }
 
       "MyUUID" in {

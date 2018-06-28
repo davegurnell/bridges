@@ -41,18 +41,6 @@ trait ElmFileBuilder extends FileBuilder[Elm] {
   }
 
   def getDeclarationTypes(tpe: Type, parentType: String): List[Ref] = {
-    def getExcludeTypes(tpe: Type): List[Ref] = {
-      tpe match {
-        case r @ Ref(_)               => r :: Nil
-        case Optional(optTpe)         => getExcludeTypes(optTpe)
-        case Array(arrTpe)            => getExcludeTypes(arrTpe)
-        case Struct(fields)           => fields.map(_._2).flatMap(getExcludeTypes)
-        case Union(uTpe)              => uTpe.flatMap(getExcludeTypes)
-        case Intersection(_, iTpe, _) => getExcludeTypes(iTpe)
-        case _ ⇒ Nil
-      }
-    }
-
     def getIncludeTypes(tpe: Type): List[Ref] = {
       tpe match {
         case r @ Ref(_)       => r :: Nil
@@ -66,10 +54,10 @@ trait ElmFileBuilder extends FileBuilder[Elm] {
       }
     }
 
-    val exclude = Ref(parentType) :: getExcludeTypes(tpe)
+    val exclude = Ref(parentType)
     val include = getIncludeTypes(tpe)
 
-    include.filterNot(exclude.contains).distinct
+    include.distinct.filterNot(_ == exclude)
   }
 }
 

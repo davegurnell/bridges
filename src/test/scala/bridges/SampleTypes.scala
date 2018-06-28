@@ -52,6 +52,9 @@ object SampleTypes {
   final case class Numeric(double: Double, float: Float, int: Int)
   final case class MyUUID(uuid: UUID)
 
+  // case class whose members are other case classes not in its adt
+  final case class ExternalReferences(color: Color, nav: Navigation)
+
   // Custom declaration of a intermediate structure
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(

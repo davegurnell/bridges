@@ -113,6 +113,14 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            """
       }
 
+      "ExternalReferences" in {
+        jsonDecoder[Elm](declaration[ExternalReferences]) shouldBe
+          i"""
+           decoder : Decode.Decoder ExternalReferences
+           decoder = decode ExternalReferences |> required "color" Color.decoder |> required "nav" Navigation.decoder
+           """
+      }
+
       "MyUUID" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =

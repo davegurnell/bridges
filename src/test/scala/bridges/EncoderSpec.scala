@@ -152,6 +152,12 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "class that references other case classes" in {
+      encode[ExternalReferences] should be(
+        Struct("color" -> Ref("Color"), "nav" -> Ref("Navigation"))
+      )
+    }
+
     "we can override uuid as string" in {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)

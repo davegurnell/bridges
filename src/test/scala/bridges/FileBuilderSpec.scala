@@ -35,6 +35,31 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         buildFile[Elm]("CustomModule", declaration[Color]) shouldBe expected
       }
 
+      "for a single case class with complex types" in {
+        val fileContent =
+          i"""
+           module CustomModule.ExternalReferences exposing (ExternalReferences, decoder, encoder)
+
+           import Json.Decode as Decode
+           import Json.Decode.Pipeline exposing (..)
+           import Json.Encode as Encode
+           import Uuid exposing (Uuid)
+           import CustomModule.Color as Color exposing (Color)
+           import CustomModule.Navigation as Navigation exposing (Navigation)
+
+           type alias ExternalReferences = { color: Color, nav: Navigation }
+
+           decoder : Decode.Decoder ExternalReferences
+           decoder = decode ExternalReferences |> required "color" Color.decoder |> required "nav" Navigation.decoder
+
+           encoder : ExternalReferences -> Encode.Value
+           encoder obj = Encode.object [ ("color", Color.encoder obj.color), ("nav", Navigation.encoder obj.nav) ]
+           """
+        val expected = Map("ExternalReferences.elm" → fileContent)
+
+        buildFile[Elm]("CustomModule", declaration[ExternalReferences]) shouldBe expected
+      }
+
       "for a trait" in {
         val fileContent =
           i"""
