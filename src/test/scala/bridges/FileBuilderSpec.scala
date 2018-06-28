@@ -56,7 +56,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
               case tpe of
                  "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" Color.decoder
                  "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" Color.decoder
-                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" Shape.decoder |> required "rightShape" Shape.decoder
+                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" decoder |> required "rightShape" decoder
                  _ -> Decode.fail ("Unexpected type for Shape")
 
            encoder : Shape -> Encode.Value
@@ -64,7 +64,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
               case tpe of
                  Circle radius color -> Encode.object [ ("radius", Encode.float radius), ("color", Color.encoder color), ("type", Encode.string "Circle") ]
                  Rectangle width height color -> Encode.object [ ("width", Encode.float width), ("height", Encode.float height), ("color", Color.encoder color), ("type", Encode.string "Rectangle") ]
-                 ShapeGroup leftShape rightShape -> Encode.object [ ("leftShape", Shape.encoder leftShape), ("rightShape", Shape.encoder rightShape), ("type", Encode.string "ShapeGroup") ]
+                 ShapeGroup leftShape rightShape -> Encode.object [ ("leftShape", encoder leftShape), ("rightShape", encoder rightShape), ("type", Encode.string "ShapeGroup") ]
            """
         val expected = Map("Shape.elm" → fileContent)
 
@@ -90,15 +90,15 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            decoderNavigation : String -> Decode.Decoder Navigation
            decoderNavigation tpe =
               case tpe of
-                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list Navigation.decoder)
-                 "NodeList" -> decode NodeList |> required "all" (Decode.list Navigation.decoder)
+                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list decoder)
+                 "NodeList" -> decode NodeList |> required "all" (Decode.list decoder)
                  _ -> Decode.fail ("Unexpected type for Navigation")
 
            encoder : Navigation -> Encode.Value
            encoder tpe =
               case tpe of
-                 Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map Navigation.encoder children)), ("type", Encode.string "Node") ]
-                 NodeList all -> Encode.object [ ("all", Encode.list (List.map Navigation.encoder all)), ("type", Encode.string "NodeList") ]
+                 Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map encoder children)), ("type", Encode.string "Node") ]
+                 NodeList all -> Encode.object [ ("all", Encode.list (List.map encoder all)), ("type", Encode.string "NodeList") ]
            """
         val expected = Map("Navigation.elm" → fileContent)
 

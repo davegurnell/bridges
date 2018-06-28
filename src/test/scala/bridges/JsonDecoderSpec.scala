@@ -45,7 +45,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
               case tpe of
                  "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" Color.decoder
                  "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" Color.decoder
-                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" Shape.decoder |> required "rightShape" Shape.decoder
+                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" decoder |> required "rightShape" decoder
                  _ -> Decode.fail ("Unexpected type for Shape")
            """
       }
@@ -90,6 +90,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Navigation" in {
+        println(declaration[Navigation])
         jsonDecoder[Elm](declaration[Navigation]) shouldBe
           i"""
            decoder : Decode.Decoder Navigation
@@ -98,8 +99,8 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            decoderNavigation : String -> Decode.Decoder Navigation
            decoderNavigation tpe =
               case tpe of
-                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list Navigation.decoder)
-                 "NodeList" -> decode NodeList |> required "all" (Decode.list Navigation.decoder)
+                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list decoder)
+                 "NodeList" -> decode NodeList |> required "all" (Decode.list decoder)
                  _ -> Decode.fail ("Unexpected type for Navigation")
            """
       }

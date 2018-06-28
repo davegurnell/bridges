@@ -43,7 +43,7 @@ class JsonEncoderSpec extends FreeSpec with Matchers {
               case tpe of
                  Circle radius color -> Encode.object [ ("radius", Encode.float radius), ("color", Color.encoder color), ("type", Encode.string "Circle") ]
                  Rectangle width height color -> Encode.object [ ("width", Encode.float width), ("height", Encode.float height), ("color", Color.encoder color), ("type", Encode.string "Rectangle") ]
-                 ShapeGroup leftShape rightShape -> Encode.object [ ("leftShape", Shape.encoder leftShape), ("rightShape", Shape.encoder rightShape), ("type", Encode.string "ShapeGroup") ]
+                 ShapeGroup leftShape rightShape -> Encode.object [ ("leftShape", encoder leftShape), ("rightShape", encoder rightShape), ("type", Encode.string "ShapeGroup") ]
            """
       }
 
@@ -88,8 +88,8 @@ class JsonEncoderSpec extends FreeSpec with Matchers {
            encoder : Navigation -> Encode.Value
            encoder tpe =
               case tpe of
-                 Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map Navigation.encoder children)), ("type", Encode.string "Node") ]
-                 NodeList all -> Encode.object [ ("all", Encode.list (List.map Navigation.encoder all)), ("type", Encode.string "NodeList") ]
+                 Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map encoder children)), ("type", Encode.string "Node") ]
+                 NodeList all -> Encode.object [ ("all", Encode.list (List.map encoder all)), ("type", Encode.string "NodeList") ]
            """
       }
 
