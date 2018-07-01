@@ -15,30 +15,30 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
     decl.tpe match {
       case Union(types) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
-        val body = types.map(decodeType(decl.id, _)).mkString("\n      ")
+        val body = types.map(decodeType).mkString("\n      ")
         i"""
-           decoder : Decode.Decoder ${decl.id}
-           decoder = Decode.field "type" Decode.string |> Decode.andThen decoder${decl.id}
+           decoder${decl.id} : Decode.Decoder ${decl.id}
+           decoder${decl.id} = Decode.field "type" Decode.string |> Decode.andThen decoder${decl.id}Tpe
 
-           decoder${decl.id} : String -> Decode.Decoder ${decl.id}
-           decoder${decl.id} tpe =
+           decoder${decl.id}Tpe : String -> Decode.Decoder ${decl.id}
+           decoder${decl.id}Tpe tpe =
               case tpe of
                  $body
                  _ -> Decode.fail ("Unexpected type for ${decl.id}")
            """
       case other ⇒
-        val body = decodeType(decl.id, other)
+        val body = decodeType(other)
 
         i"""
-           decoder : Decode.Decoder ${decl.id}
-           decoder = decode ${decl.id} $body
+           decoder${decl.id} : Decode.Decoder ${decl.id}
+           decoder${decl.id} = decode ${decl.id} $body
            """
     }
   }
 
-  def decodeType(topType: String, tpe: Type): String =
+  def decodeType(tpe: Type): String =
     tpe match {
-      case Ref(id)            => if (id == topType) "decoder" else s"$id.decoder"
+      case Ref(id)            => s"decoder$id"
       case StrLiteral(_)      => ""
       case CharLiteral(_)     => ""
       case NumLiteral(_)      => ""
@@ -52,10 +52,10 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
       case Bool               => "Decode.bool"
       case UUIDType           => "Uuid.decoder"
       case Optional(optTpe) =>
-        "(Decode.maybe " + decodeType(topType, optTpe) + ")"
-      case Array(arrTpe) => "(Decode.list " + decodeType(topType, arrTpe) + ")"
+        "(Decode.maybe " + decodeType(optTpe) + ")"
+      case Array(arrTpe) => "(Decode.list " + decodeType(arrTpe) + ")"
       case Struct(fields) =>
-        fields.map(decodeField(topType, _)).mkString("|> ", " |> ", "")
+        fields.map(decodeField).mkString("|> ", " |> ", "")
       case Union(_) => ""
       case Intersection(key, _, fields) =>
         val mainType =
@@ -63,7 +63,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
             .collectFirst { case (_, StrLiteral(name)) ⇒ name }
             .getOrElse("<Missing main type>")
         val paramsDecoder =
-          fields.fields.map(decodeField(topType, _)).mkString(" |> ")
+          fields.fields.map(decodeField).mkString(" |> ")
 
         // consider case objects vs case classes
         val bodyDecoder =
@@ -73,10 +73,10 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
         s""""$mainType" -> $bodyDecoder"""
     }
 
-  def decodeField(topType: String, field: (String, Type)): String = {
+  def decodeField(field: (String, Type)): String = {
     val fieldName = field._1
     def decode(tpe: Type) =
-      s"""required "$fieldName" ${decodeType(topType, tpe)}"""
+      s"""required "$fieldName" ${decodeType(tpe)}"""
 
     field._2 match {
       case Optional(optTpe) ⇒ s"""Decode.maybe (${decode(optTpe)})"""

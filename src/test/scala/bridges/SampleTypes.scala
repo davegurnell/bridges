@@ -55,6 +55,13 @@ object SampleTypes {
   // case class whose members are other case classes not in its adt
   final case class ExternalReferences(color: Color, nav: Navigation)
 
+  // mutually recursive types
+  final case class TypeOne(name: String, values: List[TypeTwo])
+
+  sealed trait TypeTwo
+  final case class OptionOne(value: Int) extends TypeTwo
+  final case class OptionTwo(value: TypeOne) extends TypeTwo
+
   // Custom declaration of a intermediate structure
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(

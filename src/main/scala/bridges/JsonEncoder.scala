@@ -16,33 +16,31 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
       case Union(types) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
-          types.map(encodeType(decl.id, _, "", decl.id)).mkString("\n      ")
+          types.map(encodeType(_, "", decl.id)).mkString("\n      ")
 
         i"""
-           encoder : ${decl.id} -> Encode.Value
-           encoder tpe =
+           encoder${decl.id} : ${decl.id} -> Encode.Value
+           encoder${decl.id} tpe =
               case tpe of
                  $body
            """
       case other ⇒
-        val body = encodeType(decl.id, other, "obj", decl.id)
+        val body = encodeType(other, "obj", decl.id)
 
         i"""
-        encoder : ${decl.id} -> Encode.Value
-        encoder obj = $body
+        encoder${decl.id} : ${decl.id} -> Encode.Value
+        encoder${decl.id} obj = $body
         """
     }
   }
 
   def encodeType(
-      topType: String,
       tpe: Type,
       objectName: String,
       fieldName: String
   ): String =
     tpe match {
-      case Ref(id) =>
-        if (id == topType) s"encoder $fieldName" else s"$id.encoder $fieldName"
+      case Ref(id)            => s"encoder$id $fieldName"
       case StrLiteral(_)      => ""
       case CharLiteral(_)     => ""
       case NumLiteral(_)      => ""
@@ -57,21 +55,19 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
       case UUIDType           => s"Uuid.encode $fieldName"
       case Optional(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " + encodeType(
-          topType,
           optTpe,
           objectName,
           fieldName
         ) + ")"
       case Array(arrTpe) =>
         "Encode.list (List.map " + encodeType(
-          topType,
           arrTpe,
           objectName,
           fieldName
         ) + ")"
       case Struct(fields) =>
         fields
-          .map(encodeField(topType, _, objectName))
+          .map(encodeField(_, objectName))
           .mkString("Encode.object [ ", ", ", " ]")
       case Union(_) => ""
       case Intersection(key, _, fields) =>
@@ -80,7 +76,7 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
             .collectFirst { case (_, StrLiteral(name)) ⇒ name }
             .getOrElse("<Missing main type>")
         val params = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
-        val paramsEncoder = fields.fields.map(encodeField(topType, _, ""))
+        val paramsEncoder = fields.fields.map(encodeField(_, ""))
 
         val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"
         val bodyEncoder =
@@ -91,7 +87,6 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
     }
 
   def encodeField(
-      topType: String,
       field: (String, Type),
       objectName: String
   ): String = {
@@ -99,7 +94,7 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
 
     val typeFieldName =
       if (objectName.isEmpty) fieldName else s"$objectName.$fieldName"
-    val encoding = encodeType(topType, field._2, objectName, typeFieldName)
+    val encoding = encodeType(field._2, objectName, typeFieldName)
 
     s"""("$fieldName", $encoding)"""
   }
