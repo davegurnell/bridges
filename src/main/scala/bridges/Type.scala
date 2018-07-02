@@ -35,6 +35,10 @@ object Type {
   final case class BoolLiteral(value: Boolean) extends Bool
   final case object Bool extends Bool
 
+  sealed abstract class UUIDType extends Type with Product with Serializable
+  final case class UUIDLiteral(value: java.util.UUID) extends UUIDType
+  final case object UUIDType extends UUIDType
+
   final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type) extends Type
 
@@ -48,6 +52,7 @@ object Type {
       Struct(fields.toList)
   }
 
+  //TODO: does union only contain intersections?
   final case class Union(types: List[Type]) extends Type {
     def +:(tpe: Type): Union =
       Union(tpe +: types)
@@ -58,21 +63,19 @@ object Type {
       Union(types.toList)
   }
 
-  final case class Intersection(types: List[Type]) extends Type {
-    def +:(tpe: Type): Intersection =
-      Intersection(tpe +: types)
-  }
-
-  object Intersection {
-    def apply(types: Type*): Intersection =
-      Intersection(types.toList)
-  }
+  /*
+    - key : contains a Struct (key -> StrLiteral(name)) that identifies the type. Can probably be done better...
+    - tpe: the type in this intersection
+    - fields: a Struct that contains all the fields associated to the Type of the Intersection, so we can derive on these values
+   */
+  final case class Intersection(key: Struct, tpe: Type, fields: Struct)
+      extends Type
 
   def disc(name: String, tpe: Type, fields: Struct): Intersection =
     disc("type")(name, tpe, fields)
 
   def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
-    Intersection(Struct(key -> StrLiteral(name), "fields" -> fields), tpe)
+    Intersection(Struct(key -> StrLiteral(name)), tpe, fields)
 
   def discUnion(types: (String, Type, Struct)*): Union =
     discUnion("type")(types: _*)

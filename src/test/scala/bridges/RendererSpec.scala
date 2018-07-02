@@ -1,151 +1,176 @@
 package bridges
 
-import bridges.Type.Struct
 import org.scalatest._
-import unindent._
-
-object RendererSpec {
-  import syntax._
-
-  final case class Color(red: Int, green: Int, blue: Int)
-
-  sealed abstract class Shape extends Product with Serializable
-  case class Rectangle(width: Double, height: Double, color: Color)
-      extends Shape
-  case class Circle(radius: Double, color: Color) extends Shape
-
-  final case class Alpha(name: String, char: Char, bool: Boolean)
-  final case class ArrayClass(aList: List[String], optField: Option[Float])
-  final case class Numeric(double: Double, float: Float, int: Int)
-
-  sealed abstract class ClassOrObject extends Product with Serializable
-  case class MyClass(value: Int) extends ClassOrObject
-  case object MyObject extends ClassOrObject
-
-  val customDeclaration: Declaration =
-    "Message" := Type.discUnion("level")(
-      ("error", Type.Ref("ErrorMessage"), Struct(Nil)),
-      ("warning", Type.Ref("WarningMessage"), Struct(Nil))
-    )
-}
+import syntax._
+import SampleTypes._
+import bridges.Type.Str
 
 class RendererSpec extends FreeSpec with Matchers {
-  import RendererSpec._
-  import syntax._
 
   "render" - {
-    "typescript" in {
-      val actual: String =
-        render[Typescript](
-          List(
-            declaration[Color],
-            declaration[Circle],
-            declaration[Rectangle],
-            declaration[Shape],
-            declaration[Alpha],
-            declaration[ArrayClass],
-            declaration[Numeric],
-            declaration[ClassOrObject],
-            customDeclaration
-          )
-        )
+    "typescript" - {
 
-      val expected: String =
-        i"""
-        export type Color = { red: number, green: number, blue: number };
+      "Color" in {
+        render[Typescript](declaration[Color]) shouldBe "export type Color = { red: number, green: number, blue: number };"
+      }
 
-        export type Circle = { radius: number, color: Color };
+      "Circle" in {
+        render[Typescript](declaration[Circle]) shouldBe "export type Circle = { radius: number, color: Color };"
+      }
 
-        export type Rectangle = { width: number, height: number, color: Color };
+      "Rectangle" in {
+        render[Typescript](declaration[Rectangle]) shouldBe "export type Rectangle = { width: number, height: number, color: Color };"
+      }
 
-        export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle));
+      "Shape" in {
+        render[Typescript](declaration[Shape]) shouldBe """export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup));"""
+      }
 
-        export type Alpha = { name: string, char: string, bool: boolean };
+      "Alpha" in {
+        render[Typescript](declaration[Alpha]) shouldBe "export type Alpha = { name: string, char: string, bool: boolean };"
+      }
 
-        export type ArrayClass = { aList: Array<string>, optField: (number | null) };
+      "ArrayClass" in {
+        render[Typescript](declaration[ArrayClass]) shouldBe """export type ArrayClass = { aList: Array<string>, optField: (number | null) };"""
+      }
 
-        export type Numeric = { double: number, float: number, int: number };
+      "Numeric" in {
+        render[Typescript](declaration[Numeric]) shouldBe """export type Numeric = { double: number, float: number, int: number };"""
+      }
 
-        export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));
+      "ClassOrObject" in {
+        render[Typescript](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
 
-        export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));
-        """
+      "NestedClassOrObject" in {
+        render[Typescript](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
 
-      actual should be(expected)
+      "Navigation" in {
+        render[Typescript](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
+      }
+
+      "ClassUUID" in {
+        render[Typescript](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+      }
+
+      "ExternalReferences" in {
+        render[Typescript](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
+      }
+
+      "Custom" in {
+        render[Typescript](customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
+      }
     }
 
-    "flow" in {
-      val actual: String =
-        render[Flow](
-          List(
-            declaration[Color],
-            declaration[Circle],
-            declaration[Rectangle],
-            declaration[Shape],
-            declaration[Alpha],
-            declaration[ArrayClass],
-            declaration[Numeric],
-            declaration[ClassOrObject]
-          )
-        )
+    "flow" - {
+      "Color" in {
+        render[Flow](declaration[Color]) shouldBe "export type Color = { red: number, green: number, blue: number };"
+      }
 
-      val expected: String =
-        i"""
-        export type Color = { red: number, green: number, blue: number };
+      "Circle" in {
+        render[Flow](declaration[Circle]) shouldBe "export type Circle = { radius: number, color: Color };"
+      }
 
-        export type Circle = { radius: number, color: Color };
+      "Rectangle" in {
+        render[Flow](declaration[Rectangle]) shouldBe "export type Rectangle = { width: number, height: number, color: Color };"
+      }
 
-        export type Rectangle = { width: number, height: number, color: Color };
+      "Shape" in {
+        render[Flow](declaration[Shape]) shouldBe """export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup));"""
+      }
 
-        export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle));
+      "Alpha" in {
+        render[Flow](declaration[Alpha]) shouldBe "export type Alpha = { name: string, char: string, bool: boolean };"
+      }
 
-        export type Alpha = { name: string, char: string, bool: boolean };
+      "ArrayClass" in {
+        render[Flow](declaration[ArrayClass]) shouldBe """export type ArrayClass = { aList: Array<string>, optField: (number | null) };"""
+      }
 
-        export type ArrayClass = { aList: Array<string>, optField: (number | null) };
+      "Numeric" in {
+        render[Flow](declaration[Numeric]) shouldBe """export type Numeric = { double: number, float: number, int: number };"""
+      }
 
-        export type Numeric = { double: number, float: number, int: number };
+      "ClassOrObject" in {
+        render[Flow](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
 
-        export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));
-        """
+      "NestedClassOrObject" in {
+        render[Flow](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+      }
 
-      actual should be(expected)
+      "Navigation" in {
+        render[Flow](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
+      }
+
+      "ClassUUID" in {
+        render[Flow](declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+      }
+
+      "ExternalReferences" in {
+        render[Flow](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
+      }
+
     }
 
-    "elm" in {
-      val actual: String =
-        render[Elm](
-          List(
-            declaration[Color],
-            declaration[Circle],
-            declaration[Rectangle],
-            declaration[Shape],
-            declaration[Alpha],
-            declaration[ArrayClass],
-            declaration[Numeric],
-            declaration[ClassOrObject]
-          )
-        )
+    "elm" - {
+      "Color" in {
+        render[Elm](declaration[Color]) shouldBe "type alias Color = { red: Int, green: Int, blue: Int }"
+      }
 
-      val expected: String =
-        i"""
-        type alias Color = { red: Int, green: Int, blue: Int }
+      "Circle" in {
+        render[Elm](declaration[Circle]) shouldBe "type alias Circle = { radius: Float, color: Color }"
+      }
 
-        type alias Circle = { radius: Float, color: Color }
+      "Rectangle" in {
+        render[Elm](declaration[Rectangle]) shouldBe "type alias Rectangle = { width: Float, height: Float, color: Color }"
+      }
 
-        type alias Rectangle = { width: Float, height: Float, color: Color }
+      "Shape" in {
+        render[Elm](declaration[Shape]) shouldBe """type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape"""
+      }
 
-        type Shape = Circle Float Color | Rectangle Float Float Color
+      "Alpha" in {
+        render[Elm](declaration[Alpha]) shouldBe "type alias Alpha = { name: String, char: Char, bool: Bool }"
+      }
 
-        type alias Alpha = { name: String, char: Char, bool: Bool }
+      "ArrayClass" in {
+        render[Elm](declaration[ArrayClass]) shouldBe """type alias ArrayClass = { aList: (List String), optField: (Maybe Float) }"""
+      }
 
-        type alias ArrayClass = { aList: List String, optField: Maybe Float }
+      "Numeric" in {
+        render[Elm](declaration[Numeric]) shouldBe """type alias Numeric = { double: Float, float: Float, int: Int }"""
+      }
 
-        type alias Numeric = { double: Float, float: Float, int: Int }
+      "ClassOrObject" in {
+        render[Elm](declaration[ClassOrObject]) shouldBe """type ClassOrObject = MyClass Int | MyObject"""
+      }
 
-        type ClassOrObject = MyClass Int | MyObject
-        """
+      "NestedClassOrObject" in {
+        render[Elm](declaration[NestedClassOrObject]) shouldBe """type NestedClassOrObject = MyClass Int | MyObject"""
+      }
 
-      actual should be(expected)
+      "Navigation" in {
+        render[Elm](declaration[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
+      }
+
+      "ClassUUID" in {
+        render[Elm](declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: Uuid }"""
+      }
+
+      "ExternalReferences" in {
+        render[Elm](declaration[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
+      }
+
+      "MyUUID" in {
+        // we want to treat UUID as string, using an override
+        implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
+          Encoder.pure(Str)
+
+        render[Elm](declaration[MyUUID]) shouldBe """type alias MyUUID = { uuid: String }"""
+      }
+
     }
   }
 
