@@ -24,7 +24,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
            decoder${decl.id}Tpe tpe =
               case tpe of
                  $body
-                 _ -> Decode.fail ("Unexpected type for ${decl.id}")
+                 _ -> Decode.fail ("Unexpected type for ${decl.id}: " ++ tpe)
            """
       case other ⇒
         val body = decodeType(other)
