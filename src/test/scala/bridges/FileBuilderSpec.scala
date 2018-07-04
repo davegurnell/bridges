@@ -95,7 +95,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
                  "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" decoderColor
                  "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" decoderColor
                  "ShapeGroup" -> decode ShapeGroup |> required "leftShape" decoderShape |> required "rightShape" decoderShape
-                 _ -> Decode.fail ("Unexpected type for Shape")
+                 _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
 
 
 
@@ -135,7 +135,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
               case tpe of
                  "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list decoderNavigation)
                  "NodeList" -> decode NodeList |> required "all" (Decode.list decoderNavigation)
-                 _ -> Decode.fail ("Unexpected type for Navigation")
+                 _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
 
 
 
@@ -255,7 +255,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
               case tpe of
                  "OptionOne" -> decode OptionOne |> required "value" Decode.int
                  "OptionTwo" -> decode OptionTwo |> required "value" decoderTypeOne
-                 _ -> Decode.fail ("Unexpected type for TypeTwo")
+                 _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
 
 
 
