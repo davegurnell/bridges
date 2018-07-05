@@ -2,8 +2,9 @@ package bridges
 
 import org.scalatest._
 import syntax._
-import SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
+import shapeless.Typeable
 
 class RendererSpec extends FreeSpec with Matchers {
 
@@ -182,6 +183,24 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Elm](declaration[ObjectsOnly]) shouldBe """type ObjectsOnly = ObjectOne | ObjectTwo"""
       }
 
+      "ClassWithRefinedType" in {
+        import eu.timepit.refined._
+
+        implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
+          Encoder.pure(Str)
+
+        implicit val refinedTypeTypeable: Typeable[ShortString] =
+          new Typeable[ShortString] {
+            def cast(t: Any): Option[ShortString] = {
+              if (t != null && t.isInstanceOf[String])
+                refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
+              else None
+            }
+            def describe: String = "ShortString"
+          }
+
+        render[Elm](declaration[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
+      }
     }
   }
 

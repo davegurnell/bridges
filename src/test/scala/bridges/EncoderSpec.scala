@@ -1,9 +1,10 @@
 package bridges
 
 import org.scalatest._
-import SampleTypes._
+import types.SampleTypes._
 import syntax._
 import Type._
+import shapeless.Typeable
 
 class EncoderSpec extends FreeSpec with Matchers {
 
@@ -175,6 +176,13 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "class with refined type" in {
+      implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
+        Encoder.pure(Str)
+
+      encode[ClassWithRefinedType] should be(Struct("name" -> Str))
+    }
+
     "we can override uuid as string" in {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)
@@ -213,6 +221,27 @@ class EncoderSpec extends FreeSpec with Matchers {
           ("One", Str, Struct("value" → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
+      )
+    }
+
+    "class with refined type" in {
+      import eu.timepit.refined._
+
+      implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
+        Encoder.pure(Str)
+
+      implicit val refinedTypeTypeable: Typeable[ShortString] =
+        new Typeable[ShortString] {
+          def cast(t: Any): Option[ShortString] = {
+            if (t != null && t.isInstanceOf[String])
+              refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
+            else None
+          }
+          def describe: String = "ShortString"
+        }
+
+      declaration[ClassWithRefinedType] should be(
+        "ClassWithRefinedType" := Struct("name" -> Str)
       )
     }
   }

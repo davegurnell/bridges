@@ -1,6 +1,6 @@
 package bridges
 
-import bridges.SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
 import bridges.syntax._
 import org.scalatest._
