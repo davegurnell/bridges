@@ -79,7 +79,8 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
       s"""required "$fieldName" ${decodeType(tpe)}"""
 
     field._2 match {
-      case Optional(optTpe) ⇒ s"""Decode.maybe (${decode(optTpe)})"""
+      case Optional(optTpe) ⇒
+        s"""optional "$fieldName" (Decode.maybe ${decodeType(optTpe)}) Nothing"""
       case other ⇒ decode(other)
     }
   }

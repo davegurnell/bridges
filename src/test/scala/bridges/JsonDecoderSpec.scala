@@ -62,7 +62,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[ArrayClass]) shouldBe
           i"""
            decoderArrayClass : Decode.Decoder ArrayClass
-           decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> Decode.maybe (required "optField" Decode.float)
+           decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> optional "optField" (Decode.maybe Decode.float) Nothing
            """
       }
 
