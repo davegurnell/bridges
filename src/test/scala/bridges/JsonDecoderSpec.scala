@@ -90,7 +90,6 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Navigation" in {
-        println(declaration[Navigation])
         jsonDecoder[Elm](declaration[Navigation]) shouldBe
           i"""
            decoderNavigation : Decode.Decoder Navigation
