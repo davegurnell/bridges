@@ -6,11 +6,11 @@ group: edge
 matrix:
   include:
     - jdk: openjdk8
-      scala: 2.11.9
+      scala: 2.11.12
       env: COMMAND=ci PUBLISH=
-    - jdk: openjdk8
-      scala: 2.12.6
-      env: COMMAND=ci PUBLISH=true
+    # - jdk: openjdk8
+    #   scala: 2.12.6
+    #   env: COMMAND=ci PUBLISH=true
 
 script:
   - sbt -J-Xmx6144m ++$TRAVIS_SCALA_VERSION $COMMAND
