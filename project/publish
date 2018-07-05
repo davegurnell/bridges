@@ -25,11 +25,10 @@ end
 branch = ENV['TRAVIS_BRANCH']
 version = nil
 
-unless branch =~ /^v(\d+\.\d+\.\d+)$/ ||
-  (branch == "snapshot" && ENV['TRAVIS_PULL_REQUEST'] == 'false')
+unless branch =~ /^(\d+\.\d+\.\d+)$/ ||
+  (branch == "develop" && ENV['TRAVIS_PULL_REQUEST'] == 'false')
 
-  puts "Only deploying docs on the `publish` branch, or for version tags " +
-       "and not for pull requests or other branches, exiting!"
+  puts "Only deploying for `develop` branch and version tags. Exiting!"
   exit 0
 else
   version = $1
