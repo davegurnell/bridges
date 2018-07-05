@@ -19,7 +19,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -48,7 +48,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
            import CustomModule.Color exposing (..)
            import CustomModule.Navigation exposing (..)
 
@@ -78,7 +78,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
            import CustomModule.Color exposing (..)
 
 
@@ -119,7 +119,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -150,6 +150,36 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         buildFile[Elm]("CustomModule", declaration[Navigation]) shouldBe expected
       }
 
+      "with uuid" in {
+        val fileContent =
+          i"""
+           module CustomModule2.MyUUID exposing (..)
+
+           import Json.Decode as Decode
+           import Json.Decode.Pipeline exposing (..)
+           import Json.Encode as Encode
+           import Uuid exposing (Uuid)
+
+
+
+
+           type alias MyUUID = { uuid: Uuid }
+
+
+
+           decoderMyUUID : Decode.Decoder MyUUID
+           decoderMyUUID = decode MyUUID |> required "uuid" Uuid.decoder
+
+
+
+           encoderMyUUID : MyUUID -> Encode.Value
+           encoderMyUUID obj = Encode.object [ ("uuid", Uuid.encode obj.uuid) ]
+           """
+        val expected = ("MyUUID.elm", fileContent)
+
+        buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
+      }
+
       "with overrides" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
@@ -162,7 +192,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -195,7 +225,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -235,7 +265,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
