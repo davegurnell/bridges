@@ -5,12 +5,12 @@ group: edge
 
 matrix:
   include:
-    - jdk: openjdk8
-      scala: 2.11.12
-      env: COMMAND=ci PUBLISH=
     # - jdk: openjdk8
-    #   scala: 2.12.6
-    #   env: COMMAND=ci PUBLISH=true
+    #   scala: 2.11.12
+    #   env: COMMAND=ci PUBLISH=
+    - jdk: openjdk8
+      scala: 2.12.6
+      env: COMMAND=ci PUBLISH=true
 
 script:
   - sbt -J-Xmx6144m ++$TRAVIS_SCALA_VERSION $COMMAND
@@ -26,6 +26,7 @@ cache:
   - $HOME/.sbt/cache
   - $HOME/.sbt/launchers
   - $HOME/.ivy2
+
 before_cache:
   - du -h -d 1 $HOME/.ivy2/
   - du -h -d 2 $HOME/.sbt/
