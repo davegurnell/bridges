@@ -135,6 +135,17 @@ class JsonEncoderSpec extends FreeSpec with Matchers {
            """
       }
 
+      "ObjectsOnly" in {
+        jsonEncoder[Elm](List(declaration[ObjectsOnly])) shouldBe
+          i"""
+           encoderObjectsOnly : ObjectsOnly -> Encode.Value
+           encoderObjectsOnly tpe =
+              case tpe of
+                 ObjectOne -> Encode.object [ ("type", Encode.string "ObjectOne") ]
+                 ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
+           """
+      }
+
     }
   }
 

@@ -158,6 +158,23 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "pure objects ADT" in {
+      encode[ObjectsOnly] should be(
+        discUnion(
+          (
+            "ObjectOne",
+            Ref("ObjectOne"),
+            Struct()
+          ),
+          (
+            "ObjectTwo",
+            Ref("ObjectTwo"),
+            Struct()
+          )
+        )
+      )
+    }
+
     "we can override uuid as string" in {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)

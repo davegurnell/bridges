@@ -150,6 +150,21 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            decoderMyUUID = decode MyUUID |> required "uuid" Decode.string
            """
       }
+
+      "ObjectsOnly" in {
+        jsonDecoder[Elm](declaration[ObjectsOnly]) shouldBe
+          i"""
+           decoderObjectsOnly : Decode.Decoder ObjectsOnly
+           decoderObjectsOnly = Decode.field "type" Decode.string |> Decode.andThen decoderObjectsOnlyTpe
+
+           decoderObjectsOnlyTpe : String -> Decode.Decoder ObjectsOnly
+           decoderObjectsOnlyTpe tpe =
+              case tpe of
+                 "ObjectOne" -> Decode.succeed ObjectOne
+                 "ObjectTwo" -> Decode.succeed ObjectTwo
+                 _ -> Decode.fail ("Unexpected type for ObjectsOnly: " ++ tpe)
+           """
+      }
     }
 
   }

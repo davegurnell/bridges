@@ -61,6 +61,10 @@ class RendererSpec extends FreeSpec with Matchers {
       "Custom" in {
         render[Typescript](customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
       }
+
+      "ObjectsOnly" in {
+        render[Typescript](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
+      }
     }
 
     "flow" - {
@@ -112,6 +116,9 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Flow](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
       }
 
+      "ObjectsOnly" in {
+        render[Flow](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
+      }
     }
 
     "elm" - {
@@ -169,6 +176,10 @@ class RendererSpec extends FreeSpec with Matchers {
           Encoder.pure(Str)
 
         render[Elm](declaration[MyUUID]) shouldBe """type alias MyUUID = { uuid: String }"""
+      }
+
+      "ObjectsOnly" in {
+        render[Elm](declaration[ObjectsOnly]) shouldBe """type ObjectsOnly = ObjectOne | ObjectTwo"""
       }
 
     }
