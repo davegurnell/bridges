@@ -62,6 +62,10 @@ object SampleTypes {
   final case class OptionOne(value: Int) extends TypeTwo
   final case class OptionTwo(value: TypeOne) extends TypeTwo
 
+  sealed trait ObjectsOnly
+  final case object ObjectOne extends ObjectsOnly
+  final case object ObjectTwo extends ObjectsOnly
+
   // Custom declaration of a intermediate structure
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(

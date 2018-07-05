@@ -162,7 +162,6 @@ class FileBuilderSpec extends FreeSpec with Matchers {
 
 
 
-
            type alias MyUUID = { uuid: Uuid }
 
 
@@ -211,6 +210,45 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         val expected = ("MyUUID.elm", fileContent)
 
         buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
+      }
+
+      "objects only" in {
+        val fileContent =
+          i"""
+           module CustomModule2.ObjectsOnly exposing (..)
+
+           import Json.Decode as Decode
+
+           import Json.Encode as Encode
+
+
+
+
+           type ObjectsOnly = ObjectOne | ObjectTwo
+
+
+
+           decoderObjectsOnly : Decode.Decoder ObjectsOnly
+           decoderObjectsOnly = Decode.field "type" Decode.string |> Decode.andThen decoderObjectsOnlyTpe
+
+           decoderObjectsOnlyTpe : String -> Decode.Decoder ObjectsOnly
+           decoderObjectsOnlyTpe tpe =
+              case tpe of
+                 "ObjectOne" -> Decode.succeed ObjectOne
+                 "ObjectTwo" -> Decode.succeed ObjectTwo
+                 _ -> Decode.fail ("Unexpected type for ObjectsOnly: " ++ tpe)
+
+
+
+           encoderObjectsOnly : ObjectsOnly -> Encode.Value
+           encoderObjectsOnly tpe =
+              case tpe of
+                 ObjectOne -> Encode.object [ ("type", Encode.string "ObjectOne") ]
+                 ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
+           """
+        val expected = ("ObjectsOnly.elm", fileContent)
+
+        buildFile[Elm]("CustomModule2", declaration[ObjectsOnly]) shouldBe expected
       }
 
       "for several classes at once" in {
