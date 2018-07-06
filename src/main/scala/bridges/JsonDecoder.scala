@@ -38,7 +38,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
 
   def decodeType(tpe: Type): String =
     tpe match {
-      case Ref(id)            => s"decoder$id"
+      case Ref(id)            => s"""(Decode.lazy (\\_ -> decoder$id))"""
       case StrLiteral(_)      => ""
       case CharLiteral(_)     => ""
       case NumLiteral(_)      => ""
