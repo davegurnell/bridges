@@ -130,7 +130,7 @@ We use the [git flow](https://github.com/nvie/gitflow) branching model:
 - complete features are PR'd onto `develop`;
 - releases are tagged and merged to `master`.
 
-Travis is configured to publish:
+Travis is configured to publish as follows:
 
 - releases from release tags woth the format `x.y.z`;
 - snapshots from non-PR commits to `develop`.
