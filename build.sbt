@@ -43,14 +43,7 @@ git.formattedShaVersion := {
 }
 
 // Publishing
-
 // Code taken from https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
-
-credentials += Credentials(
-  "Sonatype Nexus Repository Manager",
-  "oss.sonatype.org",
-  sys.env.getOrElse("SONATYPE_USER", ""),
-  sys.env.getOrElse("SONATYPE_PASS", ""))
 
 publishMavenStyle := true
 
@@ -58,13 +51,13 @@ isSnapshot := version.value endsWith "SNAPSHOT"
 
 publishTo := sonatypePublishTo.value
 
-useGpg := false
 usePgpKeyHex("2D2E2B8B8BBA48B5")
+
 pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg"
 pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg"
-pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 
 licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
+
 homepage := Some(url("https://github.com/davegurnell/bridges"))
 
 scmInfo := Some(
@@ -80,6 +73,19 @@ developers := List(
     url   = url("https://twitter.com/davegurnell")))
 
 // Travis
+
+// Sonatype credentials are on Travis in a secret:
+credentials ++= {
+  val travisCredentials = for {
+    user <- sys.env.get("SONATYPE_USER")
+    pass <- sys.env.get("SONATYPE_PASS")
+  } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass)
+
+  travisCredentials.toSeq
+}
+
+// Password to the PGP certificate is on Travis in a secret:
+pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 
 addCommandAlias("ci", ";clean ;coverage ;compile ;test ;coverageReport ;package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
