@@ -27,18 +27,19 @@ enablePlugins(GitVersioning)
 git.baseVersion := "0.7.0"
 
 val ReleaseTag = """^([\d\.]+)$""".r
+
 git.gitTagToVersionNumber := {
   case ReleaseTag(v) => Some(v)
   case _             => None
 }
 
 git.formattedShaVersion := {
-  val suffix = git.makeUncommittedSignifierSuffix(
-    git.gitUncommittedChanges.value,
-    git.uncommittedSignifier.value)
+  // val suffix = git.makeUncommittedSignifierSuffix(
+  //   git.gitUncommittedChanges.value,
+  //   git.uncommittedSignifier.value)
 
   git.gitHeadCommit.value.map(_.substring(0, 7)).map { sha =>
-    s"${git.baseVersion.value}-${sha}${suffix}"
+    s"${git.baseVersion.value}-${sha}-SNAPSHOT"
   }
 }
 
