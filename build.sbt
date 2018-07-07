@@ -22,6 +22,11 @@ libraryDependencies ++= Seq(
 
 // Versioning
 
+// A lot of the versioning, publishing, and Travis-related code below is adapted from:
+//
+//   - https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
+//   - http://caryrobbins.com/dev/sbt-publishing/
+
 enablePlugins(GitVersioning)
 
 git.baseVersion := "0.7.0"
@@ -39,12 +44,14 @@ git.formattedShaVersion := {
   //   git.uncommittedSignifier.value)
 
   git.gitHeadCommit.value.map(_.substring(0, 7)).map { sha =>
-    s"${git.baseVersion.value}-${sha}-SNAPSHOT"
+    // s"${git.baseVersion.value}-${sha}-SNAPSHOT"
+
+    // Actually let's not put the SHA in there... we'll end up with hundreds of excess snapshots:
+    s"${git.baseVersion.value}-SNAPSHOT"
   }
 }
 
 // Publishing
-// Code taken from https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
 
 publishMavenStyle := true
 

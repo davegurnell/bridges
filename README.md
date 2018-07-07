@@ -135,10 +135,41 @@ Travis is configured to publish as follows:
 - releases from release tags woth the format `x.y.z`;
 - snapshots from non-PR commits to `develop`.
 
-Snapshot builds have the hash of the latest commit in them,
-for example `1.2.3-abcd1234-SNAPSHOT`.
-
 The `git.baseVersion` line in `build.sbt` should be
 kept up-to-date with the *next* non-snapshot release number.
+
+### Example: Publishing a Release
+
+This development, versioning, and publishing process is a WIP.
+TODO: Investigate using git-release to automate some of this:
+
+```bash
+# Start with a clean Git (everything committed).
+
+# Switch to develop branch:
+$ git checkout develop
+
+# Ensure you're up-to-date with Github:
+$ git pull
+$ git pull --tags
+
+# See what versions we've released before.
+# Work out what version you're releasing next:
+$ git tag --list
+
+# Start a release:
+$ git flow release start x.y.z
+
+# Finish the release, updating master and develop and creating the x.y.z tag:
+$ git flow release finish x.y.z
+
+# Modify build.sbt and update git.baseVersion to x.(y+1).z:
+$ git checkout develop
+$ myeditor build.sbt # etc...
+
+# Push to Github. Travis will publish the release and a new snapshot:
+$ git push --all
+$ git push --tags
+```
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0
