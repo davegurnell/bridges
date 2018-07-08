@@ -2,8 +2,9 @@ package bridges
 
 import org.scalatest._
 import syntax._
-import SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
+import shapeless.Typeable
 
 class RendererSpec extends FreeSpec with Matchers {
 
@@ -61,6 +62,10 @@ class RendererSpec extends FreeSpec with Matchers {
       "Custom" in {
         render[Typescript](customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
       }
+
+      "ObjectsOnly" in {
+        render[Typescript](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
+      }
     }
 
     "flow" - {
@@ -112,6 +117,9 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Flow](declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
       }
 
+      "ObjectsOnly" in {
+        render[Flow](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
+      }
     }
 
     "elm" - {
@@ -171,6 +179,28 @@ class RendererSpec extends FreeSpec with Matchers {
         render[Elm](declaration[MyUUID]) shouldBe """type alias MyUUID = { uuid: String }"""
       }
 
+      "ObjectsOnly" in {
+        render[Elm](declaration[ObjectsOnly]) shouldBe """type ObjectsOnly = ObjectOne | ObjectTwo"""
+      }
+
+      "ClassWithRefinedType" in {
+        import eu.timepit.refined._
+
+        implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
+          Encoder.pure(Str)
+
+        implicit val refinedTypeTypeable: Typeable[ShortString] =
+          new Typeable[ShortString] {
+            def cast(t: Any): Option[ShortString] = {
+              if (t != null && t.isInstanceOf[String])
+                refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
+              else None
+            }
+            def describe: String = "ShortString"
+          }
+
+        render[Elm](declaration[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
+      }
     }
   }
 

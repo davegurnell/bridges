@@ -1,11 +1,19 @@
-package bridges
+package types
 
 import java.util.UUID
 
+import bridges.syntax._
 import bridges.Type.Struct
-import syntax._
+import bridges.{Declaration, Type}
+import eu.timepit.refined.W
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.Size
+import eu.timepit.refined.numeric.Interval.ClosedOpen
 
 object SampleTypes {
+  type ShortStringRefinementType = Size[ClosedOpen[W.`1`.T, W.`100`.T]]
+  type ShortString = String Refined ShortStringRefinementType
+
   // Sample product
   case class Pair(a: String, b: Int)
 
@@ -62,10 +70,16 @@ object SampleTypes {
   final case class OptionOne(value: Int) extends TypeTwo
   final case class OptionTwo(value: TypeOne) extends TypeTwo
 
+  sealed trait ObjectsOnly
+  final case object ObjectOne extends ObjectsOnly
+  final case object ObjectTwo extends ObjectsOnly
+
   // Custom declaration of a intermediate structure
   val customDeclaration: Declaration =
     "Message" := Type.discUnion("level")(
       ("error", Type.Ref("ErrorMessage"), Struct(Nil)),
       ("warning", Type.Ref("WarningMessage"), Struct(Nil))
     )
+
+  final case class ClassWithRefinedType(name: ShortString)
 }

@@ -24,7 +24,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
            decoder${decl.id}Tpe tpe =
               case tpe of
                  $body
-                 _ -> Decode.fail ("Unexpected type for ${decl.id}")
+                 _ -> Decode.fail ("Unexpected type for ${decl.id}: " ++ tpe)
            """
       case other ⇒
         val body = decodeType(other)
@@ -38,7 +38,7 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
 
   def decodeType(tpe: Type): String =
     tpe match {
-      case Ref(id)            => s"decoder$id"
+      case Ref(id)            => s"""(Decode.lazy (\\_ -> decoder$id))"""
       case StrLiteral(_)      => ""
       case CharLiteral(_)     => ""
       case NumLiteral(_)      => ""
@@ -79,7 +79,8 @@ trait ElmJsonDecoder extends JsonDecoder[Elm] {
       s"""required "$fieldName" ${decodeType(tpe)}"""
 
     field._2 match {
-      case Optional(optTpe) ⇒ s"""Decode.maybe (${decode(optTpe)})"""
+      case Optional(optTpe) ⇒
+        s"""optional "$fieldName" (Decode.maybe ${decodeType(optTpe)}) Nothing"""
       case other ⇒ decode(other)
     }
   }

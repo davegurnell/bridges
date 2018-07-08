@@ -1,6 +1,6 @@
 package bridges
 
-import bridges.SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
 import syntax._
 import org.scalatest._
@@ -132,6 +132,17 @@ class JsonEncoderSpec extends FreeSpec with Matchers {
           i"""
            encoderMyUUID : MyUUID -> Encode.Value
            encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
+           """
+      }
+
+      "ObjectsOnly" in {
+        jsonEncoder[Elm](List(declaration[ObjectsOnly])) shouldBe
+          i"""
+           encoderObjectsOnly : ObjectsOnly -> Encode.Value
+           encoderObjectsOnly tpe =
+              case tpe of
+                 ObjectOne -> Encode.object [ ("type", Encode.string "ObjectOne") ]
+                 ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
            """
       }
 

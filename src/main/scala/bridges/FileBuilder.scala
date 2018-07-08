@@ -35,14 +35,24 @@ trait ElmFileBuilder extends FileBuilder[Elm] {
           )
       }
 
+    val pipelineImport =
+      if (decoders.contains("required"))
+        "import Json.Decode.Pipeline exposing (..)"
+      else ""
+
+    val uuidImport =
+      if (decoders.contains("Uuid") || encoders.contains("Uuid"))
+        "import Uuid exposing (Uuid)"
+      else ""
+
     val content =
       i"""
        module $module.$fileName exposing (..)
 
        import Json.Decode as Decode
-       import Json.Decode.Pipeline exposing (..)
+       $pipelineImport
        import Json.Encode as Encode
-       import Uuid exposing (Uuid)
+       $uuidImport
        $imports
 
        $declarations

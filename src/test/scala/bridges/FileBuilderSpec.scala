@@ -1,6 +1,6 @@
 package bridges
 
-import bridges.SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
 import bridges.syntax._
 import org.scalatest._
@@ -19,7 +19,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -48,7 +48,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
            import CustomModule.Color exposing (..)
            import CustomModule.Navigation exposing (..)
 
@@ -58,7 +58,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
 
 
            decoderExternalReferences : Decode.Decoder ExternalReferences
-           decoderExternalReferences = decode ExternalReferences |> required "color" decoderColor |> required "nav" decoderNavigation
+           decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
 
 
 
@@ -78,7 +78,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
            import CustomModule.Color exposing (..)
 
 
@@ -92,10 +92,10 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            decoderShapeTpe : String -> Decode.Decoder Shape
            decoderShapeTpe tpe =
               case tpe of
-                 "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" decoderColor
-                 "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" decoderColor
-                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" decoderShape |> required "rightShape" decoderShape
-                 _ -> Decode.fail ("Unexpected type for Shape")
+                 "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+                 "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
+                 _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
 
 
 
@@ -119,7 +119,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -133,9 +133,9 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            decoderNavigationTpe : String -> Decode.Decoder Navigation
            decoderNavigationTpe tpe =
               case tpe of
-                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list decoderNavigation)
-                 "NodeList" -> decode NodeList |> required "all" (Decode.list decoderNavigation)
-                 _ -> Decode.fail ("Unexpected type for Navigation")
+                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+                 "NodeList" -> decode NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+                 _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
 
 
 
@@ -150,6 +150,35 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         buildFile[Elm]("CustomModule", declaration[Navigation]) shouldBe expected
       }
 
+      "with uuid" in {
+        val fileContent =
+          i"""
+           module CustomModule2.MyUUID exposing (..)
+
+           import Json.Decode as Decode
+           import Json.Decode.Pipeline exposing (..)
+           import Json.Encode as Encode
+           import Uuid exposing (Uuid)
+
+
+
+           type alias MyUUID = { uuid: Uuid }
+
+
+
+           decoderMyUUID : Decode.Decoder MyUUID
+           decoderMyUUID = decode MyUUID |> required "uuid" Uuid.decoder
+
+
+
+           encoderMyUUID : MyUUID -> Encode.Value
+           encoderMyUUID obj = Encode.object [ ("uuid", Uuid.encode obj.uuid) ]
+           """
+        val expected = ("MyUUID.elm", fileContent)
+
+        buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
+      }
+
       "with overrides" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
@@ -162,7 +191,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -183,6 +212,45 @@ class FileBuilderSpec extends FreeSpec with Matchers {
         buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
       }
 
+      "objects only" in {
+        val fileContent =
+          i"""
+           module CustomModule2.ObjectsOnly exposing (..)
+
+           import Json.Decode as Decode
+
+           import Json.Encode as Encode
+
+
+
+
+           type ObjectsOnly = ObjectOne | ObjectTwo
+
+
+
+           decoderObjectsOnly : Decode.Decoder ObjectsOnly
+           decoderObjectsOnly = Decode.field "type" Decode.string |> Decode.andThen decoderObjectsOnlyTpe
+
+           decoderObjectsOnlyTpe : String -> Decode.Decoder ObjectsOnly
+           decoderObjectsOnlyTpe tpe =
+              case tpe of
+                 "ObjectOne" -> Decode.succeed ObjectOne
+                 "ObjectTwo" -> Decode.succeed ObjectTwo
+                 _ -> Decode.fail ("Unexpected type for ObjectsOnly: " ++ tpe)
+
+
+
+           encoderObjectsOnly : ObjectsOnly -> Encode.Value
+           encoderObjectsOnly tpe =
+              case tpe of
+                 ObjectOne -> Encode.object [ ("type", Encode.string "ObjectOne") ]
+                 ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
+           """
+        val expected = ("ObjectsOnly.elm", fileContent)
+
+        buildFile[Elm]("CustomModule2", declaration[ObjectsOnly]) shouldBe expected
+      }
+
       "for several classes at once" in {
         // we want to treat UUID as string, using an override
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
@@ -195,7 +263,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -235,7 +303,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            import Json.Decode as Decode
            import Json.Decode.Pipeline exposing (..)
            import Json.Encode as Encode
-           import Uuid exposing (Uuid)
+
 
 
 
@@ -245,7 +313,7 @@ class FileBuilderSpec extends FreeSpec with Matchers {
 
 
            decoderTypeOne : Decode.Decoder TypeOne
-           decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list decoderTypeTwo)
+           decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
 
            decoderTypeTwo : Decode.Decoder TypeTwo
            decoderTypeTwo = Decode.field "type" Decode.string |> Decode.andThen decoderTypeTwoTpe
@@ -254,8 +322,8 @@ class FileBuilderSpec extends FreeSpec with Matchers {
            decoderTypeTwoTpe tpe =
               case tpe of
                  "OptionOne" -> decode OptionOne |> required "value" Decode.int
-                 "OptionTwo" -> decode OptionTwo |> required "value" decoderTypeOne
-                 _ -> Decode.fail ("Unexpected type for TypeTwo")
+                 "OptionTwo" -> decode OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
+                 _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
 
 
 

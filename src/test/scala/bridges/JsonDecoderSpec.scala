@@ -1,6 +1,6 @@
 package bridges
 
-import bridges.SampleTypes._
+import types.SampleTypes._
 import bridges.Type.Str
 import bridges.syntax._
 import org.scalatest._
@@ -22,7 +22,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[Circle]) shouldBe
           i"""
            decoderCircle : Decode.Decoder Circle
-           decoderCircle = decode Circle |> required "radius" Decode.float |> required "color" decoderColor
+           decoderCircle = decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
            """
       }
 
@@ -30,7 +30,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[Rectangle]) shouldBe
           i"""
            decoderRectangle : Decode.Decoder Rectangle
-           decoderRectangle = decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" decoderColor
+           decoderRectangle = decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
            """
       }
 
@@ -43,10 +43,10 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            decoderShapeTpe : String -> Decode.Decoder Shape
            decoderShapeTpe tpe =
               case tpe of
-                 "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" decoderColor
-                 "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" decoderColor
-                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" decoderShape |> required "rightShape" decoderShape
-                 _ -> Decode.fail ("Unexpected type for Shape")
+                 "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+                 "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+                 "ShapeGroup" -> decode ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
+                 _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
            """
       }
 
@@ -62,7 +62,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[ArrayClass]) shouldBe
           i"""
            decoderArrayClass : Decode.Decoder ArrayClass
-           decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> Decode.maybe (required "optField" Decode.float)
+           decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> optional "optField" (Decode.maybe Decode.float) Nothing
            """
       }
 
@@ -85,12 +85,11 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
               case tpe of
                  "MyClass" -> decode MyClass |> required "value" Decode.int
                  "MyObject" -> Decode.succeed MyObject
-                 _ -> Decode.fail ("Unexpected type for ClassOrObject")
+                 _ -> Decode.fail ("Unexpected type for ClassOrObject: " ++ tpe)
            """
       }
 
       "Navigation" in {
-        println(declaration[Navigation])
         jsonDecoder[Elm](declaration[Navigation]) shouldBe
           i"""
            decoderNavigation : Decode.Decoder Navigation
@@ -99,9 +98,9 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            decoderNavigationTpe : String -> Decode.Decoder Navigation
            decoderNavigationTpe tpe =
               case tpe of
-                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list decoderNavigation)
-                 "NodeList" -> decode NodeList |> required "all" (Decode.list decoderNavigation)
-                 _ -> Decode.fail ("Unexpected type for Navigation")
+                 "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+                 "NodeList" -> decode NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+                 _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
            """
       }
 
@@ -117,7 +116,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](declaration[ExternalReferences]) shouldBe
           i"""
            decoderExternalReferences : Decode.Decoder ExternalReferences
-           decoderExternalReferences = decode ExternalReferences |> required "color" decoderColor |> required "nav" decoderNavigation
+           decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
            """
       }
 
@@ -125,7 +124,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         jsonDecoder[Elm](List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
           i"""
            decoderTypeOne : Decode.Decoder TypeOne
-           decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list decoderTypeTwo)
+           decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
 
            decoderTypeTwo : Decode.Decoder TypeTwo
            decoderTypeTwo = Decode.field "type" Decode.string |> Decode.andThen decoderTypeTwoTpe
@@ -134,8 +133,8 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
            decoderTypeTwoTpe tpe =
               case tpe of
                  "OptionOne" -> decode OptionOne |> required "value" Decode.int
-                 "OptionTwo" -> decode OptionTwo |> required "value" decoderTypeOne
-                 _ -> Decode.fail ("Unexpected type for TypeTwo")
+                 "OptionTwo" -> decode OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
+                 _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
            """
       }
 
@@ -148,6 +147,21 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
           i"""
            decoderMyUUID : Decode.Decoder MyUUID
            decoderMyUUID = decode MyUUID |> required "uuid" Decode.string
+           """
+      }
+
+      "ObjectsOnly" in {
+        jsonDecoder[Elm](declaration[ObjectsOnly]) shouldBe
+          i"""
+           decoderObjectsOnly : Decode.Decoder ObjectsOnly
+           decoderObjectsOnly = Decode.field "type" Decode.string |> Decode.andThen decoderObjectsOnlyTpe
+
+           decoderObjectsOnlyTpe : String -> Decode.Decoder ObjectsOnly
+           decoderObjectsOnlyTpe tpe =
+              case tpe of
+                 "ObjectOne" -> Decode.succeed ObjectOne
+                 "ObjectTwo" -> Decode.succeed ObjectTwo
+                 _ -> Decode.fail ("Unexpected type for ObjectsOnly: " ++ tpe)
            """
       }
     }
