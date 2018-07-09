@@ -14,7 +14,7 @@ scalacOptions ++= Seq(
 
 libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"     % "2.3.3",
-  "com.davegurnell"   %% "unindent"      % "1.1.0",
+  "com.davegurnell"   %% "unindent"      % "1.1.0" exclude("org.typelevel", "scala-library"),
   "org.apache.commons" % "commons-lang3" % "3.5",
   "org.scalatest"     %% "scalatest"     % "3.0.5" % Test,
   "eu.timepit"        %% "refined"       % "0.9.0" % Test
@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
 
 enablePlugins(GitVersioning)
 
-git.baseVersion := "0.8.0"
+git.baseVersion := "0.8.1"
 
 val ReleaseTag = """^([\d\.]+)$""".r
 
