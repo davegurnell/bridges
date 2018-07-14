@@ -1,10 +1,10 @@
-package types
+package bridges
 
 import java.util.UUID
 
+import bridges.core._
+import bridges.core.Type._
 import bridges.syntax._
-import bridges.Type.Struct
-import bridges.{Declaration, Type}
 import eu.timepit.refined.W
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.Size

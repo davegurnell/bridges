@@ -12,7 +12,7 @@ Copyright 2017-2018 Dave Gurnell. Licensed [Apache 2.0][license].
 
 Grab the code by adding the following to your `build.sbt`:
 
-~~~ scala
+~~~scala
 libraryDependencies += "com.davegurnell" %% "bridges" % "<<VERSION>>"
 ~~~
 
@@ -22,7 +22,7 @@ libraryDependencies += "com.davegurnell" %% "bridges" % "<<VERSION>>"
 
 Create a simple data model:
 
-~~~ scala
+~~~scala
 final case class Color(red: Int, green: Int, blue: Int)
 
 sealed abstract class Shape extends Product with Serializable
@@ -35,7 +35,7 @@ Call `declaration[Foo]` to generate a type-declaration for `Foo`.
 Call `render[Typescript](...)` to convert a list of declarations as Typescript,
 or `render[Flow](...)` to render them as Flow types.
 
-~~~ scala
+~~~scala
 import bridges._
 import bridges.syntax._
 
@@ -123,7 +123,7 @@ created in purpose to showcase this issue.
 
 The relevant fragments of code are:
 
-```$scala
+~~~scala
 type ShortStringRefinementType = Size[ClosedOpen[W.`1`.T, W.`100`.T]]
 type ShortString = String Refined ShortStringRefinementType
 
@@ -149,7 +149,7 @@ final case class ClassWithRefinedType(name: ShortString)
   render[Elm](declaration[ClassWithRefinedType]) shouldBe
     """type alias ClassWithRefinedType = { name: String }"""
 }
-```
+~~~
 
 ## Developing
 
@@ -172,7 +172,7 @@ kept up-to-date with the *next* non-snapshot release number.
 This development, versioning, and publishing process is a WIP.
 TODO: Investigate using git-release to automate some of this:
 
-```bash
+~~~bash
 # Start with a clean Git (everything committed).
 
 # Switch to develop branch:
@@ -199,6 +199,6 @@ $ myeditor build.sbt # etc...
 # Push to Github. Travis will publish the release and a new snapshot:
 $ git push --all
 $ git push --tags
-```
+~~~
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0

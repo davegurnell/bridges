@@ -1,4 +1,4 @@
-package bridges
+package bridges.core
 
 sealed abstract class Type extends Product with Serializable {
   import Type._

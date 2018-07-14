@@ -1,7 +1,8 @@
-package bridges
+package bridges.elm
 
-import types.SampleTypes._
-import bridges.Type.Str
+import bridges.SampleTypes._
+import bridges.core._
+import bridges.core.Type._
 import bridges.syntax._
 import org.scalatest._
 import unindent._
