@@ -1,23 +1,9 @@
-package bridges
+package bridges.core
 
 import bridges.syntax.typeName
-
 import scala.language.higherKinds
+import shapeless._
 import shapeless.labelled.FieldType
-import shapeless.{
-  :+:,
-  ::,
-  CNil,
-  Coproduct,
-  HList,
-  HNil,
-  LabelledGeneric,
-  Lazy,
-  LowPriority,
-  Typeable,
-  Unwrapped,
-  Witness
-}
 
 trait Encoder[A] {
   def encode: Type

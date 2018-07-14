@@ -1,13 +1,13 @@
-package bridges
+package bridges.typescript
 
+import bridges.SampleTypes._
+import bridges.core._
+import bridges.core.Type._
+import bridges.syntax._
 import org.scalatest._
-import types.SampleTypes._
-import syntax._
-import Type._
 import shapeless.Typeable
 
-class EncoderSpec extends FreeSpec with Matchers {
-
+class TypescriptEncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
