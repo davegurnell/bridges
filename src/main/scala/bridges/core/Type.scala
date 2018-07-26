@@ -10,6 +10,35 @@ sealed abstract class Type extends Product with Serializable {
 
   def |(that: Type): Union =
     Union(this.unionTypes ++ that.unionTypes)
+
+  def renameRef(from: String, to: String): Type =
+    this match {
+      case Ref(`from`)          => Ref(to)
+      case tpe: Ref             => tpe
+      case tpe: StrLiteral      => tpe
+      case tpe: CharLiteral     => tpe
+      case tpe: NumLiteral      => tpe
+      case tpe: FloatingLiteral => tpe
+      case tpe: BoolLiteral     => tpe
+      case tpe: UUIDLiteral     => tpe
+      case tpe: Str             => tpe
+      case tpe: Character       => tpe
+      case tpe: Num             => tpe
+      case tpe: Floating        => tpe
+      case tpe: Bool            => tpe
+      case tpe: UUIDType        => tpe
+      case Optional(tpe)        => Optional(tpe.renameRef(from, to))
+      case Array(tpe)           => Array(tpe.renameRef(from, to))
+      case Struct(fields)       => Struct(fields.renameRef(from, to))
+      case Union(types)         => Union(types.map(_.renameRef(from, to)))
+
+      case Intersection(Struct(keys), tpe, Struct(fields)) =>
+        Intersection(
+          Struct(keys.renameRef(from, to)),
+          tpe.renameRef(from, to),
+          Struct(fields.renameRef(from, to))
+        )
+    }
 }
 
 object Type {
@@ -81,7 +110,13 @@ object Type {
     discUnion("type")(types: _*)
 
   def discUnion(key: String)(types: (String, Type, Struct)*): Union =
-    Union(
-      types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList
-    )
+    Union(types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList)
+
+  implicit class TypeMapOps(types: List[(String, Type)]) {
+    def renameRef(from: String, to: String): List[(String, Type)] =
+      types.map {
+        case (name, tpe) =>
+          (name, tpe.renameRef(from, to))
+      }
+  }
 }
