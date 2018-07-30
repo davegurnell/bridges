@@ -21,7 +21,7 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "Shape" in {
-    render[Flow](declaration[Shape]) shouldBe """export type Shape = (({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup));"""
+    render[Flow](declaration[Shape]) shouldBe """export type Shape = ({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup);"""
   }
 
   "Alpha" in {
@@ -37,15 +37,15 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassOrObject" in {
-    render[Flow](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+    render[Flow](declaration[ClassOrObject]) shouldBe """export type ClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);"""
   }
 
   "NestedClassOrObject" in {
-    render[Flow](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = (({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject));"""
+    render[Flow](declaration[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);"""
   }
 
   "Navigation" in {
-    render[Flow](declaration[Navigation]) shouldBe """export type Navigation = (({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList));"""
+    render[Flow](declaration[Navigation]) shouldBe """export type Navigation = ({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList);"""
   }
 
   "ClassUUID" in {
@@ -57,6 +57,6 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "ObjectsOnly" in {
-    render[Flow](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
+    render[Flow](declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = ({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo);"""
   }
 }
