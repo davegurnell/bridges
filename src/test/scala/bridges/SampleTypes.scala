@@ -12,26 +12,26 @@ import eu.timepit.refined.numeric.Interval.ClosedOpen
 
 object SampleTypes {
   type ShortStringRefinementType = Size[ClosedOpen[W.`1`.T, W.`100`.T]]
-  type ShortString = String Refined ShortStringRefinementType
+  type ShortString               = String Refined ShortStringRefinementType
 
   // Sample product
   case class Pair(a: String, b: Int)
 
   // Sample coproduct
   sealed abstract class OneOrOther extends Product with Serializable
-  case class One(value: String) extends OneOrOther
-  case class Other(value: Int) extends OneOrOther
+  case class One(value: String)    extends OneOrOther
+  case class Other(value: Int)     extends OneOrOther
 
   // Coproduct with Object
-  sealed trait ClassOrObject extends Product with Serializable
+  sealed trait ClassOrObject     extends Product with Serializable
   case class MyClass(value: Int) extends ClassOrObject
-  case object MyObject extends ClassOrObject
+  case object MyObject           extends ClassOrObject
 
   // Coproduct with Object in a nested object
   sealed abstract class NestedClassOrObject extends Product with Serializable
   object NestedClassOrObject {
     case class MyClass(value: Int) extends NestedClassOrObject
-    case object MyObject extends NestedClassOrObject
+    case object MyObject           extends NestedClassOrObject
   }
 
   // Sample value class
@@ -42,17 +42,15 @@ object SampleTypes {
 
   // ADT with intermediate type appearing more than once:
   final case class Color(red: Int, green: Int, blue: Int)
-  sealed abstract class Shape extends Product with Serializable
-  final case class Circle(radius: Double, color: Color) extends Shape
-  final case class Rectangle(width: Double, height: Double, color: Color)
-      extends Shape
-  final case class ShapeGroup(leftShape: Shape, rightShape: Shape) extends Shape
+  sealed abstract class Shape                                             extends Product with Serializable
+  final case class Circle(radius: Double, color: Color)                   extends Shape
+  final case class Rectangle(width: Double, height: Double, color: Color) extends Shape
+  final case class ShapeGroup(leftShape: Shape, rightShape: Shape)        extends Shape
 
   // Recursive structure
   sealed trait Navigation
-  final case class NodeList(all: List[Navigation]) extends Navigation
-  final case class Node(name: String, children: List[Navigation])
-      extends Navigation
+  final case class NodeList(all: List[Navigation])                extends Navigation
+  final case class Node(name: String, children: List[Navigation]) extends Navigation
 
   // case classes with specific values (list, Float, Option, Char, etc)
   final case class Alpha(name: String, char: Char, bool: Boolean)
@@ -67,7 +65,7 @@ object SampleTypes {
   final case class TypeOne(name: String, values: List[TypeTwo])
 
   sealed trait TypeTwo
-  final case class OptionOne(value: Int) extends TypeTwo
+  final case class OptionOne(value: Int)     extends TypeTwo
   final case class OptionTwo(value: TypeOne) extends TypeTwo
 
   sealed trait ObjectsOnly

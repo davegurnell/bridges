@@ -1,8 +1,8 @@
 package bridges.elm
 
 import bridges.SampleTypes._
-import bridges.core._
 import bridges.core.Type._
+import bridges.core._
 import bridges.syntax._
 import org.scalatest._
 import unindent._
@@ -34,7 +34,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("Color.elm", fileContent)
 
-    buildFile[Elm]("CustomModule", declaration[Color]) shouldBe expected
+    Elm.buildFile("CustomModule", declaration[Color]) shouldBe expected
   }
 
   "for a single case class with complex types" in {
@@ -64,7 +64,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("ExternalReferences.elm", fileContent)
 
-    buildFile[Elm]("CustomModule", declaration[ExternalReferences]) shouldBe expected
+    Elm.buildFile("CustomModule", declaration[ExternalReferences]) shouldBe expected
   }
 
   "for a trait" in {
@@ -105,7 +105,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("Shape.elm", fileContent)
 
-    buildFile[Elm]("CustomModule", declaration[Shape]) shouldBe expected
+    Elm.buildFile("CustomModule", declaration[Shape]) shouldBe expected
   }
 
   "for a recursive trait" in {
@@ -144,7 +144,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("Navigation.elm", fileContent)
 
-    buildFile[Elm]("CustomModule", declaration[Navigation]) shouldBe expected
+    Elm.buildFile("CustomModule", declaration[Navigation]) shouldBe expected
   }
 
   "with uuid" in {
@@ -173,7 +173,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("MyUUID.elm", fileContent)
 
-    buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
+    Elm.buildFile("CustomModule2", declaration[MyUUID]) shouldBe expected
   }
 
   "with overrides" in {
@@ -206,7 +206,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       """
     val expected = ("MyUUID.elm", fileContent)
 
-    buildFile[Elm]("CustomModule2", declaration[MyUUID]) shouldBe expected
+    Elm.buildFile("CustomModule2", declaration[MyUUID]) shouldBe expected
   }
 
   "objects only" in {
@@ -245,7 +245,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
        """
     val expected = ("ObjectsOnly.elm", fileContent)
 
-    buildFile[Elm]("CustomModule2", declaration[ObjectsOnly]) shouldBe expected
+    Elm.buildFile("CustomModule2", declaration[ObjectsOnly]) shouldBe expected
   }
 
   "for several classes at once" in {
@@ -286,7 +286,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
 
     val expected = ("Color.elm", fileContent)
 
-    buildFile[Elm](
+    Elm.buildFile(
       "CustomModule2",
       List(declaration[Color], declaration[MyUUID])
     ) shouldBe expected
@@ -336,7 +336,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
 
     val expected = ("TypeOne.elm", fileContent)
 
-    buildFile[Elm](
+    Elm.buildFile(
       "CustomModule2",
       List(declaration[TypeOne], declaration[TypeTwo])
     ) shouldBe expected

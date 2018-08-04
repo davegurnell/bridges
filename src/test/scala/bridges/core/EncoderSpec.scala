@@ -43,7 +43,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       encode[OneOrOther] should be(
         discUnion(
-          ("One", Ref("One"), Struct("value" -> Str)),
+          ("One", Ref("One"), Struct("value"     -> Str)),
           ("Other", Ref("Other"), Struct("value" -> Num))
         )
       )
@@ -74,7 +74,7 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[One] should be(Str)
       encode[OneOrOther] should be(
         discUnion(
-          ("One", Str, Struct("value" → Str)),
+          ("One", Str, Struct("value"            → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
       )
@@ -92,9 +92,9 @@ class EncoderSpec extends FreeSpec with Matchers {
             "Rectangle",
             Ref("Rectangle"),
             Struct(
-              "width" -> Floating,
+              "width"  -> Floating,
               "height" -> Floating,
-              "color" -> Ref("Color")
+              "color"  -> Ref("Color")
             )
           ),
           (
@@ -109,9 +109,9 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
       encode[Rectangle] should be(
         Struct(
-          "width" -> Floating,
+          "width"  -> Floating,
           "height" -> Floating,
-          "color" -> Ref("Color")
+          "color"  -> Ref("Color")
         )
       )
       encode[ShapeGroup] should be(
@@ -204,7 +204,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       declaration[OneOrOther] should be(
         "OneOrOther" := discUnion(
-          ("One", Ref("One"), Struct("value" → Str)),
+          ("One", Ref("One"), Struct("value"     → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
       )
@@ -217,7 +217,7 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[One] should be(Str)
       declaration[OneOrOther] should be(
         "OneOrOther" := discUnion(
-          ("One", Str, Struct("value" → Str)),
+          ("One", Str, Struct("value"            → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
       )
@@ -231,11 +231,10 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       implicit val refinedTypeTypeable: Typeable[ShortString] =
         new Typeable[ShortString] {
-          def cast(t: Any): Option[ShortString] = {
+          def cast(t: Any): Option[ShortString] =
             if (t != null && t.isInstanceOf[String])
               refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
             else None
-          }
           def describe: String = "ShortString"
         }
 

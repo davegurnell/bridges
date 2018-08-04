@@ -1,5 +1,5 @@
 package bridges.typescript
 
-sealed trait Typescript
+import bridges.core.CoreBehaviour
 
-object Typescript extends TypescriptRenderer
+object Typescript extends CoreBehaviour with TypescriptRenderer

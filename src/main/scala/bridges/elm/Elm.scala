@@ -2,9 +2,4 @@ package bridges.elm
 
 import bridges.core._
 
-sealed trait Elm
-
-object Elm extends ElmJsonDecoder
-  with ElmJsonEncoder
-  with ElmRenderer
-  with ElmFileBuilder
+object Elm extends CoreBehaviour with ElmRenderer with ElmJsonDecoder with ElmJsonEncoder with ElmFileBuilder
