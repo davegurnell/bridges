@@ -17,13 +17,11 @@ trait FlowRenderer {
       case _: NumLiteral      => 1000
       case _: FloatingLiteral => 1000
       case _: BoolLiteral     => 1000
-      case _: UUIDLiteral     => 1000
       case _: Str             => 1000
       case _: Character       => 1000
       case _: Num             => 1000
       case _: Floating        => 1000
       case _: Bool            => 1000
-      case _: UUIDType        => 1000
       case _: Optional        => 800
       case _: Array           => 800
       case _: Struct          => 600
@@ -39,13 +37,11 @@ trait FlowRenderer {
       case NumLiteral(num)        => num.toString
       case FloatingLiteral(float) => float.toString
       case BoolLiteral(bool)      => bool.toString
-      case UUIDLiteral(uuid)      => uuid.toString // Flow doesn't have native UUID type
       case Str                    => "string"
       case Character              => "string"
       case Num                    => "number"
       case Floating               => "number"
       case Bool                   => "boolean"
-      case UUIDType               => "string" // Flow doesn't have native UUID type
       case Optional(optTpe)       => "?" + renderParens(tpe)(optTpe)
       case Array(arrTpe)          => renderParens(tpe)(arrTpe) + "[]"
       case Struct(fields)         => fields.map(renderField).mkString("{ ", ", ", " }")

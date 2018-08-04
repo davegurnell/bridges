@@ -90,14 +90,6 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
       """
   }
 
-  "ClassUUID" in {
-    Elm.encoder(declaration[ClassUUID]) shouldBe
-    i"""
-      encoderClassUUID : ClassUUID -> Encode.Value
-      encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
-      """
-  }
-
   "ExternalReferences" in {
     Elm.encoder(declaration[ExternalReferences]) shouldBe
     i"""
@@ -107,7 +99,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "TypeOne and TypeTwo" in {
-    Elm.encoder(List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
+    Elm.encoder(List(declaration[TypeOne], declaration[TypeTwo]), Map.empty[Ref, TypeReplacement]) shouldBe
     i"""
       encoderTypeOne : TypeOne -> Encode.Value
       encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
@@ -120,20 +112,82 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
       """
   }
 
-  "MyUUID" in {
-    // we want to treat UUID as string, using an override
-    implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-      Encoder.pure(Str)
+  "ClassUUID" - {
+    "by default we treat UUID as a normal type we created" in {
+      // this is the case when we don't import any Elm specific UUID library and we will create our own UUID type there
 
-    Elm.encoder(declaration[MyUUID]) shouldBe
-    i"""
-      encoderMyUUID : MyUUID -> Encode.Value
-      encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
+      Elm.encoder(declaration[ClassUUID]) shouldBe
+      i"""
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", encoderUUID obj.a) ]
       """
+    }
+
+    "we can provide a map to substitute UUID decoding with a custom encoding logic" in {
+      // this is the case when we import Elm specific UUID types we want to use in our decoder, but Scala can't know about them without extra hints
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+      )
+
+      Elm.encoder(declaration[ClassUUID], customTypeReplacements) shouldBe
+      i"""
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
+      """
+    }
+
+    "we can override the Encoder so we treat UUID as another basic type, like String, and encode it accordingly" in {
+      // probably not recommended, better to use a mapping as in other tests, but it is supported
+      implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
+        Encoder.pure(Str)
+
+      Elm.encoder(declaration[ClassUUID]) shouldBe
+      i"""
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", Encode.string obj.a) ]
+      """
+    }
+  }
+
+  "ClassDate" - {
+    "by default we treat Date as a normal type we created" in {
+      // this is the case when we don't import any Elm specific Date library and we will create our own Date type there
+
+      Elm.encoder(declaration[ClassDate]) shouldBe
+      i"""
+      encoderClassDate : ClassDate -> Encode.Value
+      encoderClassDate obj = Encode.object [ ("a", encoderDate obj.a) ]
+      """
+    }
+
+    "we can provide a map to substitute Date decoding with a custom encoding logic" in {
+      // this is the case when we import Elm specific Date types we want to use in our decoder, but Scala can't know about them without extra hints
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("Date") → TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
+      )
+
+      Elm.encoder(declaration[ClassDate], customTypeReplacements) shouldBe
+      i"""
+      encoderClassDate : ClassDate -> Encode.Value
+      encoderClassDate obj = Encode.object [ ("a", Date.encode obj.a) ]
+      """
+    }
+
+    "we can override the Encoder so we treat Date as another basic type, like String, and encode it accordingly" in {
+      // probably not recommended, better to use a mapping as in other tests, but it is supported
+      implicit val dateEncoder: BasicEncoder[java.util.Date] =
+        Encoder.pure(Str)
+
+      Elm.encoder(declaration[ClassDate]) shouldBe
+      i"""
+      encoderClassDate : ClassDate -> Encode.Value
+      encoderClassDate obj = Encode.object [ ("a", Encode.string obj.a) ]
+      """
+    }
   }
 
   "ObjectsOnly" in {
-    Elm.encoder(List(declaration[ObjectsOnly])) shouldBe
+    Elm.encoder(declaration[ObjectsOnly]) shouldBe
     i"""
       encoderObjectsOnly : ObjectsOnly -> Encode.Value
       encoderObjectsOnly tpe =

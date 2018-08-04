@@ -17,13 +17,11 @@ trait TypescriptRenderer {
       case NumLiteral(num)        => num.toString
       case FloatingLiteral(float) => float.toString
       case BoolLiteral(bool)      => bool.toString
-      case UUIDLiteral(uuid)      => uuid.toString // Typescript doesn't have native UUID type
       case Str                    => "string"
       case Character              => "string"
       case Num                    => "number"
       case Floating               => "number"
       case Bool                   => "boolean"
-      case UUIDType               => "string" // Typescript doesn't have native UUID type
       case Optional(optTpe)       => "(" + renderType(optTpe) + " | null)"
       case Array(arrTpe)          => renderType(arrTpe) + "[]"
       case Struct(fields)         => fields.map(renderField).mkString("{ ", ", ", " }")

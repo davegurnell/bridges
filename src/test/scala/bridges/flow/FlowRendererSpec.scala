@@ -46,7 +46,11 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassUUID" in {
-    Flow.render(declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+    Flow.render(declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: UUID };"""
+  }
+
+  "ClassDate" in {
+    Flow.render(declaration[ClassDate]) shouldBe """export type ClassDate = { a: Date };"""
   }
 
   "ExternalReferences" in {

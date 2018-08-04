@@ -42,9 +42,6 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit val booleanEncoder: BasicEncoder[Boolean] =
     pure(Bool)
 
-  implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-    pure(UUIDType)
-
   implicit def optionEncoder[A](
       implicit enc: BasicEncoder[A]
   ): BasicEncoder[Option[A]] =

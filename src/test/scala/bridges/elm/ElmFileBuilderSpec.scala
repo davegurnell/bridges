@@ -2,7 +2,6 @@ package bridges.elm
 
 import bridges.SampleTypes._
 import bridges.core.Type._
-import bridges.core._
 import bridges.syntax._
 import org.scalatest._
 import unindent._
@@ -18,15 +17,11 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Encode as Encode
 
 
-
-
       type alias Color = { red: Int, green: Int, blue: Int }
-
 
 
       decoderColor : Decode.Decoder Color
       decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
-
 
 
       encoderColor : Color -> Encode.Value
@@ -45,18 +40,14 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Decode as Decode
       import Json.Decode.Pipeline exposing (..)
       import Json.Encode as Encode
-
       import CustomModule.Color exposing (..)
       import CustomModule.Navigation exposing (..)
-
 
       type alias ExternalReferences = { color: Color, nav: Navigation }
 
 
-
       decoderExternalReferences : Decode.Decoder ExternalReferences
       decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
-
 
 
       encoderExternalReferences : ExternalReferences -> Encode.Value
@@ -75,12 +66,9 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Decode as Decode
       import Json.Decode.Pipeline exposing (..)
       import Json.Encode as Encode
-
       import CustomModule.Color exposing (..)
 
-
       type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape
-
 
 
       decoderShape : Decode.Decoder Shape
@@ -93,7 +81,6 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
             "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
             "ShapeGroup" -> decode ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
             _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
-
 
 
       encoderShape : Shape -> Encode.Value
@@ -118,10 +105,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Encode as Encode
 
 
-
-
       type Navigation = Node String (List Navigation) | NodeList (List Navigation)
-
 
 
       decoderNavigation : Decode.Decoder Navigation
@@ -135,7 +119,6 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
             _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
 
 
-
       encoderNavigation : Navigation -> Encode.Value
       encoderNavigation tpe =
          case tpe of
@@ -147,66 +130,60 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
     Elm.buildFile("CustomModule", declaration[Navigation]) shouldBe expected
   }
 
-  "with uuid" in {
-    val fileContent =
-      i"""
-      module CustomModule2.MyUUID exposing (..)
+  "UUID" - {
+    "without overrides" in {
+      val fileContent =
+        i"""
+      module CustomModule2.ClassUUID exposing (..)
+
+      import Json.Decode as Decode
+      import Json.Decode.Pipeline exposing (..)
+      import Json.Encode as Encode
+      import CustomModule2.UUID exposing (..)
+
+      type alias ClassUUID = { a: UUID }
+
+
+      decoderClassUUID : Decode.Decoder ClassUUID
+      decoderClassUUID = decode ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
+
+
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", encoderUUID obj.a) ]
+      """
+      val expected = ("ClassUUID.elm", fileContent)
+
+      Elm.buildFile("CustomModule2", declaration[ClassUUID]) shouldBe expected
+    }
+
+    "with overrides" in {
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+      )
+
+      val fileContent =
+        i"""
+      module CustomModule2.ClassUUID exposing (..)
 
       import Json.Decode as Decode
       import Json.Decode.Pipeline exposing (..)
       import Json.Encode as Encode
       import Uuid exposing (Uuid)
 
+      type alias ClassUUID = { a: Uuid }
 
 
-      type alias MyUUID = { uuid: Uuid }
+      decoderClassUUID : Decode.Decoder ClassUUID
+      decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
 
 
-
-      decoderMyUUID : Decode.Decoder MyUUID
-      decoderMyUUID = decode MyUUID |> required "uuid" Uuid.decoder
-
-
-
-      encoderMyUUID : MyUUID -> Encode.Value
-      encoderMyUUID obj = Encode.object [ ("uuid", Uuid.encode obj.uuid) ]
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
       """
-    val expected = ("MyUUID.elm", fileContent)
+      val expected = ("ClassUUID.elm", fileContent)
 
-    Elm.buildFile("CustomModule2", declaration[MyUUID]) shouldBe expected
-  }
-
-  "with overrides" in {
-    // we want to treat UUID as string, using an override
-    implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-      Encoder.pure(Str)
-
-    val fileContent =
-      i"""
-      module CustomModule2.MyUUID exposing (..)
-
-      import Json.Decode as Decode
-      import Json.Decode.Pipeline exposing (..)
-      import Json.Encode as Encode
-
-
-
-
-      type alias MyUUID = { uuid: String }
-
-
-
-      decoderMyUUID : Decode.Decoder MyUUID
-      decoderMyUUID = decode MyUUID |> required "uuid" Decode.string
-
-
-
-      encoderMyUUID : MyUUID -> Encode.Value
-      encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
-      """
-    val expected = ("MyUUID.elm", fileContent)
-
-    Elm.buildFile("CustomModule2", declaration[MyUUID]) shouldBe expected
+      Elm.buildFile("CustomModule2", declaration[ClassUUID], customTypeReplacements) shouldBe expected
+    }
   }
 
   "objects only" in {
@@ -219,10 +196,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Encode as Encode
 
 
-
-
       type ObjectsOnly = ObjectOne | ObjectTwo
-
 
 
       decoderObjectsOnly : Decode.Decoder ObjectsOnly
@@ -236,7 +210,6 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
             _ -> Decode.fail ("Unexpected type for ObjectsOnly: " ++ tpe)
 
 
-
       encoderObjectsOnly : ObjectsOnly -> Encode.Value
       encoderObjectsOnly tpe =
          case tpe of
@@ -248,48 +221,85 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
     Elm.buildFile("CustomModule2", declaration[ObjectsOnly]) shouldBe expected
   }
 
-  "for several classes at once" in {
-    // we want to treat UUID as string, using an override
-    implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-      Encoder.pure(Str)
-
-    val fileContent =
-      i"""
+  "for several classes at once" - {
+    "without overrides" in {
+      val fileContent =
+        i"""
       module CustomModule2.Color exposing (..)
 
       import Json.Decode as Decode
       import Json.Decode.Pipeline exposing (..)
       import Json.Encode as Encode
-
-
-
+      import CustomModule2.UUID exposing (..)
 
       type alias Color = { red: Int, green: Int, blue: Int }
-      type alias MyUUID = { uuid: String }
-
+      type alias ClassUUID = { a: UUID }
 
 
       decoderColor : Decode.Decoder Color
       decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
 
-      decoderMyUUID : Decode.Decoder MyUUID
-      decoderMyUUID = decode MyUUID |> required "uuid" Decode.string
-
+      decoderClassUUID : Decode.Decoder ClassUUID
+      decoderClassUUID = decode ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
 
 
       encoderColor : Color -> Encode.Value
       encoderColor obj = Encode.object [ ("red", Encode.int obj.red), ("green", Encode.int obj.green), ("blue", Encode.int obj.blue) ]
 
-      encoderMyUUID : MyUUID -> Encode.Value
-      encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", encoderUUID obj.a) ]
       """
 
-    val expected = ("Color.elm", fileContent)
+      val expected = ("Color.elm", fileContent)
 
-    Elm.buildFile(
-      "CustomModule2",
-      List(declaration[Color], declaration[MyUUID])
-    ) shouldBe expected
+      Elm.buildFile(
+        "CustomModule2",
+        List(declaration[Color], declaration[ClassUUID]),
+        Map.empty[Ref, TypeReplacement]
+      ) shouldBe expected
+    }
+
+    "with custom mappings" in {
+
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+      )
+
+      val fileContent =
+        i"""
+      module CustomModule2.Color exposing (..)
+
+      import Json.Decode as Decode
+      import Json.Decode.Pipeline exposing (..)
+      import Json.Encode as Encode
+      import Uuid exposing (Uuid)
+
+      type alias Color = { red: Int, green: Int, blue: Int }
+      type alias ClassUUID = { a: Uuid }
+
+
+      decoderColor : Decode.Decoder Color
+      decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
+
+      decoderClassUUID : Decode.Decoder ClassUUID
+      decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
+
+
+      encoderColor : Color -> Encode.Value
+      encoderColor obj = Encode.object [ ("red", Encode.int obj.red), ("green", Encode.int obj.green), ("blue", Encode.int obj.blue) ]
+
+      encoderClassUUID : ClassUUID -> Encode.Value
+      encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
+      """
+
+      val expected = ("Color.elm", fileContent)
+
+      Elm.buildFile(
+        "CustomModule2",
+        List(declaration[Color], declaration[ClassUUID]),
+        customTypeReplacements
+      ) shouldBe expected
+    }
   }
 
   "for mutually recursive classes" in {
@@ -302,11 +312,8 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
       import Json.Encode as Encode
 
 
-
-
       type alias TypeOne = { name: String, values: (List TypeTwo) }
       type TypeTwo = OptionOne Int | OptionTwo TypeOne
-
 
 
       decoderTypeOne : Decode.Decoder TypeOne
@@ -323,7 +330,6 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
             _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
 
 
-
       encoderTypeOne : TypeOne -> Encode.Value
       encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
 
@@ -338,7 +344,8 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
 
     Elm.buildFile(
       "CustomModule2",
-      List(declaration[TypeOne], declaration[TypeTwo])
+      List(declaration[TypeOne], declaration[TypeTwo]),
+      Map.empty[Ref, TypeReplacement]
     ) shouldBe expected
   }
 }

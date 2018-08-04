@@ -46,7 +46,11 @@ class TypescriptRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassUUID" in {
-    Typescript.render(declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: string };"""
+    Typescript.render(declaration[ClassUUID]) shouldBe """export type ClassUUID = { a: UUID };"""
+  }
+
+  "ClassDate" in {
+    Typescript.render(declaration[ClassDate]) shouldBe """export type ClassDate = { a: Date };"""
   }
 
   "ExternalReferences" in {

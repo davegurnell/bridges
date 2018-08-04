@@ -20,13 +20,11 @@ sealed abstract class Type extends Product with Serializable {
       case tpe: NumLiteral      => tpe
       case tpe: FloatingLiteral => tpe
       case tpe: BoolLiteral     => tpe
-      case tpe: UUIDLiteral     => tpe
       case tpe: Str             => tpe
       case tpe: Character       => tpe
       case tpe: Num             => tpe
       case tpe: Floating        => tpe
       case tpe: Bool            => tpe
-      case tpe: UUIDType        => tpe
       case Optional(tpe)        => Optional(tpe.renameRef(from, to))
       case Array(tpe)           => Array(tpe.renameRef(from, to))
       case Struct(fields)       => Struct(fields.renameRef(from, to))
@@ -63,10 +61,6 @@ object Type {
   sealed abstract class Bool                   extends Type with Product with Serializable
   final case class BoolLiteral(value: Boolean) extends Bool
   final case object Bool                       extends Bool
-
-  sealed abstract class UUIDType                      extends Type with Product with Serializable
-  final case class UUIDLiteral(value: java.util.UUID) extends UUIDType
-  final case object UUIDType                          extends UUIDType
 
   final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type)    extends Type
