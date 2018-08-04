@@ -9,7 +9,7 @@ import unindent._
 
 class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   "Color" in {
-    jsonEncoder[Elm](declaration[Color]) shouldBe
+    Elm.encoder(declaration[Color]) shouldBe
     i"""
       encoderColor : Color -> Encode.Value
       encoderColor obj = Encode.object [ ("red", Encode.int obj.red), ("green", Encode.int obj.green), ("blue", Encode.int obj.blue) ]
@@ -17,7 +17,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Circle" in {
-    jsonEncoder[Elm](declaration[Circle]) shouldBe
+    Elm.encoder(declaration[Circle]) shouldBe
     i"""
       encoderCircle : Circle -> Encode.Value
       encoderCircle obj = Encode.object [ ("radius", Encode.float obj.radius), ("color", encoderColor obj.color) ]
@@ -25,7 +25,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Rectangle" in {
-    jsonEncoder[Elm](declaration[Rectangle]) shouldBe
+    Elm.encoder(declaration[Rectangle]) shouldBe
     i"""
       encoderRectangle : Rectangle -> Encode.Value
       encoderRectangle obj = Encode.object [ ("width", Encode.float obj.width), ("height", Encode.float obj.height), ("color", encoderColor obj.color) ]
@@ -33,7 +33,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Shape" in {
-    jsonEncoder[Elm](declaration[Shape]) shouldBe
+    Elm.encoder(declaration[Shape]) shouldBe
     i"""
       encoderShape : Shape -> Encode.Value
       encoderShape tpe =
@@ -45,7 +45,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Alpha" in {
-    jsonEncoder[Elm](declaration[Alpha]) shouldBe
+    Elm.encoder(declaration[Alpha]) shouldBe
     i"""
       encoderAlpha : Alpha -> Encode.Value
       encoderAlpha obj = Encode.object [ ("name", Encode.string obj.name), ("char", Encode.string obj.char), ("bool", Encode.bool obj.bool) ]
@@ -53,7 +53,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ArrayClass" in {
-    jsonEncoder[Elm](declaration[ArrayClass]) shouldBe
+    Elm.encoder(declaration[ArrayClass]) shouldBe
     i"""
       encoderArrayClass : ArrayClass -> Encode.Value
       encoderArrayClass obj = Encode.object [ ("aList", Encode.list (List.map Encode.string obj.aList)), ("optField", Maybe.withDefault Encode.null (Maybe.map Encode.float obj.optField)) ]
@@ -61,7 +61,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Numeric" in {
-    jsonEncoder[Elm](declaration[Numeric]) shouldBe
+    Elm.encoder(declaration[Numeric]) shouldBe
     i"""
       encoderNumeric : Numeric -> Encode.Value
       encoderNumeric obj = Encode.object [ ("double", Encode.float obj.double), ("float", Encode.float obj.float), ("int", Encode.int obj.int) ]
@@ -69,7 +69,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ClassOrObject" in {
-    jsonEncoder[Elm](declaration[ClassOrObject]) shouldBe
+    Elm.encoder(declaration[ClassOrObject]) shouldBe
     i"""
       encoderClassOrObject : ClassOrObject -> Encode.Value
       encoderClassOrObject tpe =
@@ -80,7 +80,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "Navigation" in {
-    jsonEncoder[Elm](declaration[Navigation]) shouldBe
+    Elm.encoder(declaration[Navigation]) shouldBe
     i"""
       encoderNavigation : Navigation -> Encode.Value
       encoderNavigation tpe =
@@ -91,7 +91,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ClassUUID" in {
-    jsonEncoder[Elm](declaration[ClassUUID]) shouldBe
+    Elm.encoder(declaration[ClassUUID]) shouldBe
     i"""
       encoderClassUUID : ClassUUID -> Encode.Value
       encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
@@ -99,7 +99,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ExternalReferences" in {
-    jsonEncoder[Elm](declaration[ExternalReferences]) shouldBe
+    Elm.encoder(declaration[ExternalReferences]) shouldBe
     i"""
       encoderExternalReferences : ExternalReferences -> Encode.Value
       encoderExternalReferences obj = Encode.object [ ("color", encoderColor obj.color), ("nav", encoderNavigation obj.nav) ]
@@ -107,7 +107,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "TypeOne and TypeTwo" in {
-    jsonEncoder[Elm](List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
+    Elm.encoder(List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
     i"""
       encoderTypeOne : TypeOne -> Encode.Value
       encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
@@ -125,7 +125,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
     implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
       Encoder.pure(Str)
 
-    jsonEncoder[Elm](declaration[MyUUID]) shouldBe
+    Elm.encoder(declaration[MyUUID]) shouldBe
     i"""
       encoderMyUUID : MyUUID -> Encode.Value
       encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
@@ -133,7 +133,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ObjectsOnly" in {
-    jsonEncoder[Elm](List(declaration[ObjectsOnly])) shouldBe
+    Elm.encoder(List(declaration[ObjectsOnly])) shouldBe
     i"""
       encoderObjectsOnly : ObjectsOnly -> Encode.Value
       encoderObjectsOnly tpe =

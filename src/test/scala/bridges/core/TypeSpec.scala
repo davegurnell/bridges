@@ -1,10 +1,7 @@
 package bridges.core
 
-import bridges.SampleTypes._
 import bridges.core.Type._
-import bridges.syntax._
 import org.scalatest._
-import shapeless.Typeable
 
 class TypeSpec extends FreeSpec with Matchers {
   "type.renameRef" - {

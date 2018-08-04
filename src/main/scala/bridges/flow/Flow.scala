@@ -1,5 +1,5 @@
 package bridges.flow
 
-sealed trait Flow
+import bridges.core.CoreBehaviour
 
-object Flow extends FlowRenderer
+object Flow extends CoreBehaviour with FlowRenderer

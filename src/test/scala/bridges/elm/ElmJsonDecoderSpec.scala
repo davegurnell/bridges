@@ -1,18 +1,18 @@
 package bridges.elm
 
 import bridges.SampleTypes._
-import bridges.core._
 import bridges.core.Type._
+import bridges.core._
 import bridges.syntax._
 import org.scalatest._
 import unindent._
 
-class JsonDecoderSpec extends FreeSpec with Matchers {
+class ElmJsonDecoderSpec extends FreeSpec with Matchers {
   "decoder" - {
     "elm" - {
 
       "Color" in {
-        jsonDecoder[Elm](declaration[Color]) shouldBe
+        Elm.decoder(declaration[Color]) shouldBe
         i"""
            decoderColor : Decode.Decoder Color
            decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
@@ -20,7 +20,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Circle" in {
-        jsonDecoder[Elm](declaration[Circle]) shouldBe
+        Elm.decoder(declaration[Circle]) shouldBe
         i"""
            decoderCircle : Decode.Decoder Circle
            decoderCircle = decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
@@ -28,7 +28,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Rectangle" in {
-        jsonDecoder[Elm](declaration[Rectangle]) shouldBe
+        Elm.decoder(declaration[Rectangle]) shouldBe
         i"""
            decoderRectangle : Decode.Decoder Rectangle
            decoderRectangle = decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
@@ -36,7 +36,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Shape" in {
-        jsonDecoder[Elm](declaration[Shape]) shouldBe
+        Elm.decoder(declaration[Shape]) shouldBe
         i"""
            decoderShape : Decode.Decoder Shape
            decoderShape = Decode.field "type" Decode.string |> Decode.andThen decoderShapeTpe
@@ -52,7 +52,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Alpha" in {
-        jsonDecoder[Elm](declaration[Alpha]) shouldBe
+        Elm.decoder(declaration[Alpha]) shouldBe
         i"""
            decoderAlpha : Decode.Decoder Alpha
            decoderAlpha = decode Alpha |> required "name" Decode.string |> required "char" Decode.string |> required "bool" Decode.bool
@@ -60,7 +60,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "ArrayClass" in {
-        jsonDecoder[Elm](declaration[ArrayClass]) shouldBe
+        Elm.decoder(declaration[ArrayClass]) shouldBe
         i"""
            decoderArrayClass : Decode.Decoder ArrayClass
            decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> optional "optField" (Decode.maybe Decode.float) Nothing
@@ -68,7 +68,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Numeric" in {
-        jsonDecoder[Elm](declaration[Numeric]) shouldBe
+        Elm.decoder(declaration[Numeric]) shouldBe
         i"""
            decoderNumeric : Decode.Decoder Numeric
            decoderNumeric = decode Numeric |> required "double" Decode.float |> required "float" Decode.float |> required "int" Decode.int
@@ -76,7 +76,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "ClassOrObject" in {
-        jsonDecoder[Elm](declaration[ClassOrObject]) shouldBe
+        Elm.decoder(declaration[ClassOrObject]) shouldBe
         i"""
            decoderClassOrObject : Decode.Decoder ClassOrObject
            decoderClassOrObject = Decode.field "type" Decode.string |> Decode.andThen decoderClassOrObjectTpe
@@ -91,7 +91,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "Navigation" in {
-        jsonDecoder[Elm](declaration[Navigation]) shouldBe
+        Elm.decoder(declaration[Navigation]) shouldBe
         i"""
            decoderNavigation : Decode.Decoder Navigation
            decoderNavigation = Decode.field "type" Decode.string |> Decode.andThen decoderNavigationTpe
@@ -106,7 +106,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "ClassUUID" in {
-        jsonDecoder[Elm](declaration[ClassUUID]) shouldBe
+        Elm.decoder(declaration[ClassUUID]) shouldBe
         i"""
            decoderClassUUID : Decode.Decoder ClassUUID
            decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
@@ -114,7 +114,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "ExternalReferences" in {
-        jsonDecoder[Elm](declaration[ExternalReferences]) shouldBe
+        Elm.decoder(declaration[ExternalReferences]) shouldBe
         i"""
            decoderExternalReferences : Decode.Decoder ExternalReferences
            decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
@@ -122,7 +122,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "TypeOne and TypeTwo" in {
-        jsonDecoder[Elm](List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
+        Elm.decoder(List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
         i"""
            decoderTypeOne : Decode.Decoder TypeOne
            decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
@@ -144,7 +144,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
         implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
           Encoder.pure(Str)
 
-        jsonDecoder[Elm](declaration[MyUUID]) shouldBe
+        Elm.decoder(declaration[MyUUID]) shouldBe
         i"""
            decoderMyUUID : Decode.Decoder MyUUID
            decoderMyUUID = decode MyUUID |> required "uuid" Decode.string
@@ -152,7 +152,7 @@ class JsonDecoderSpec extends FreeSpec with Matchers {
       }
 
       "ObjectsOnly" in {
-        jsonDecoder[Elm](declaration[ObjectsOnly]) shouldBe
+        Elm.decoder(declaration[ObjectsOnly]) shouldBe
         i"""
            decoderObjectsOnly : Decode.Decoder ObjectsOnly
            decoderObjectsOnly = Decode.field "type" Decode.string |> Decode.andThen decoderObjectsOnlyTpe
