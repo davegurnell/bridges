@@ -7,7 +7,7 @@ import unindent._
 trait ElmJsonDecoder {
   implicit val jsonDecoder: JsonDecoder[Elm] =
     new JsonDecoder[Elm] {
-      def decoder(decl: Declaration): String = {
+      def decoder(decl: Declaration): String =
         decl.tpe match {
           case Union(types) ⇒
             // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
@@ -30,7 +30,6 @@ trait ElmJsonDecoder {
             decoder${decl.id} = decode ${decl.id} $body
             """
         }
-      }
 
       def decodeType(tpe: Type): String =
         tpe match {

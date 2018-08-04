@@ -97,3 +97,7 @@ pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 
 addCommandAlias("ci", ";clean ;coverage ;compile ;test ;coverageReport ;package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
+
+// Formatting
+
+scalafmtOnCompile := true
