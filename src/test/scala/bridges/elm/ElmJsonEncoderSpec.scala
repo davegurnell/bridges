@@ -10,7 +10,7 @@ import unindent._
 class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   "Color" in {
     jsonEncoder[Elm](declaration[Color]) shouldBe
-      i"""
+    i"""
       encoderColor : Color -> Encode.Value
       encoderColor obj = Encode.object [ ("red", Encode.int obj.red), ("green", Encode.int obj.green), ("blue", Encode.int obj.blue) ]
       """
@@ -18,7 +18,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Circle" in {
     jsonEncoder[Elm](declaration[Circle]) shouldBe
-      i"""
+    i"""
       encoderCircle : Circle -> Encode.Value
       encoderCircle obj = Encode.object [ ("radius", Encode.float obj.radius), ("color", encoderColor obj.color) ]
       """
@@ -26,7 +26,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Rectangle" in {
     jsonEncoder[Elm](declaration[Rectangle]) shouldBe
-      i"""
+    i"""
       encoderRectangle : Rectangle -> Encode.Value
       encoderRectangle obj = Encode.object [ ("width", Encode.float obj.width), ("height", Encode.float obj.height), ("color", encoderColor obj.color) ]
       """
@@ -34,7 +34,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Shape" in {
     jsonEncoder[Elm](declaration[Shape]) shouldBe
-      i"""
+    i"""
       encoderShape : Shape -> Encode.Value
       encoderShape tpe =
          case tpe of
@@ -46,7 +46,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Alpha" in {
     jsonEncoder[Elm](declaration[Alpha]) shouldBe
-      i"""
+    i"""
       encoderAlpha : Alpha -> Encode.Value
       encoderAlpha obj = Encode.object [ ("name", Encode.string obj.name), ("char", Encode.string obj.char), ("bool", Encode.bool obj.bool) ]
       """
@@ -54,7 +54,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "ArrayClass" in {
     jsonEncoder[Elm](declaration[ArrayClass]) shouldBe
-      i"""
+    i"""
       encoderArrayClass : ArrayClass -> Encode.Value
       encoderArrayClass obj = Encode.object [ ("aList", Encode.list (List.map Encode.string obj.aList)), ("optField", Maybe.withDefault Encode.null (Maybe.map Encode.float obj.optField)) ]
       """
@@ -62,7 +62,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Numeric" in {
     jsonEncoder[Elm](declaration[Numeric]) shouldBe
-      i"""
+    i"""
       encoderNumeric : Numeric -> Encode.Value
       encoderNumeric obj = Encode.object [ ("double", Encode.float obj.double), ("float", Encode.float obj.float), ("int", Encode.int obj.int) ]
       """
@@ -70,7 +70,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "ClassOrObject" in {
     jsonEncoder[Elm](declaration[ClassOrObject]) shouldBe
-      i"""
+    i"""
       encoderClassOrObject : ClassOrObject -> Encode.Value
       encoderClassOrObject tpe =
          case tpe of
@@ -81,7 +81,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "Navigation" in {
     jsonEncoder[Elm](declaration[Navigation]) shouldBe
-      i"""
+    i"""
       encoderNavigation : Navigation -> Encode.Value
       encoderNavigation tpe =
          case tpe of
@@ -92,7 +92,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "ClassUUID" in {
     jsonEncoder[Elm](declaration[ClassUUID]) shouldBe
-      i"""
+    i"""
       encoderClassUUID : ClassUUID -> Encode.Value
       encoderClassUUID obj = Encode.object [ ("a", Uuid.encode obj.a) ]
       """
@@ -100,7 +100,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "ExternalReferences" in {
     jsonEncoder[Elm](declaration[ExternalReferences]) shouldBe
-      i"""
+    i"""
       encoderExternalReferences : ExternalReferences -> Encode.Value
       encoderExternalReferences obj = Encode.object [ ("color", encoderColor obj.color), ("nav", encoderNavigation obj.nav) ]
       """
@@ -108,7 +108,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "TypeOne and TypeTwo" in {
     jsonEncoder[Elm](List(declaration[TypeOne], declaration[TypeTwo])) shouldBe
-      i"""
+    i"""
       encoderTypeOne : TypeOne -> Encode.Value
       encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
 
@@ -126,7 +126,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
       Encoder.pure(Str)
 
     jsonEncoder[Elm](declaration[MyUUID]) shouldBe
-      i"""
+    i"""
       encoderMyUUID : MyUUID -> Encode.Value
       encoderMyUUID obj = Encode.object [ ("uuid", Encode.string obj.uuid) ]
       """
@@ -134,7 +134,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "ObjectsOnly" in {
     jsonEncoder[Elm](List(declaration[ObjectsOnly])) shouldBe
-      i"""
+    i"""
       encoderObjectsOnly : ObjectsOnly -> Encode.Value
       encoderObjectsOnly tpe =
          case tpe of

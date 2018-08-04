@@ -1,7 +1,7 @@
 package bridges
 
 import bridges.core._
-import shapeless.{Lazy, Typeable}
+import shapeless.{ Lazy, Typeable }
 
 object syntax {
   import Type._

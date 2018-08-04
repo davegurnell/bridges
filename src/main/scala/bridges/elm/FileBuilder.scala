@@ -65,14 +65,14 @@ trait ElmFileBuilder {
           decl: Declaration
       ): (String, String, String) = {
         val declaration = render[Elm](decl)
-        val decoder = jsonDecoder[Elm](decl)
-        val encoder = jsonEncoder[Elm](decl)
+        val decoder     = jsonDecoder[Elm](decl)
+        val encoder     = jsonEncoder[Elm](decl)
 
         (declaration, decoder, encoder)
       }
 
       def getDeclarationTypes(tpe: Type, parentType: String): List[Ref] = {
-        def getIncludeTypes(tpe: Type): List[Ref] = {
+        def getIncludeTypes(tpe: Type): List[Ref] =
           tpe match {
             case r @ Ref(_)       => r :: Nil
             case Optional(optTpe) => getIncludeTypes(optTpe)
@@ -83,7 +83,6 @@ trait ElmFileBuilder {
               fields.fields.map(_._2).flatMap(getIncludeTypes)
             case _ ⇒ Nil
           }
-        }
 
         val exclude = Ref(parentType)
         val include = getIncludeTypes(tpe)

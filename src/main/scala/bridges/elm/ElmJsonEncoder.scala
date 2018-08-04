@@ -7,7 +7,7 @@ import unindent._
 trait ElmJsonEncoder {
   implicit val jsonEncoder: JsonEncoder[Elm] =
     new JsonEncoder[Elm] {
-      def encoder(decl: Declaration): String = {
+      def encoder(decl: Declaration): String =
         decl.tpe match {
           case Union(types) ⇒
             // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
@@ -28,7 +28,6 @@ trait ElmJsonEncoder {
             encoder${decl.id} obj = $body
             """
         }
-      }
 
       def encodeType(tpe: Type, objectName: String, fieldName: String): String =
         tpe match {
@@ -67,7 +66,7 @@ trait ElmJsonEncoder {
               key.fields
                 .collectFirst { case (_, StrLiteral(name)) ⇒ name }
                 .getOrElse("<Missing main type>")
-            val params = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
+            val params        = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
             val paramsEncoder = fields.fields.map(encodeField(_, ""))
 
             val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"

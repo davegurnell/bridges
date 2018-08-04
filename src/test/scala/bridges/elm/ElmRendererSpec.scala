@@ -76,11 +76,10 @@ class ElmRendererSpec extends FreeSpec with Matchers {
 
     implicit val refinedTypeTypeable: Typeable[ShortString] =
       new Typeable[ShortString] {
-        def cast(t: Any): Option[ShortString] = {
+        def cast(t: Any): Option[ShortString] =
           if (t != null && t.isInstanceOf[String])
             refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
           else None
-        }
         def describe: String = "ShortString"
       }
 

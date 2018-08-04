@@ -91,10 +91,10 @@ trait EncoderInstances1 extends EncoderInstances0 {
       hEncFields: Lazy[StructEncoder[H]],
       tEnc: UnionEncoder[T]
   ): UnionEncoder[FieldType[K, H] :+: T] = {
-    val name = witness.value.name
-    val head = hEnc.value.encode
+    val name       = witness.value.name
+    val head       = hEnc.value.encode
     val headFields = hEncFields.value.encode
-    val tail = tEnc.encode
+    val tail       = tEnc.encode
 
     pureUnion(disc(name, head, headFields) +: tail)
   }

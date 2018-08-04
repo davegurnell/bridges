@@ -2,7 +2,7 @@ package bridges.elm
 
 import bridges.core._
 import bridges.core.Type._
-import org.apache.commons.lang3.StringEscapeUtils.{escapeJava => escape}
+import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
 
 trait ElmRenderer {
   implicit val renderer: Renderer[Elm] =
@@ -35,7 +35,7 @@ trait ElmRenderer {
           case Union(types)        => types.map(renderType).mkString(" | ")
           case Intersection(_, iTpe, fields) =>
             val mainType = renderType(iTpe)
-            val params = fields.fields.map { case (_, vTpe) ⇒ renderType(vTpe) }.mkString(" ")
+            val params   = fields.fields.map { case (_, vTpe) ⇒ renderType(vTpe) }.mkString(" ")
 
             // we trim in case we have no params (case object) as tests don't like extra spaces
             s"$mainType $params".trim
