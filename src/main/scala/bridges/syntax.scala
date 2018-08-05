@@ -2,9 +2,9 @@ package bridges
 
 import bridges.core._
 import shapeless.{ Lazy, Typeable }
+import Type._
 
 object syntax {
-  import Type._
 
   def encode[A: Encoder]: Type =
     Encoder[A].encode

@@ -5,7 +5,6 @@ import bridges.core.Type._
 import bridges.core._
 import bridges.syntax._
 import org.scalatest._
-import shapeless.Typeable
 
 class ElmRendererSpec extends FreeSpec with Matchers {
   "Color" in {
@@ -69,19 +68,7 @@ class ElmRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassWithRefinedType" in {
-    import eu.timepit.refined._
-
-    implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
-      Encoder.pure(Str)
-
-    implicit val refinedTypeTypeable: Typeable[ShortString] =
-      new Typeable[ShortString] {
-        def cast(t: Any): Option[ShortString] =
-          if (t != null && t.isInstanceOf[String])
-            refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
-          else None
-        def describe: String = "ShortString"
-      }
+    import eu.timepit.refined.shapeless.typeable._
 
     Elm.render(declaration[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
   }

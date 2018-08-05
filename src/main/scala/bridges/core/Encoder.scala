@@ -1,6 +1,7 @@
 package bridges.core
 
 import bridges.syntax.typeName
+import eu.timepit.refined.api._
 import scala.language.higherKinds
 import shapeless._
 import shapeless.labelled.FieldType
@@ -60,6 +61,10 @@ trait EncoderInstances2 extends EncoderInstances1 {
       encoder: BasicEncoder[B]
   ): BasicEncoder[A] =
     pure(encoder.encode)
+
+  implicit def refinedEncoder[A, B](implicit enc: BasicEncoder[A]): BasicEncoder[Refined[A, B]] =
+    Encoder.pure(enc.encode)
+
 }
 
 trait EncoderInstances1 extends EncoderInstances0 {
