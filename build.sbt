@@ -12,12 +12,15 @@ scalacOptions ++= Seq(
   "-Ypartial-unification"
 )
 
+val refinedVersion = "0.9.0"
+
 libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"     % "2.3.3",
-  "com.davegurnell"   %% "unindent"      % "1.1.0" exclude("org.typelevel", "scala-library"),
-  "org.apache.commons" % "commons-lang3" % "3.5",
-  "org.scalatest"     %% "scalatest"     % "3.0.5" % Test,
-  "eu.timepit"        %% "refined"       % "0.9.0" % Test
+  "com.chuusai"       %% "shapeless"          % "2.3.3",
+  "com.davegurnell"   %% "unindent"           % "1.1.0" exclude("org.typelevel", "scala-library"),
+  "org.apache.commons" % "commons-lang3"      % "3.5",
+  "org.scalatest"     %% "scalatest"          % "3.0.5" % Test,
+  "eu.timepit"        %% "refined"            % refinedVersion % Provided,
+  "eu.timepit"        %% "refined-shapeless"  % refinedVersion % Provided
 )
 
 // Versioning

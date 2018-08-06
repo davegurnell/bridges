@@ -4,7 +4,6 @@ import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.syntax._
 import org.scalatest._
-import shapeless.Typeable
 
 class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
@@ -175,10 +174,10 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
-    "class with refined type" in {
-      implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
-        Encoder.pure(Str)
-
+    "refined types and class containing them" in {
+      encode[RefinedString] should be(Str)
+      encode[RefinedInt] should be(Num)
+      encode[RefinedChar] should be(Character)
       encode[ClassWithRefinedType] should be(Struct("name" -> Str))
     }
 
@@ -224,19 +223,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "class with refined type" in {
-      import eu.timepit.refined._
-
-      implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
-        Encoder.pure(Str)
-
-      implicit val refinedTypeTypeable: Typeable[ShortString] =
-        new Typeable[ShortString] {
-          def cast(t: Any): Option[ShortString] =
-            if (t != null && t.isInstanceOf[String])
-              refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
-            else None
-          def describe: String = "ShortString"
-        }
+      import eu.timepit.refined.shapeless.typeable._
 
       declaration[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := Struct("name" -> Str)

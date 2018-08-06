@@ -111,45 +111,19 @@ you need to do the following:
 
 If you are interested in this library
 you are most likely using [Refined](https://github.com/fthomas/refined).
-If you do, you will notice that any Refined type
-you use in your case classes fails to derive properly,
-usually resulting in missing fields.
 
-The solution for this issue is to use `implicits` that define conversions
-from your refined type to a more generic version.
-For example, from a refined `String` to a generic `String`.
-You can see an example in tests that use class `ClassWithRefinedType`,
-created in purpose to showcase this issue.
+We have provided a default encoder for refined types. It will defaults
+to the basic type associated with the refined type. For example:
 
-The relevant fragments of code are:
+* For `Int Refined Greater[W.`6`.T]` we treat the type as an `Int`
+* For `String Refined Size[ClosedOpen[W.`1`.T, W.`100`.T]]` we treat the type as a `String`
+* etc
 
-~~~scala
-type ShortStringRefinementType = Size[ClosedOpen[W.`1`.T, W.`100`.T]]
-type ShortString = String Refined ShortStringRefinementType
+This should cover most (if not all) use cases of refined types when converting to other languages.
+You can still override the default encoder with your own higher-precedence encoder. 
 
-final case class ClassWithRefinedType(name: ShortString)
+You can see an example of this in tests for class `ClassWithRefinedType`.
 
-"ClassWithRefinedType" in {
-  import eu.timepit.refined._
-
-  implicit val refinedTypeEncoder: BasicEncoder[ShortString] =
-    Encoder.pure(Str)
-
-  implicit val refinedTypeTypeable: Typeable[ShortString] =
-    new Typeable[ShortString] {
-      def cast(t: Any): Option[ShortString] =
-        if (t != null && t.isInstanceOf[String])
-          refineV[ShortStringRefinementType](t.asInstanceOf[String]).toOption
-        else None
-
-      def describe: String =
-        "ShortString"
-    }
-
-  render[Elm](declaration[ClassWithRefinedType]) shouldBe
-    """type alias ClassWithRefinedType = { name: String }"""
-}
-~~~
 
 ## Developing
 
