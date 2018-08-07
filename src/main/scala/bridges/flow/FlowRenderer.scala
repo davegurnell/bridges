@@ -24,8 +24,8 @@ trait FlowRenderer {
       case _: Floating        => 1000
       case _: Bool            => 1000
       case _: UUIDType        => 1000
+      case _: Array           => 900
       case _: Optional        => 800
-      case _: Array           => 800
       case _: Struct          => 600
       case _: Union           => 400
       case _: Intersection    => 200
@@ -55,8 +55,10 @@ trait FlowRenderer {
       case Intersection(key, iTpe, _) => List(key, iTpe).map(renderParens(tpe)).mkString(" & ")
     }
 
-  private def renderField(field: (String, Type)): String =
-    s"""${field._1}: ${renderType(field._2)}"""
+  private def renderField(field: (String, Type)): String = {
+    val (name, tpe) = field
+    s"""${name}: ${renderType(tpe)}"""
+  }
 
   private def renderParens(outer: Type)(inner: Type): String =
     if (precedence(outer) >= precedence(inner)) {

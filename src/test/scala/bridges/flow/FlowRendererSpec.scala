@@ -1,6 +1,7 @@
 package bridges.flow
 
 import bridges.SampleTypes._
+import bridges.core.Type._
 import bridges.syntax._
 import org.scalatest._
 
@@ -55,5 +56,13 @@ class FlowRendererSpec extends FreeSpec with Matchers {
 
   "ObjectsOnly" in {
     Flow.render(declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = ({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo);"""
+  }
+
+  "Optional of Array" in {
+    Flow.render("Foo" := Optional(Array(Str))) shouldBe """export type Foo = ?string[];"""
+  }
+
+  "Array of Optional" in {
+    Flow.render("Foo" := Array(Optional(Str))) shouldBe """export type Foo = (?string)[];"""
   }
 }
