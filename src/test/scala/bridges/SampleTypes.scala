@@ -8,11 +8,14 @@ import bridges.syntax._
 import eu.timepit.refined.W
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.Size
+import eu.timepit.refined.generic.Equal
+import eu.timepit.refined.numeric.Greater
 import eu.timepit.refined.numeric.Interval.ClosedOpen
 
 object SampleTypes {
-  type ShortStringRefinementType = Size[ClosedOpen[W.`1`.T, W.`100`.T]]
-  type ShortString               = String Refined ShortStringRefinementType
+  type RefinedString = String Refined Size[ClosedOpen[W.`1`.T, W.`100`.T]]
+  type RefinedInt    = Int Refined Greater[W.`6`.T]
+  type RefinedChar   = Char Refined Equal[W.`'3'`.T]
 
   // Sample product
   case class Pair(a: String, b: Int)
@@ -81,5 +84,5 @@ object SampleTypes {
       ("warning", Type.Ref("WarningMessage"), Struct(Nil))
     )
 
-  final case class ClassWithRefinedType(name: ShortString)
+  final case class ClassWithRefinedType(name: RefinedString)
 }
