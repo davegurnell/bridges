@@ -1,12 +1,11 @@
-package bridges
+package bridges.core
 
+import bridges.SampleTypes._
+import bridges.core.Type._
+import bridges.syntax._
 import org.scalatest._
-import SampleTypes._
-import syntax._
-import Type._
 
 class EncoderSpec extends FreeSpec with Matchers {
-
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
@@ -15,7 +14,6 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[Float] should be(Floating)
       encode[Double] should be(Floating)
       encode[Boolean] should be(Bool)
-      encode[java.util.UUID] should be(UUIDType)
     }
 
     "options" in {
@@ -33,7 +31,11 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "a class with UUID member" in {
-      encode[ClassUUID] should be(Struct("a" -> UUIDType))
+      encode[ClassUUID] should be(Struct("a" -> Ref("UUID")))
+    }
+
+    "a class with Date member" in {
+      encode[ClassDate] should be(Struct("a" -> Ref("Date")))
     }
 
     "case classes" in {
@@ -43,7 +45,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       encode[OneOrOther] should be(
         discUnion(
-          ("One", Ref("One"), Struct("value" -> Str)),
+          ("One", Ref("One"), Struct("value"     -> Str)),
           ("Other", Ref("Other"), Struct("value" -> Num))
         )
       )
@@ -74,7 +76,7 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[One] should be(Str)
       encode[OneOrOther] should be(
         discUnion(
-          ("One", Str, Struct("value" → Str)),
+          ("One", Str, Struct("value"            → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
       )
@@ -92,9 +94,9 @@ class EncoderSpec extends FreeSpec with Matchers {
             "Rectangle",
             Ref("Rectangle"),
             Struct(
-              "width" -> Floating,
+              "width"  -> Floating,
               "height" -> Floating,
-              "color" -> Ref("Color")
+              "color"  -> Ref("Color")
             )
           ),
           (
@@ -109,9 +111,9 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
       encode[Rectangle] should be(
         Struct(
-          "width" -> Floating,
+          "width"  -> Floating,
           "height" -> Floating,
-          "color" -> Ref("Color")
+          "color"  -> Ref("Color")
         )
       )
       encode[ShapeGroup] should be(
@@ -158,12 +160,36 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "pure objects ADT" in {
+      encode[ObjectsOnly] should be(
+        discUnion(
+          (
+            "ObjectOne",
+            Ref("ObjectOne"),
+            Struct()
+          ),
+          (
+            "ObjectTwo",
+            Ref("ObjectTwo"),
+            Struct()
+          )
+        )
+      )
+    }
+
+    "refined types and class containing them" in {
+      encode[RefinedString] should be(Str)
+      encode[RefinedInt] should be(Num)
+      encode[RefinedChar] should be(Character)
+      encode[ClassWithRefinedType] should be(Struct("name" -> Str))
+    }
+
     "we can override uuid as string" in {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)
 
-      encode[MyUUID] should be(
-        Struct("uuid" -> Str)
+      encode[ClassUUID] should be(
+        Struct("a" -> Str)
       )
     }
   }
@@ -180,7 +206,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       declaration[OneOrOther] should be(
         "OneOrOther" := discUnion(
-          ("One", Ref("One"), Struct("value" → Str)),
+          ("One", Ref("One"), Struct("value"     → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
       )
@@ -193,9 +219,17 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[One] should be(Str)
       declaration[OneOrOther] should be(
         "OneOrOther" := discUnion(
-          ("One", Str, Struct("value" → Str)),
+          ("One", Str, Struct("value"            → Str)),
           ("Other", Ref("Other"), Struct("value" → Num))
         )
+      )
+    }
+
+    "class with refined type" in {
+      import eu.timepit.refined.shapeless.typeable._
+
+      declaration[ClassWithRefinedType] should be(
+        "ClassWithRefinedType" := Struct("name" -> Str)
       )
     }
   }

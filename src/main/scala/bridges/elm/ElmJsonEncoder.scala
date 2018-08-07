@@ -1,73 +1,65 @@
-package bridges
+package bridges.elm
 
-import bridges.Type._
+import bridges.core._
+import bridges.core.Type._
 import unindent._
 
-trait JsonEncoder[A] {
-  def encoder(decl: Declaration): String
-  def encoder(decls: List[Declaration]): String =
-    decls.map(encoder).mkString("\n\n")
-}
+trait ElmJsonEncoder {
+  def encoder(decls: List[Declaration], customTypeReplacements: Map[Ref, TypeReplacement]): String =
+    decls.map(encoder(_, customTypeReplacements)).mkString("\n\n")
 
-trait ElmJsonEncoder extends JsonEncoder[Elm] {
-
-  def encoder(decl: Declaration): String = {
+  def encoder(decl: Declaration, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String =
     decl.tpe match {
       case Union(types) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
-          types.map(encodeType(_, "", decl.id)).mkString("\n      ")
+          types.map(encodeType(_, "", decl.id, customTypeReplacements)).mkString("\n      ")
 
         i"""
-           encoder${decl.id} : ${decl.id} -> Encode.Value
-           encoder${decl.id} tpe =
-              case tpe of
-                 $body
-           """
+            encoder${decl.id} : ${decl.id} -> Encode.Value
+            encoder${decl.id} tpe =
+               case tpe of
+                  $body
+            """
       case other ⇒
-        val body = encodeType(other, "obj", decl.id)
+        val body = encodeType(other, "obj", decl.id, customTypeReplacements)
 
         i"""
-        encoder${decl.id} : ${decl.id} -> Encode.Value
-        encoder${decl.id} obj = $body
-        """
+            encoder${decl.id} : ${decl.id} -> Encode.Value
+            encoder${decl.id} obj = $body
+            """
     }
-  }
 
-  def encodeType(
-      tpe: Type,
-      objectName: String,
-      fieldName: String
-  ): String =
+  private def encodeType(tpe: Type, objectName: String, fieldName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     tpe match {
-      case Ref(id)            => s"encoder$id $fieldName"
+      case r @ Ref(id)        => customTypeReplacements.get(r).map(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
       case StrLiteral(_)      => ""
       case CharLiteral(_)     => ""
       case NumLiteral(_)      => ""
       case FloatingLiteral(_) => ""
       case BoolLiteral(_)     => ""
-      case UUIDLiteral(_)     => ""
       case Str                => s"Encode.string $fieldName"
       case Character          => s"Encode.string $fieldName"
       case Num                => s"Encode.int $fieldName"
       case Floating           => s"Encode.float $fieldName"
       case Bool               => s"Encode.bool $fieldName"
-      case UUIDType           => s"Uuid.encode $fieldName"
       case Optional(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " + encodeType(
           optTpe,
           objectName,
-          fieldName
+          fieldName,
+          customTypeReplacements
         ) + ")"
       case Array(arrTpe) =>
         "Encode.list (List.map " + encodeType(
           arrTpe,
           objectName,
-          fieldName
+          fieldName,
+          customTypeReplacements
         ) + ")"
       case Struct(fields) =>
         fields
-          .map(encodeField(_, objectName))
+          .map(encodeField(_, objectName, customTypeReplacements))
           .mkString("Encode.object [ ", ", ", " ]")
       case Union(_) => ""
       case Intersection(key, _, fields) =>
@@ -75,8 +67,8 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
           key.fields
             .collectFirst { case (_, StrLiteral(name)) ⇒ name }
             .getOrElse("<Missing main type>")
-        val params = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
-        val paramsEncoder = fields.fields.map(encodeField(_, ""))
+        val params        = fields.fields.map { case (name, _) ⇒ name }.mkString(" ")
+        val paramsEncoder = fields.fields.map(encodeField(_, "", customTypeReplacements))
 
         val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"
         val bodyEncoder =
@@ -86,20 +78,18 @@ trait ElmJsonEncoder extends JsonEncoder[Elm] {
         s"""$caseEncoder -> $bodyEncoder"""
     }
 
-  def encodeField(
+  private def encodeField(
       field: (String, Type),
-      objectName: String
+      objectName: String,
+      customTypeReplacements: Map[Ref, TypeReplacement]
   ): String = {
     val fieldName = field._1
 
     val typeFieldName =
       if (objectName.isEmpty) fieldName else s"$objectName.$fieldName"
-    val encoding = encodeType(field._2, objectName, typeFieldName)
+    val encoding = encodeType(field._2, objectName, typeFieldName, customTypeReplacements)
 
     s"""("$fieldName", $encoding)"""
   }
-}
 
-object JsonEncoder {
-  implicit object ElmJsonEncoder extends ElmJsonEncoder
 }

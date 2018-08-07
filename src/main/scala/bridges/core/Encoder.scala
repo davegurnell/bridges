@@ -1,23 +1,10 @@
-package bridges
+package bridges.core
 
 import bridges.syntax.typeName
-
+import eu.timepit.refined.api._
 import scala.language.higherKinds
+import shapeless._
 import shapeless.labelled.FieldType
-import shapeless.{
-  :+:,
-  ::,
-  CNil,
-  Coproduct,
-  HList,
-  HNil,
-  LabelledGeneric,
-  Lazy,
-  LowPriority,
-  Typeable,
-  Unwrapped,
-  Witness
-}
 
 trait Encoder[A] {
   def encode: Type
@@ -56,9 +43,6 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit val booleanEncoder: BasicEncoder[Boolean] =
     pure(Bool)
 
-  implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-    pure(UUIDType)
-
   implicit def optionEncoder[A](
       implicit enc: BasicEncoder[A]
   ): BasicEncoder[Option[A]] =
@@ -74,6 +58,10 @@ trait EncoderInstances2 extends EncoderInstances1 {
       encoder: BasicEncoder[B]
   ): BasicEncoder[A] =
     pure(encoder.encode)
+
+  implicit def refinedEncoder[A, B](implicit enc: BasicEncoder[A]): BasicEncoder[Refined[A, B]] =
+    Encoder.pure(enc.encode)
+
 }
 
 trait EncoderInstances1 extends EncoderInstances0 {
@@ -105,10 +93,10 @@ trait EncoderInstances1 extends EncoderInstances0 {
       hEncFields: Lazy[StructEncoder[H]],
       tEnc: UnionEncoder[T]
   ): UnionEncoder[FieldType[K, H] :+: T] = {
-    val name = witness.value.name
-    val head = hEnc.value.encode
+    val name       = witness.value.name
+    val head       = hEnc.value.encode
     val headFields = hEncFields.value.encode
-    val tail = tEnc.encode
+    val tail       = tEnc.encode
 
     pureUnion(disc(name, head, headFields) +: tail)
   }
