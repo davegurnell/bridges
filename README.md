@@ -120,7 +120,7 @@ to the basic type associated with the refined type. For example:
 * etc
 
 This should cover most (if not all) use cases of refined types when converting to other languages.
-You can still override the default encoder with your own higher-precedence encoder. 
+You can still override the default encoder with your own higher-precedence encoder.
 
 You can see an example of this in tests for class `ClassWithRefinedType`.
 
