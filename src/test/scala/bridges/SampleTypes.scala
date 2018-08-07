@@ -1,6 +1,6 @@
 package bridges
 
-import java.util.UUID
+import java.util.{ Date, UUID }
 
 import bridges.core._
 import bridges.core.Type._
@@ -43,6 +43,9 @@ object SampleTypes {
   // Sample UUID
   case class ClassUUID(a: UUID)
 
+  // Sample Date
+  case class ClassDate(a: Date)
+
   // ADT with intermediate type appearing more than once:
   final case class Color(red: Int, green: Int, blue: Int)
   sealed abstract class Shape                                             extends Product with Serializable
@@ -59,7 +62,6 @@ object SampleTypes {
   final case class Alpha(name: String, char: Char, bool: Boolean)
   final case class ArrayClass(aList: List[String], optField: Option[Float])
   final case class Numeric(double: Double, float: Float, int: Int)
-  final case class MyUUID(uuid: UUID)
 
   // case class whose members are other case classes not in its adt
   final case class ExternalReferences(color: Color, nav: Navigation)

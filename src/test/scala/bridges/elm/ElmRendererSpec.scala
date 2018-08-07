@@ -47,20 +47,50 @@ class ElmRendererSpec extends FreeSpec with Matchers {
     Elm.render(declaration[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
   }
 
-  "ClassUUID" in {
-    Elm.render(declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: Uuid }"""
-  }
-
   "ExternalReferences" in {
     Elm.render(declaration[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
   }
 
-  "MyUUID" in {
-    // we want to treat UUID as string, using an override
-    implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
-      Encoder.pure(Str)
+  "ClassUUID" - {
+    "Without any specific override" in {
+      Elm.render(declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: UUID }"""
+    }
 
-    Elm.render(declaration[MyUUID]) shouldBe """type alias MyUUID = { uuid: String }"""
+    "providing a type override map" in {
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+      )
+
+      Elm.render(declaration[ClassUUID], customTypeReplacements) shouldBe """type alias ClassUUID = { a: Uuid }"""
+    }
+
+    "using override to treat UUID as a String" in {
+      implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
+        Encoder.pure(Str)
+
+      Elm.render(declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: String }"""
+    }
+  }
+
+  "ClassDate" - {
+    "Without any specific override" in {
+      Elm.render(declaration[ClassDate]) shouldBe """type alias ClassDate = { a: Date }"""
+    }
+
+    "providing a type override map" in {
+      val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
+        Ref("Date") → TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
+      )
+
+      Elm.render(declaration[ClassDate], customTypeReplacements) shouldBe """type alias ClassDate = { a: Date }"""
+    }
+
+    "using override to treat Date as a String" in {
+      implicit val dateEncoder: BasicEncoder[java.util.Date] =
+        Encoder.pure(Str)
+
+      Elm.render(declaration[ClassDate]) shouldBe """type alias ClassDate = { a: String }"""
+    }
   }
 
   "ObjectsOnly" in {

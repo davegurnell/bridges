@@ -14,7 +14,6 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[Float] should be(Floating)
       encode[Double] should be(Floating)
       encode[Boolean] should be(Bool)
-      encode[java.util.UUID] should be(UUIDType)
     }
 
     "options" in {
@@ -32,7 +31,11 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "a class with UUID member" in {
-      encode[ClassUUID] should be(Struct("a" -> UUIDType))
+      encode[ClassUUID] should be(Struct("a" -> Ref("UUID")))
+    }
+
+    "a class with Date member" in {
+      encode[ClassDate] should be(Struct("a" -> Ref("Date")))
     }
 
     "case classes" in {
@@ -185,8 +188,8 @@ class EncoderSpec extends FreeSpec with Matchers {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)
 
-      encode[MyUUID] should be(
-        Struct("uuid" -> Str)
+      encode[ClassUUID] should be(
+        Struct("a" -> Str)
       )
     }
   }
