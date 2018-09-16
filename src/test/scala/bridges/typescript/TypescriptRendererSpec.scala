@@ -1,6 +1,7 @@
 package bridges.typescript
 
 import bridges.SampleTypes._
+import bridges.core.Type
 import bridges.syntax._
 import org.scalatest._
 
@@ -58,9 +59,13 @@ class TypescriptRendererSpec extends FreeSpec with Matchers {
   }
 
   //TODO fix this
-//  "Custom" in {
-//    Typescript.render(customDeclaration) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
-//  }
+  "Custom" in {
+    val mappings: Map[Type, String] = Map(
+      customErrorMsg   → "{ level: \"error\" }",
+      customWarningMsg → "{ level: \"warning\" }"
+    )
+    Typescript.render(customDeclaration, mappings) shouldBe """export type Message = (({ level: "error" } & ErrorMessage) | ({ level: "warning" } & WarningMessage));"""
+  }
 
   "ObjectsOnly" in {
     Typescript.render(declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""

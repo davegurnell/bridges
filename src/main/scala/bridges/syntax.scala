@@ -19,7 +19,7 @@ object syntax {
     def :=[A](tpe: Type): Declaration =
       Declaration(str, tpe)
   }
-//TODO is declaration needed really? or can we just override AProduct?
+
   implicit class DeclarationListOps(declarations: List[Declaration]) {
     def renameRef(from: String, to: String): List[Declaration] =
       declarations.map(_.renameRef(from, to))
