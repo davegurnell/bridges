@@ -57,26 +57,6 @@ object Type {
       SumOfProducts(products.toList)
   }
 
-  /*
-    - key : contains a Struct (key -> StrLiteral(name)) that identifies the type. Can probably be done better...
-    - tpe: the type in this intersection
-    - fields: a Struct that contains all the fields associated to the Type of the Intersection, so we can derive on these values
-    //TODO: intersection must be a specific structure for Flow/Typescrypt, see expected output and act accordingly
-   */
-//  final case class Intersection(key: AProduct, tpe: Type, fields: AProduct) extends Type
-//
-//  def disc(name: String, tpe: Type, fields: AProduct): Intersection =
-//    disc("type")(name, tpe, fields)
-//
-//  def disc(key: String)(name: String, tpe: Type, fields: AProduct): Intersection =
-//    Intersection(AProduct(key -> StrLiteral(name)), tpe, fields)
-//
-//  def discUnion(types: (String, Type, AProduct)*): Union =
-//    discUnion("type")(types: _*)
-//
-//  def discUnion(key: String)(types: (String, Type, AProduct)*): Union =
-//    Union(types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList)
-
   implicit class TypeMapOps(types: List[(String, Type)]) {
     def renameRef(from: String, to: String): List[(String, Type)] =
       types.map {
