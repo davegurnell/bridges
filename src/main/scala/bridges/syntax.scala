@@ -2,7 +2,6 @@ package bridges
 
 import bridges.core._
 import shapeless.{ Lazy, Typeable }
-import Type._
 
 object syntax {
 
@@ -20,12 +19,7 @@ object syntax {
     def :=[A](tpe: Type): Declaration =
       Declaration(str, tpe)
   }
-
-  implicit class StringPairOps(a: (String, Type, Struct)) {
-    def |(b: (String, Type, Struct)): Union =
-      discUnion(a, b)
-  }
-
+//TODO is declaration needed really? or can we just override AProduct?
   implicit class DeclarationListOps(declarations: List[Declaration]) {
     def renameRef(from: String, to: String): List[Declaration] =
       declarations.map(_.renameRef(from, to))

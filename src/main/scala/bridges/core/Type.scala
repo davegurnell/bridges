@@ -3,65 +3,38 @@ package bridges.core
 sealed abstract class Type extends Product with Serializable {
   import Type._
 
-  def unionTypes: List[Type] = this match {
-    case Union(types) => types
-    case _            => List(this)
-  }
-
-  def |(that: Type): Union =
-    Union(this.unionTypes ++ that.unionTypes)
-
   def renameRef(from: String, to: String): Type =
     this match {
-      case Ref(`from`)          => Ref(to)
-      case tpe: Ref             => tpe
-      case tpe: StrLiteral      => tpe
-      case tpe: CharLiteral     => tpe
-      case tpe: NumLiteral      => tpe
-      case tpe: FloatingLiteral => tpe
-      case tpe: BoolLiteral     => tpe
-      case tpe: Str             => tpe
-      case tpe: Character       => tpe
-      case tpe: Num             => tpe
-      case tpe: Floating        => tpe
-      case tpe: Bool            => tpe
-      case Optional(tpe)        => Optional(tpe.renameRef(from, to))
-      case Array(tpe)           => Array(tpe.renameRef(from, to))
-      case Struct(fields)       => Struct(fields.renameRef(from, to))
-      case Union(types)         => Union(types.map(_.renameRef(from, to)))
-
-      case Intersection(Struct(keys), tpe, Struct(fields)) =>
-        Intersection(
-          Struct(keys.renameRef(from, to)),
-          tpe.renameRef(from, to),
-          Struct(fields.renameRef(from, to))
-        )
+      case Ref(`from`)     => Ref(to)
+      case tpe: Ref        => tpe
+      case tpe @ Str       => tpe
+      case tpe @ Character => tpe
+      case tpe @ Num       => tpe
+      case tpe @ Floating  => tpe
+      case tpe @ Bool      => tpe
+      case Optional(tpe)   => Optional(tpe.renameRef(from, to))
+      case Array(tpe)      => Array(tpe.renameRef(from, to))
+      case Struct(fields)  => Struct(fields.renameRef(from, to))
+      case tpe: AProduct   => renameProduct(from, to, tpe)
+      case SumOfProducts(types) =>
+        SumOfProducts(types.map(renameProduct(from, to, _)))
     }
+
+  private def renameProduct(from: String, to: String, product: AProduct): AProduct = {
+    val newName       = if (product.name == from) to else from
+    val renamedFields = Struct(product.fields.fields.renameRef(from, to))
+    AProduct(newName, renamedFields)
+  }
 }
 
 object Type {
   final case class Ref(id: String) extends Type
 
-  sealed abstract class Str                  extends Type with Product with Serializable
-  final case class StrLiteral(value: String) extends Str
-  final case object Str                      extends Str
-
-  sealed abstract class Character           extends Type with Product with Serializable
-  final case class CharLiteral(value: Char) extends Character
-  final case object Character               extends Character
-
-  sealed abstract class Num               extends Type with Product with Serializable
-  final case class NumLiteral(value: Num) extends Num
-  final case object Num                   extends Num
-
-  sealed abstract class Floating                    extends Type with Product with Serializable
-  final case class FloatingLiteral(value: Floating) extends Floating
-  final case object Floating                        extends Floating
-
-  sealed abstract class Bool                   extends Type with Product with Serializable
-  final case class BoolLiteral(value: Boolean) extends Bool
-  final case object Bool                       extends Bool
-
+  final case object Str                extends Type
+  final case object Character          extends Type
+  final case object Num                extends Type
+  final case object Floating           extends Type
+  final case object Bool               extends Type
   final case class Optional(tpe: Type) extends Type
   final case class Array(tpe: Type)    extends Type
 
@@ -74,36 +47,38 @@ object Type {
     def apply(fields: (String, Type)*): Struct =
       Struct(fields.toList)
   }
+//TODO: do we need Struct?
+  final case class AProduct(name: String, fields: Struct) extends Type
 
-  //TODO: does union only contain intersections?
-  final case class Union(types: List[Type]) extends Type {
-    def +:(tpe: Type): Union =
-      Union(tpe +: types)
+  final case class SumOfProducts(types: List[AProduct]) extends Type {
+    def +:(tpe: AProduct): SumOfProducts = //TODO: used?
+      SumOfProducts(tpe +: types)
   }
 
-  object Union {
-    def apply(types: Type*): Union =
-      Union(types.toList)
+  object SumOfProducts {
+    def apply(products: AProduct*): SumOfProducts =
+      SumOfProducts(products.toList)
   }
 
   /*
     - key : contains a Struct (key -> StrLiteral(name)) that identifies the type. Can probably be done better...
     - tpe: the type in this intersection
     - fields: a Struct that contains all the fields associated to the Type of the Intersection, so we can derive on these values
+    //TODO: intersection must be a specific structure for Flow/Typescrypt, see expected output and act accordingly
    */
-  final case class Intersection(key: Struct, tpe: Type, fields: Struct) extends Type
-
-  def disc(name: String, tpe: Type, fields: Struct): Intersection =
-    disc("type")(name, tpe, fields)
-
-  def disc(key: String)(name: String, tpe: Type, fields: Struct): Intersection =
-    Intersection(Struct(key -> StrLiteral(name)), tpe, fields)
-
-  def discUnion(types: (String, Type, Struct)*): Union =
-    discUnion("type")(types: _*)
-
-  def discUnion(key: String)(types: (String, Type, Struct)*): Union =
-    Union(types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList)
+//  final case class Intersection(key: AProduct, tpe: Type, fields: AProduct) extends Type
+//
+//  def disc(name: String, tpe: Type, fields: AProduct): Intersection =
+//    disc("type")(name, tpe, fields)
+//
+//  def disc(key: String)(name: String, tpe: Type, fields: AProduct): Intersection =
+//    Intersection(AProduct(key -> StrLiteral(name)), tpe, fields)
+//
+//  def discUnion(types: (String, Type, AProduct)*): Union =
+//    discUnion("type")(types: _*)
+//
+//  def discUnion(key: String)(types: (String, Type, AProduct)*): Union =
+//    Union(types.map { case (name, tpe, fields) => disc(key)(name, tpe, fields) }.toList)
 
   implicit class TypeMapOps(types: List[(String, Type)]) {
     def renameRef(from: String, to: String): List[(String, Type)] =

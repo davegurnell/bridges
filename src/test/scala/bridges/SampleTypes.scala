@@ -77,12 +77,13 @@ object SampleTypes {
   final case object ObjectOne extends ObjectsOnly
   final case object ObjectTwo extends ObjectsOnly
 
+  //TODO: how can we preserve this behaviour? It is important!
   // Custom declaration of a intermediate structure
-  val customDeclaration: Declaration =
-    "Message" := Type.discUnion("level")(
-      ("error", Type.Ref("ErrorMessage"), Struct(Nil)),
-      ("warning", Type.Ref("WarningMessage"), Struct(Nil))
-    )
+//  val customDeclaration: Declaration =
+//    "Message" := Type.discUnion("level")(
+//      ("error", Type.Ref("ErrorMessage"), Struct(Nil)),
+//      ("warning", Type.Ref("WarningMessage"), Struct(Nil))
+//    )
 
   final case class ClassWithRefinedType(name: RefinedString)
 }

@@ -17,12 +17,6 @@ class TypeSpec extends FreeSpec with Matchers {
       actual should equal(expected)
     }
 
-    "StrLiteral" in {
-      val actual   = StrLiteral("foo").renameRef("foo", "bar")
-      val expected = StrLiteral("foo")
-      actual should equal(expected)
-    }
-
     "Optional" in {
       val actual   = Optional(Ref("foo")).renameRef("foo", "bar")
       val expected = Optional(Ref("bar"))
@@ -52,41 +46,41 @@ class TypeSpec extends FreeSpec with Matchers {
 
       actual should equal(expected)
     }
-
-    "Intersection" in {
-      val actual = Intersection(
-        Struct(
-          List(
-            "a" -> Ref("foo"),
-            "b" -> Ref("baz")
-          )
-        ),
-        Ref("foo"),
-        Struct(
-          List(
-            "a" -> Ref("foo"),
-            "b" -> Ref("baz")
-          )
-        )
-      ).renameRef("foo", "bar")
-
-      val expected = Intersection(
-        Struct(
-          List(
-            "a" -> Ref("bar"),
-            "b" -> Ref("baz")
-          )
-        ),
-        Ref("bar"),
-        Struct(
-          List(
-            "a" -> Ref("bar"),
-            "b" -> Ref("baz")
-          )
-        )
-      )
-
-      actual should equal(expected)
-    }
+//TODO: add Product, SumOfProducts tests for rename?
+//    "Intersection" in {
+//      val actual = Intersection(
+//        AProduct(
+//          List(
+//            "a" -> Ref("foo"),
+//            "b" -> Ref("baz")
+//          )
+//        ),
+//        Ref("foo"),
+//        AProduct(
+//          List(
+//            "a" -> Ref("foo"),
+//            "b" -> Ref("baz")
+//          )
+//        )
+//      ).renameRef("foo", "bar")
+//
+//      val expected = Intersection(
+//        AProduct(
+//          List(
+//            "a" -> Ref("bar"),
+//            "b" -> Ref("baz")
+//          )
+//        ),
+//        Ref("bar"),
+//        AProduct(
+//          List(
+//            "a" -> Ref("bar"),
+//            "b" -> Ref("baz")
+//          )
+//        )
+//      )
+//
+//      actual should equal(expected)
+//    }
   }
 }
