@@ -177,8 +177,8 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[RefinedString] should be(Str)
       encode[RefinedInt] should be(Num)
       encode[RefinedChar] should be(Character)
+      //TODO: fix
 //      encode[ClassWithRefinedType] should be(AProduct("ClassWithRefinedType", Struct("name" -> Str)))
-      //TODO fix this error
     }
 
     "we can override uuid as string" in {

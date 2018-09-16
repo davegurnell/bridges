@@ -46,41 +46,149 @@ class TypeSpec extends FreeSpec with Matchers {
 
       actual should equal(expected)
     }
-//TODO: add Product, SumOfProducts tests for rename?
-//    "Intersection" in {
-//      val actual = Intersection(
-//        AProduct(
-//          List(
-//            "a" -> Ref("foo"),
-//            "b" -> Ref("baz")
-//          )
-//        ),
-//        Ref("foo"),
-//        AProduct(
-//          List(
-//            "a" -> Ref("foo"),
-//            "b" -> Ref("baz")
-//          )
-//        )
-//      ).renameRef("foo", "bar")
-//
-//      val expected = Intersection(
-//        AProduct(
-//          List(
-//            "a" -> Ref("bar"),
-//            "b" -> Ref("baz")
-//          )
-//        ),
-//        Ref("bar"),
-//        AProduct(
-//          List(
-//            "a" -> Ref("bar"),
-//            "b" -> Ref("baz")
-//          )
-//        )
-//      )
-//
-//      actual should equal(expected)
-//    }
+
+    "AProduct" - {
+      "renames members " in {
+        val actual = AProduct(
+          "typeA",
+          Struct(
+            List(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
+            )
+          )
+        ).renameRef("foo", "bar")
+
+        val expected = AProduct(
+          "typeA",
+          Struct(
+            List(
+              "a" -> Ref("bar"),
+              "b" -> Ref("baz")
+            )
+          )
+        )
+
+        actual should equal(expected)
+      }
+      "renames type name" in {
+        val actual = AProduct(
+          "typeA",
+          Struct(
+            List(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
+            )
+          )
+        ).renameRef("typeA", "typeB")
+
+        val expected = AProduct(
+          "typeB",
+          Struct(
+            List(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
+            )
+          )
+        )
+
+        actual should equal(expected)
+      }
+    }
+
+    "SumOfProducts" - {
+      "renames members " in {
+        val actual =
+          SumOfProducts(
+            AProduct(
+              "typeA",
+              Struct(
+                List(
+                  "a" -> Ref("foo"),
+                  "b" -> Ref("baz")
+                )
+              )
+            ),
+            AProduct(
+              "typeB",
+              Struct(
+                List(
+                  "a" -> Ref("foo"),
+                  "b" -> Ref("baz")
+                )
+              )
+            )
+          ).renameRef("foo", "bar")
+
+        val expected = SumOfProducts(
+          AProduct(
+            "typeA",
+            Struct(
+              List(
+                "a" -> Ref("bar"),
+                "b" -> Ref("baz")
+              )
+            )
+          ),
+          AProduct(
+            "typeB",
+            Struct(
+              List(
+                "a" -> Ref("bar"),
+                "b" -> Ref("baz")
+              )
+            )
+          )
+        )
+
+        actual should equal(expected)
+      }
+      "renames type name of members" in {
+        val actual =
+          SumOfProducts(
+            AProduct(
+              "typeA",
+              Struct(
+                List(
+                  "a" -> Ref("foo"),
+                  "b" -> Ref("baz")
+                )
+              )
+            ),
+            AProduct(
+              "typeA",
+              Struct(
+                List(
+                  "a" -> Ref("foo"),
+                  "b" -> Ref("baz")
+                )
+              )
+            )
+          ).renameRef("typeA", "typeC")
+
+        val expected = SumOfProducts(
+          AProduct(
+            "typeC",
+            Struct(
+              List(
+                "a" -> Ref("foo"),
+                "b" -> Ref("baz")
+              )
+            )
+          ),
+          AProduct(
+            "typeC",
+            Struct(
+              List(
+                "a" -> Ref("foo"),
+                "b" -> Ref("baz")
+              )
+            )
+          )
+        )
+
+        actual should equal(expected)
+      }
+    }
   }
 }

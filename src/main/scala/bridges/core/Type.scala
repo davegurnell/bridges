@@ -21,8 +21,8 @@ sealed abstract class Type extends Product with Serializable {
     }
 
   private def renameProduct(from: String, to: String, product: AProduct): AProduct = {
-    val newName       = if (product.name == from) to else from
-    val renamedFields = Struct(product.fields.fields.renameRef(from, to))
+    val newName       = if (product.name == from) to else product.name
+    val renamedFields = Struct(product.struct.fields.renameRef(from, to))
     AProduct(newName, renamedFields)
   }
 }
@@ -47,13 +47,10 @@ object Type {
     def apply(fields: (String, Type)*): Struct =
       Struct(fields.toList)
   }
-//TODO: do we need Struct?
-  final case class AProduct(name: String, fields: Struct) extends Type
 
-  final case class SumOfProducts(types: List[AProduct]) extends Type {
-    def +:(tpe: AProduct): SumOfProducts = //TODO: used?
-      SumOfProducts(tpe +: types)
-  }
+  final case class AProduct(name: String, struct: Struct) extends Type
+
+  final case class SumOfProducts(types: List[AProduct]) extends Type
 
   object SumOfProducts {
     def apply(products: AProduct*): SumOfProducts =
