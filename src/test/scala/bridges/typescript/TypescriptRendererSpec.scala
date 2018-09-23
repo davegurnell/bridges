@@ -58,7 +58,6 @@ class TypescriptRendererSpec extends FreeSpec with Matchers {
     Typescript.render(declaration[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
   }
 
-  //TODO fix this
   "Custom" in {
     val mappings: Map[Type, String] = Map(
       customErrorMsg   → "{ level: \"error\" }",
