@@ -177,8 +177,10 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[RefinedString] should be(Str)
       encode[RefinedInt] should be(Num)
       encode[RefinedChar] should be(Character)
-      //TODO: fix
-//      encode[ClassWithRefinedType] should be(AProduct("ClassWithRefinedType", Struct("name" -> Str)))
+
+      //Note that the import is required or it fails!
+      import eu.timepit.refined.shapeless.typeable._
+      encode[ClassWithRefinedType] should be(AProduct("ClassWithRefinedType", Struct("name" -> Str)))
     }
 
     "we can override uuid as string" in {
@@ -223,11 +225,11 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "class with refined type" in {
+      //Note that the import is required or it fails!
       import eu.timepit.refined.shapeless.typeable._
-      //TODO fix this error
-//      declaration[ClassWithRefinedType] should be(
-//        "ClassWithRefinedType" := AProduct("ClassWithRefinedType", Struct("name" -> Str))
-//      )
+      declaration[ClassWithRefinedType] should be(
+        "ClassWithRefinedType" := AProduct("ClassWithRefinedType", Struct("name" -> Str))
+      )
     }
   }
 }
