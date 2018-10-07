@@ -4,6 +4,7 @@ import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.syntax._
 import org.scalatest._
+import shapeless.Typeable
 
 class FlowRendererSpec extends FreeSpec with Matchers {
   "Color" in {
@@ -73,5 +74,20 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   "class with parameters" in {
     Flow.render(declaration[ClassWithParams[String, Int]]) shouldBe """export type ClassWithParams = { param: string, param2: number };"""
     Flow.render(declaration[ClassWithParams[Alpha, ArrayClass]]) shouldBe """export type ClassWithParams = { param: Alpha, param2: ArrayClass };"""
+
+    class Sample[A, B] {
+      // without the implicits below, the typer can't find the instances and we get a diverging implicit expansion error
+      implicit val aTypeable: Typeable[A] = new Typeable[A] {
+        override def cast(t: Any): Option[A] = None
+        override def describe: String        = "A"
+      }
+      implicit val bTypeable: Typeable[B] = new Typeable[B] {
+        override def cast(t: Any): Option[B] = None
+        override def describe: String        = "B"
+      }
+
+      // We can use the implicit typeable definitions above to tweak the result or just assign type to the params before encoding.
+      Flow.render(declaration[ClassWithParams[A, B]]) shouldBe """export type ClassWithParams = { param: A, param2: B }"""
+    }
   }
 }

@@ -4,6 +4,7 @@ import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.syntax._
 import org.scalatest._
+import shapeless.Typeable
 
 class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
@@ -199,6 +200,19 @@ class EncoderSpec extends FreeSpec with Matchers {
       encode[ClassWithParams[Alpha, ArrayClass]] should be(
         AProduct("ClassWithParams", Struct("param" -> Ref("Alpha"), "param2" -> Ref("ArrayClass")))
       )
+
+      class Sample[A, B] {
+        // without the implicits below, the typer can't find the instances and we get a diverging implicit expansion error
+        implicit val aTypeable: Typeable[A] = new Typeable[A] {
+          override def cast(t: Any): Option[A] = None
+          override def describe: String        = "A"
+        }
+        implicit val bTypeable: Typeable[B] = new Typeable[B] {
+          override def cast(t: Any): Option[B] = None
+          override def describe: String        = "B"
+        }
+        encode[ClassWithParams[A, B]] should be(AProduct("ClassWithParams", Struct("param" -> Ref("A"), "param2" -> Ref("B"))))
+      }
     }
   }
 
