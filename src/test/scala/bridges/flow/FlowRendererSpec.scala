@@ -69,4 +69,9 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   "Array of Optional" in {
     Flow.render("Foo" := Array(Optional(Str))) shouldBe """export type Foo = (?string)[];"""
   }
+
+  "class with parameters" in {
+    Flow.render(declaration[ClassWithParams[String, Int]]) shouldBe """export type ClassWithParams = { param: string, param2: number };"""
+    Flow.render(declaration[ClassWithParams[Alpha, ArrayClass]]) shouldBe """export type ClassWithParams = { param: Alpha, param2: ArrayClass };"""
+  }
 }

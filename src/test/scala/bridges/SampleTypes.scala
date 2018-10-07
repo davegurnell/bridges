@@ -94,4 +94,6 @@ object SampleTypes {
     "Message" := Type.SumOfProducts(customErrorMsg, customWarningMsg)
 
   final case class ClassWithRefinedType(name: RefinedString)
+
+  final case class ClassWithParams[Y, Z](param: Y, param2: Z)
 }

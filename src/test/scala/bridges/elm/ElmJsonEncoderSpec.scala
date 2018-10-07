@@ -196,4 +196,18 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
             ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
       """
   }
+
+  "class with parameters" in {
+    Elm.encoder(declaration[ClassWithParams[String, Int]]) shouldBe
+    i"""
+           encoderClassWithParams : ClassWithParams -> Encode.Value
+           encoderClassWithParams obj = Encode.object [ ("param", Encode.string obj.param), ("param2", Encode.int obj.param2) ]
+           """
+
+    Elm.encoder(declaration[ClassWithParams[Alpha, ArrayClass]]) shouldBe
+    i"""
+           encoderClassWithParams : ClassWithParams -> Encode.Value
+           encoderClassWithParams obj = Encode.object [ ("param", encoderAlpha obj.param), ("param2", encoderArrayClass obj.param2) ]
+           """
+  }
 }

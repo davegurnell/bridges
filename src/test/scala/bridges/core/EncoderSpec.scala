@@ -191,6 +191,15 @@ class EncoderSpec extends FreeSpec with Matchers {
         AProduct("ClassUUID", Struct("a" -> Str))
       )
     }
+
+    "class with parameters" in {
+      import eu.timepit.refined.shapeless.typeable._
+      encode[ClassWithParams[String, Int]] should be(AProduct("ClassWithParams", Struct("param"             -> Str, "param2" -> Num)))
+      encode[ClassWithParams[RefinedInt, RefinedChar]] should be(AProduct("ClassWithParams", Struct("param" -> Num, "param2" -> Character)))
+      encode[ClassWithParams[Alpha, ArrayClass]] should be(
+        AProduct("ClassWithParams", Struct("param" -> Ref("Alpha"), "param2" -> Ref("ArrayClass")))
+      )
+    }
   }
 
   "declaration[A]" - {
@@ -229,6 +238,12 @@ class EncoderSpec extends FreeSpec with Matchers {
       import eu.timepit.refined.shapeless.typeable._
       declaration[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := AProduct("ClassWithRefinedType", Struct("name" -> Str))
+      )
+    }
+
+    "class with parameters" in {
+      declaration[ClassWithParams[Alpha, ArrayClass]] should be(
+        "ClassWithParams" := AProduct("ClassWithParams", Struct("param" -> Ref("Alpha"), "param2" -> Ref("ArrayClass")))
       )
     }
   }

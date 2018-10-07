@@ -102,4 +102,9 @@ class ElmRendererSpec extends FreeSpec with Matchers {
 
     Elm.render(declaration[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
   }
+
+  "class with parameters" in {
+    Elm.render(declaration[ClassWithParams[String, Int]]) shouldBe """type alias ClassWithParams = { param: String, param2: Int }"""
+    Elm.render(declaration[ClassWithParams[Alpha, ArrayClass]]) shouldBe """type alias ClassWithParams = { param: Alpha, param2: ArrayClass }"""
+  }
 }

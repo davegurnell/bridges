@@ -69,4 +69,9 @@ class TypescriptRendererSpec extends FreeSpec with Matchers {
   "ObjectsOnly" in {
     Typescript.render(declaration[ObjectsOnly]) shouldBe """export type ObjectsOnly = (({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo));"""
   }
+
+  "class with parameters" in {
+    Typescript.render(declaration[ClassWithParams[String, Int]]) shouldBe """export type ClassWithParams = { param: string, param2: number };"""
+    Typescript.render(declaration[ClassWithParams[Alpha, ArrayClass]]) shouldBe """export type ClassWithParams = { param: Alpha, param2: ArrayClass };"""
+  }
 }
