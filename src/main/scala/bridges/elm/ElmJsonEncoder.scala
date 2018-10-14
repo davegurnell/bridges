@@ -5,37 +5,37 @@ import bridges.core.Type._
 import unindent._
 
 trait ElmJsonEncoder {
-  def encoder(decls: List[Declaration], customTypeReplacements: Map[Ref, TypeReplacement]): String =
+  def encoder(decls: List[Decl], customTypeReplacements: Map[Ref, TypeReplacement]): String =
     decls.map(encoder(_, customTypeReplacements)).mkString("\n\n")
 
-  def encoder(decl: Declaration, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String =
+  def encoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String =
     decl.tpe match {
-      case SumOfProducts(products) ⇒
+      case Sum(products) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
           products.map(encodeSumType(_, customTypeReplacements)).mkString("\n      ")
 
         i"""
-            encoder${decl.id} : ${decl.id} -> Encode.Value
-            encoder${decl.id} tpe =
+            encoder${decl.name} : ${decl.name} -> Encode.Value
+            encoder${decl.name} tpe =
                case tpe of
                   $body
             """
       case other ⇒
-        val body = encodeType(other, "obj", decl.id, customTypeReplacements)
+        val body = encodeType(other, "obj", decl.name, customTypeReplacements)
 
         i"""
-            encoder${decl.id} : ${decl.id} -> Encode.Value
-            encoder${decl.id} obj = $body
+            encoder${decl.name} : ${decl.name} -> Encode.Value
+            encoder${decl.name} obj = $body
             """
     }
 
-  private def encodeSumType(aProduct: AProduct, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
-    val refName  = Ref(aProduct.name)
-    val mainType = customTypeReplacements.get(refName).map(_.newType).getOrElse(aProduct.name)
+  private def encodeSumType(prod: DeclF[Type.Prod], customTypeReplacements: Map[Ref, TypeReplacement]): String = {
+    val refName  = Ref(prod.name)
+    val mainType = customTypeReplacements.get(refName).map(_.newType).getOrElse(prod.name)
 
-    val params        = aProduct.struct.fields.map { case (name, _) ⇒ name }.mkString(" ")
-    val paramsEncoder = aProduct.struct.fields.map(encodeField(_, "", customTypeReplacements))
+    val params        = prod.tpe.fields.map(_.name).mkString(" ")
+    val paramsEncoder = prod.tpe.fields.map(encodeField(_, "", customTypeReplacements))
 
     val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"
     val bodyEncoder =
@@ -49,45 +49,24 @@ trait ElmJsonEncoder {
     tpe match {
       case r @ Ref(id) => customTypeReplacements.get(r).map(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
       case Str         => s"Encode.string $fieldName"
-      case Character   => s"Encode.string $fieldName"
-      case Num         => s"Encode.int $fieldName"
-      case Floating    => s"Encode.float $fieldName"
+      case Chr         => s"Encode.string $fieldName"
+      case Intr        => s"Encode.int $fieldName"
+      case Real        => s"Encode.float $fieldName"
       case Bool        => s"Encode.bool $fieldName"
-      case Optional(optTpe) =>
-        "Maybe.withDefault Encode.null (Maybe.map " + encodeType(
-          optTpe,
-          objectName,
-          fieldName,
-          customTypeReplacements
-        ) + ")"
-      case Array(arrTpe) =>
-        "Encode.list (List.map " + encodeType(
-          arrTpe,
-          objectName,
-          fieldName,
-          customTypeReplacements
-        ) + ")"
-      case Struct(fields) =>
-        fields
-          .map(encodeField(_, objectName, customTypeReplacements))
-          .mkString("Encode.object [ ", ", ", " ]")
-      case AProduct(_, struct) =>
-        encodeType(struct, objectName, fieldName, customTypeReplacements)
-      case _: SumOfProducts => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
+      case Opt(optTpe) =>
+        "Maybe.withDefault Encode.null (Maybe.map " + encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
+      case Arr(arrTpe)  => "Encode.list (List.map " + encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
+      case Prod(fields) => fields.map(encodeField(_, objectName, customTypeReplacements)).mkString("Encode.object [ ", ", ", " ]")
+      case _: Sum       => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
     }
 
-  private def encodeField(
-      field: (String, Type),
-      objectName: String,
-      customTypeReplacements: Map[Ref, TypeReplacement]
-  ): String = {
-    val fieldName = field._1
-
+  private def encodeField(field: Decl, objectName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val typeFieldName =
-      if (objectName.isEmpty) fieldName else s"$objectName.$fieldName"
-    val encoding = encodeType(field._2, objectName, typeFieldName, customTypeReplacements)
+      if (objectName.isEmpty) field.name else s"$objectName.${field.name}"
 
-    s"""("$fieldName", $encoding)"""
+    val encoding = encodeType(field.tpe, objectName, typeFieldName, customTypeReplacements)
+
+    s"""("${field.name}", $encoding)"""
   }
 
 }

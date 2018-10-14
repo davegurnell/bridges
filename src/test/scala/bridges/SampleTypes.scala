@@ -4,7 +4,7 @@ import java.util.{ Date, UUID }
 
 import bridges.core._
 import bridges.core.Type._
-import bridges.syntax._
+import bridges.core.syntax._
 import eu.timepit.refined.W
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.Size
@@ -78,20 +78,16 @@ object SampleTypes {
   final case object ObjectTwo extends ObjectsOnly
 
   // Custom declaration of a intermediate structure
-  val customErrorMsg = AProduct(
-    "ErrorMessage",
-    Struct(
-      "error" → Type.Ref("ErrorMessage")
+  val customErrorMsg = "ErrorMessage" := prod(
+      "error" := ref("ErrorMessage")
     )
-  )
-  val customWarningMsg = AProduct(
-    "WarningMessage",
-    Struct(
-      "warning" → Type.Ref("WarningMessage")
+
+  val customWarningMsg = "WarningMessage" := prod(
+      "warning" := ref("WarningMessage")
     )
-  )
-  val customDeclaration: Declaration =
-    "Message" := Type.SumOfProducts(customErrorMsg, customWarningMsg)
+
+  val customDeclaration: Decl =
+    "Message" := sum(customErrorMsg, customWarningMsg)
 
   final case class ClassWithRefinedType(name: RefinedString)
 }

@@ -1,67 +1,55 @@
 package bridges.core
 
+final case class DeclF[+A <: Type](name: String, tpe: A) {
+  def renameRef(from: String, to: String): DeclF[A] =
+    DeclF(
+      if (name == from) to else name,
+      tpe.renameRef(from, to).asInstanceOf[A]
+    )
+}
+
 sealed abstract class Type extends Product with Serializable {
   import Type._
 
   def renameRef(from: String, to: String): Type =
     this match {
-      case Ref(`from`)     => Ref(to)
-      case tpe: Ref        => tpe
-      case tpe @ Str       => tpe
-      case tpe @ Character => tpe
-      case tpe @ Num       => tpe
-      case tpe @ Floating  => tpe
-      case tpe @ Bool      => tpe
-      case Optional(tpe)   => Optional(tpe.renameRef(from, to))
-      case Array(tpe)      => Array(tpe.renameRef(from, to))
-      case Struct(fields)  => Struct(fields.renameRef(from, to))
-      case tpe: AProduct   => renameProduct(from, to, tpe)
-      case SumOfProducts(types) =>
-        SumOfProducts(types.map(renameProduct(from, to, _)))
+      case Ref(`from`)  => Ref(to)
+      case tpe: Ref     => tpe
+      case tpe @ Str    => tpe
+      case tpe @ Chr    => tpe
+      case tpe @ Intr   => tpe
+      case tpe @ Real   => tpe
+      case tpe @ Bool   => tpe
+      case Opt(tpe)     => Opt(tpe.renameRef(from, to))
+      case Arr(tpe)     => Arr(tpe.renameRef(from, to))
+      case Prod(fields) => Prod(fields.map(_.renameRef(from, to)))
+      case Sum(types)   => Sum(types.map(_.renameRef(from, to)))
     }
-
-  private def renameProduct(from: String, to: String, product: AProduct): AProduct = {
-    val newName       = if (product.name == from) to else product.name
-    val renamedFields = Struct(product.struct.fields.renameRef(from, to))
-    AProduct(newName, renamedFields)
-  }
 }
 
 object Type {
   final case class Ref(id: String) extends Type
+  final case object Str            extends Type
+  final case object Chr            extends Type
+  final case object Intr           extends Type
+  final case object Real           extends Type
+  final case object Bool           extends Type
+  final case class Opt(tpe: Type)  extends Type
+  final case class Arr(tpe: Type)  extends Type
 
-  final case object Str                extends Type
-  final case object Character          extends Type
-  final case object Num                extends Type
-  final case object Floating           extends Type
-  final case object Bool               extends Type
-  final case class Optional(tpe: Type) extends Type
-  final case class Array(tpe: Type)    extends Type
+  final case class Prod(fields: List[Decl]) extends Type {
+    def +:(field: Decl): Prod =
+      Prod(field +: fields)
 
-  final case class Struct(fields: List[(String, Type)]) extends Type {
-    def +:(field: (String, Type)): Struct =
-      Struct(field +: fields)
+    def :+(field: Decl): Prod =
+      Prod(fields :+ field)
   }
 
-  object Struct {
-    def apply(fields: (String, Type)*): Struct =
-      Struct(fields.toList)
-  }
+  final case class Sum(products: List[ProdDecl]) extends Type {
+    def +:(prod: ProdDecl): Sum =
+      Sum(prod +: products)
 
-  final case class AProduct(name: String, struct: Struct) extends Type
-
-  final case class SumOfProducts(types: List[AProduct]) extends Type
-
-  object SumOfProducts {
-    def apply(products: AProduct*): SumOfProducts =
-      SumOfProducts(products.toList)
-  }
-
-  implicit class TypeMapOps(types: List[(String, Type)]) {
-    def renameRef(from: String, to: String): List[(String, Type)] =
-      types.map {
-        case (name, tpe) =>
-          (name, tpe.renameRef(from, to))
-      }
+    def :+(prod: ProdDecl): Sum =
+      Sum(products :+ prod)
   }
 }

@@ -1,9 +1,11 @@
 package bridges.core
 
-import bridges.core.Type._
+import bridges.core.syntax._
 import org.scalatest._
 
 class TypeSpec extends FreeSpec with Matchers {
+  import Type._
+
   "type.renameRef" - {
     "matching Ref" in {
       val actual   = Ref("foo").renameRef("foo", "bar")
@@ -18,125 +20,55 @@ class TypeSpec extends FreeSpec with Matchers {
     }
 
     "Optional" in {
-      val actual   = Optional(Ref("foo")).renameRef("foo", "bar")
-      val expected = Optional(Ref("bar"))
+      val actual   = Opt(Ref("foo")).renameRef("foo", "bar")
+      val expected = Opt(Ref("bar"))
       actual should equal(expected)
     }
 
     "Array" in {
-      val actual   = Array(Ref("foo")).renameRef("foo", "bar")
-      val expected = Array(Ref("bar"))
+      val actual   = Arr(Ref("foo")).renameRef("foo", "bar")
+      val expected = Arr(Ref("bar"))
       actual should equal(expected)
     }
 
-    "Struct" in {
-      val actual = Struct(
-        List(
-          "a" -> Ref("foo"),
-          "b" -> Ref("baz")
-        )
+    "Prod" in {
+      val actual = prod(
+        "a" := Ref("foo"),
+        "b" := Ref("baz")
       ).renameRef("foo", "bar")
 
-      val expected = Struct(
-        List(
-          "a" -> Ref("bar"),
-          "b" -> Ref("baz")
-        )
+      val expected = prod(
+        "a" := Ref("bar"),
+        "b" := Ref("baz")
       )
 
       actual should equal(expected)
     }
 
-    "AProduct" - {
+    "Sum" - {
       "renames members " in {
-        val actual = AProduct(
-          "typeA",
-          Struct(
-            List(
-              "a" -> Ref("foo"),
-              "b" -> Ref("baz")
-            )
+        val actual = sum(
+          "typeA" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
+          ),
+          "typeB" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
           )
         ).renameRef("foo", "bar")
 
-        val expected = AProduct(
-          "typeA",
-          Struct(
+        val expected = sum(
+          "typeA" := Prod(
             List(
-              "a" -> Ref("bar"),
-              "b" -> Ref("baz")
-            )
-          )
-        )
-
-        actual should equal(expected)
-      }
-      "renames type name" in {
-        val actual = AProduct(
-          "typeA",
-          Struct(
-            List(
-              "a" -> Ref("foo"),
-              "b" -> Ref("baz")
-            )
-          )
-        ).renameRef("typeA", "typeB")
-
-        val expected = AProduct(
-          "typeB",
-          Struct(
-            List(
-              "a" -> Ref("foo"),
-              "b" -> Ref("baz")
-            )
-          )
-        )
-
-        actual should equal(expected)
-      }
-    }
-
-    "SumOfProducts" - {
-      "renames members " in {
-        val actual =
-          SumOfProducts(
-            AProduct(
-              "typeA",
-              Struct(
-                List(
-                  "a" -> Ref("foo"),
-                  "b" -> Ref("baz")
-                )
-              )
-            ),
-            AProduct(
-              "typeB",
-              Struct(
-                List(
-                  "a" -> Ref("foo"),
-                  "b" -> Ref("baz")
-                )
-              )
-            )
-          ).renameRef("foo", "bar")
-
-        val expected = SumOfProducts(
-          AProduct(
-            "typeA",
-            Struct(
-              List(
-                "a" -> Ref("bar"),
-                "b" -> Ref("baz")
-              )
+              "a" := Ref("bar"),
+              "b" := Ref("baz")
             )
           ),
-          AProduct(
-            "typeB",
-            Struct(
-              List(
-                "a" -> Ref("bar"),
-                "b" -> Ref("baz")
-              )
+          "typeB" := Prod(
+            List(
+              "a" := Ref("bar"),
+              "b" := Ref("baz")
             )
           )
         )
@@ -144,46 +76,25 @@ class TypeSpec extends FreeSpec with Matchers {
         actual should equal(expected)
       }
       "renames type name of members" in {
-        val actual =
-          SumOfProducts(
-            AProduct(
-              "typeA",
-              Struct(
-                List(
-                  "a" -> Ref("foo"),
-                  "b" -> Ref("baz")
-                )
-              )
-            ),
-            AProduct(
-              "typeA",
-              Struct(
-                List(
-                  "a" -> Ref("foo"),
-                  "b" -> Ref("baz")
-                )
-              )
-            )
-          ).renameRef("typeA", "typeC")
-
-        val expected = SumOfProducts(
-          AProduct(
-            "typeC",
-            Struct(
-              List(
-                "a" -> Ref("foo"),
-                "b" -> Ref("baz")
-              )
-            )
+        val actual = sum(
+          "typeA" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
           ),
-          AProduct(
-            "typeC",
-            Struct(
-              List(
-                "a" -> Ref("foo"),
-                "b" -> Ref("baz")
-              )
-            )
+          "typeA" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
+          )
+        ).renameRef("typeA", "typeC")
+
+        val expected = sum(
+          "typeC" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
+          ),
+          "typeC" := prod(
+            "a" := Ref("foo"),
+            "b" := Ref("baz")
           )
         )
 

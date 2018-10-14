@@ -31,19 +31,19 @@ final case class Rectangle(width: Double, height: Double, color: Color) extends 
 
 ~~~
 
-Call `declaration[Foo]` to generate a type-declaration for `Foo`.
+Call `decl[Foo]` to generate a type-declaration for `Foo`.
 Call `render[Typescript](...)` to convert a list of declarations as Typescript,
 or `render[Flow](...)` to render them as Flow types.
 
 ~~~scala
 import bridges._
-import bridges.syntax._
+import bridges.core.syntax._
 
 render(List(
-  declaration[Color],
-  declaration[Circle],
-  declaration[Rectangle],
-  declaration[Shape]
+  decl[Color],
+  decl[Circle],
+  decl[Rectangle],
+  decl[Shape]
 ))
 // res1: String =
 // export type Color = {
