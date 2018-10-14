@@ -72,7 +72,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
     val name = witness.value.name
     val head = hEnc.value.encode
     val tail = tEnc.encode
-    pureProd((name := head) +: tail)
+    pureProd(Prod((name := head) +: tail.fields))
   }
 
   implicit def cnilSumEncoder: SumEncoder[CNil] =
@@ -87,7 +87,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
     val name    = witness.value.name
     val product = hEnc.value.encode
     val tail    = tEnc.encode
-    pureSum((name := product) +: tail)
+    pureSum(Sum((name := product) +: tail.products))
   }
 
   implicit def genericProdEncoder[A, R](

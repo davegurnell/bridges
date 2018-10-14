@@ -1,11 +1,8 @@
 package bridges.core
 
 final case class DeclF[+A <: Type](name: String, tpe: A) {
-  def renameRef(from: String, to: String): DeclF[A] =
-    DeclF(
-      if (name == from) to else name,
-      tpe.renameRef(from, to).asInstanceOf[A]
-    )
+  def renameRef(from: String, to: String): Decl =
+    DeclF(if (name == from) to else name, tpe.renameRef(from, to))
 }
 
 sealed abstract class Type extends Product with Serializable {
@@ -23,33 +20,19 @@ sealed abstract class Type extends Product with Serializable {
       case Opt(tpe)     => Opt(tpe.renameRef(from, to))
       case Arr(tpe)     => Arr(tpe.renameRef(from, to))
       case Prod(fields) => Prod(fields.map(_.renameRef(from, to)))
-      case Sum(types)   => Sum(types.map(_.renameRef(from, to)))
+      case Sum(prods)   => Sum(prods.map(_.renameRef(from, to).asInstanceOf[ProdDecl]))
     }
 }
 
 object Type {
-  final case class Ref(id: String) extends Type
-  final case object Str            extends Type
-  final case object Chr            extends Type
-  final case object Intr           extends Type
-  final case object Real           extends Type
-  final case object Bool           extends Type
-  final case class Opt(tpe: Type)  extends Type
-  final case class Arr(tpe: Type)  extends Type
-
-  final case class Prod(fields: List[Decl]) extends Type {
-    def +:(field: Decl): Prod =
-      Prod(field +: fields)
-
-    def :+(field: Decl): Prod =
-      Prod(fields :+ field)
-  }
-
-  final case class Sum(products: List[ProdDecl]) extends Type {
-    def +:(prod: ProdDecl): Sum =
-      Sum(prod +: products)
-
-    def :+(prod: ProdDecl): Sum =
-      Sum(products :+ prod)
-  }
+  final case class Ref(id: String)               extends Type
+  final case object Str                          extends Type
+  final case object Chr                          extends Type
+  final case object Intr                         extends Type
+  final case object Real                         extends Type
+  final case object Bool                         extends Type
+  final case class Opt(tpe: Type)                extends Type
+  final case class Arr(tpe: Type)                extends Type
+  final case class Prod(fields: List[Decl])      extends Type
+  final case class Sum(products: List[ProdDecl]) extends Type
 }
