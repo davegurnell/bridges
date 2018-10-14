@@ -1,8 +1,8 @@
 package bridges.flow
 
 import bridges.SampleTypes._
-import bridges.core.Type._
-import bridges.core.syntax._
+import bridges.flow.FlowType._
+import bridges.flow.syntax._
 import org.scalatest._
 
 class FlowRendererSpec extends FreeSpec with Matchers {
@@ -19,7 +19,7 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "Shape" in {
-    Flow.render(decl[Shape]) shouldBe """export type Shape = ({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup);"""
+    Flow.render(decl[Shape]) shouldBe """export type Shape = { type: "Circle", radius: number, color: Color } | { type: "Rectangle", width: number, height: number, color: Color } | { type: "ShapeGroup", leftShape: Shape, rightShape: Shape };"""
   }
 
   "Alpha" in {
@@ -35,15 +35,15 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassOrObject" in {
-    Flow.render(decl[ClassOrObject]) shouldBe """export type ClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);"""
+    Flow.render(decl[ClassOrObject]) shouldBe """export type ClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };"""
   }
 
   "NestedClassOrObject" in {
-    Flow.render(decl[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);"""
+    Flow.render(decl[NestedClassOrObject]) shouldBe """export type NestedClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };"""
   }
 
   "Navigation" in {
-    Flow.render(decl[Navigation]) shouldBe """export type Navigation = ({ type: "Node" } & Node) | ({ type: "NodeList" } & NodeList);"""
+    Flow.render(decl[Navigation]) shouldBe """export type Navigation = { type: "Node", name: string, children: Navigation[] } | { type: "NodeList", all: Navigation[] };"""
   }
 
   "ClassUUID" in {
@@ -59,7 +59,7 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "ObjectsOnly" in {
-    Flow.render(decl[ObjectsOnly]) shouldBe """export type ObjectsOnly = ({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo);"""
+    Flow.render(decl[ObjectsOnly]) shouldBe """export type ObjectsOnly = { type: "ObjectOne" } | { type: "ObjectTwo" };"""
   }
 
   "Optional of Array" in {

@@ -1,28 +1,22 @@
 package bridges.core
 
-final case class DeclF[+A <: Type](name: String, tpe: A) {
-  def renameRef(from: String, to: String): Decl =
-    DeclF(if (name == from) to else name, tpe.renameRef(from, to))
-}
+import bridges.core.syntax._
 
-sealed abstract class Type extends Product with Serializable {
-  import Type._
-
-  def renameRef(from: String, to: String): Type =
-    this match {
-      case Ref(`from`)  => Ref(to)
-      case tpe: Ref     => tpe
-      case tpe @ Str    => tpe
-      case tpe @ Chr    => tpe
-      case tpe @ Intr   => tpe
-      case tpe @ Real   => tpe
-      case tpe @ Bool   => tpe
-      case Opt(tpe)     => Opt(tpe.renameRef(from, to))
-      case Arr(tpe)     => Arr(tpe.renameRef(from, to))
-      case Prod(fields) => Prod(fields.map(_.renameRef(from, to)))
-      case Sum(prods)   => Sum(prods.map(_.renameRef(from, to).asInstanceOf[ProdDecl]))
-    }
-}
+/** Representation of a nominal, sum-of-products style type.
+  *
+  * We can encode Scala ADTs to this representation:
+  *
+  *  - sealed traits become instances of Sum;
+  *  - case classes become instances of Prod;
+  *  - references to other types in the body of a Sum or Prod become Refs;
+  *  - we have special encodings for Options and sequences
+  * (which are normally handled specially in the target language).
+  *
+  * We can generate Elm bindings directly from this representation.
+  * For Flow and Typescript bindings we
+  * translate to other intermediate representations.
+  */
+sealed abstract class Type extends Product with Serializable
 
 object Type {
   final case class Ref(id: String)               extends Type
@@ -35,4 +29,28 @@ object Type {
   final case class Arr(tpe: Type)                extends Type
   final case class Prod(fields: List[Decl])      extends Type
   final case class Sum(products: List[ProdDecl]) extends Type
+
+  implicit private val prodRename: Rename[Prod] =
+    Rename.pure { (tpe, from, to) =>
+      tpe match {
+        case Prod(fields) => Prod(fields.map(_.rename(from, to)))
+      }
+    }
+
+  implicit val rename: Rename[Type] =
+    Rename.pure { (tpe, from, to) =>
+      tpe match {
+        case Ref(`from`)   => Ref(to)
+        case tpe: Ref      => tpe
+        case tpe @ Str     => tpe
+        case tpe @ Chr     => tpe
+        case tpe @ Intr    => tpe
+        case tpe @ Real    => tpe
+        case tpe @ Bool    => tpe
+        case Opt(tpe)      => Opt(tpe.rename(from, to))
+        case Arr(tpe)      => Arr(tpe.rename(from, to))
+        case Prod(fields)  => Prod(fields.map(_.rename(from, to)))
+        case Sum(products) => Sum(products.map(_.rename(from, to)))
+      }
+    }
 }

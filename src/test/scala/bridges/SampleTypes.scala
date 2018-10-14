@@ -79,11 +79,11 @@ object SampleTypes {
 
   // Custom declaration of a intermediate structure
   val customErrorMsg = "ErrorMessage" := prod(
-      "error" := ref("ErrorMessage")
+      "error" := Ref("ErrorMessage")
     )
 
   val customWarningMsg = "WarningMessage" := prod(
-      "warning" := ref("WarningMessage")
+      "warning" := Ref("WarningMessage")
     )
 
   val customDeclaration: Decl =

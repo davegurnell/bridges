@@ -1,8 +1,8 @@
 package bridges.core
 
-trait Renderer {
-  def render(decl: Decl): String
+trait Renderer[A] {
+  def render(decl: DeclF[A]): String
 
-  def render(decls: List[Decl]): String =
+  def render(decls: List[DeclF[A]]): String =
     decls.map(render).mkString("\n\n")
 }

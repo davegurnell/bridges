@@ -2,11 +2,10 @@ package bridges.elm
 
 import bridges.core._
 import bridges.core.Type._
-import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
 
-trait ElmRenderer {
-
-  def render(decl: Decl): String = render(decl, Map.empty)
+trait ElmRenderer extends Renderer[Type] {
+  def render(decl: Decl): String =
+    render(decl, Map.empty)
 
   def render(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     decl.tpe match {
@@ -34,8 +33,7 @@ trait ElmRenderer {
       case Opt(optTpe)  => "(Maybe " + renderType(optTpe, customTypeReplacements) + ")"
       case Arr(arrTpe)  => "(List " + renderType(arrTpe, customTypeReplacements) + ")"
       case Prod(fields) => fields.map(renderField(_, customTypeReplacements)).mkString("{ ", ", ", " }")
-      // case AProduct(_, struct) => renderType(struct, customTypeReplacements)
-      case _: Sum => throw new IllegalArgumentException("SumOfProducts Renderer: we should never be here")
+      case _: Sum       => throw new IllegalArgumentException("SumOfProducts Renderer: we should never be here")
     }
 
   private def renderField(field: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String =
