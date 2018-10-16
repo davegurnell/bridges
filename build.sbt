@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
 
 enablePlugins(GitVersioning)
 
-git.baseVersion := "0.8.1"
+git.baseVersion := "0.10.0"
 
 val ReleaseTag = """^([\d\.]+)$""".r
 
