@@ -1,92 +1,119 @@
 package bridges.core
 
-import bridges.core.Type._
+import bridges.core.syntax._
 import org.scalatest._
 
 class TypeSpec extends FreeSpec with Matchers {
-  "type.renameRef" - {
+  import Type._
+
+  def t[A <: Type](a: A): Type = a
+
+  "type.rename" - {
     "matching Ref" in {
-      val actual   = Ref("foo").renameRef("foo", "bar")
-      val expected = Ref("bar")
+      val actual   = t(Ref("foo")).rename("foo", "bar")
+      val expected = t(Ref("bar"))
       actual should equal(expected)
     }
 
     "non-matching Ref" in {
-      val actual   = Ref("baz").renameRef("foo", "bar")
-      val expected = Ref("baz")
-      actual should equal(expected)
-    }
-
-    "StrLiteral" in {
-      val actual   = StrLiteral("foo").renameRef("foo", "bar")
-      val expected = StrLiteral("foo")
+      val actual   = t(Ref("baz")).rename("foo", "bar")
+      val expected = t(Ref("baz"))
       actual should equal(expected)
     }
 
     "Optional" in {
-      val actual   = Optional(Ref("foo")).renameRef("foo", "bar")
-      val expected = Optional(Ref("bar"))
+      val actual   = t(Opt(Ref("foo"))).rename("foo", "bar")
+      val expected = t(Opt(Ref("bar")))
       actual should equal(expected)
     }
 
     "Array" in {
-      val actual   = Array(Ref("foo")).renameRef("foo", "bar")
-      val expected = Array(Ref("bar"))
+      val actual   = t(Arr(Ref("foo"))).rename("foo", "bar")
+      val expected = t(Arr(Ref("bar")))
       actual should equal(expected)
     }
 
-    "Struct" in {
-      val actual = Struct(
-        List(
-          "a" -> Ref("foo"),
-          "b" -> Ref("baz")
+    "Prod" in {
+      val actual = t(
+        prod(
+          "a" := Ref("foo"),
+          "b" := Ref("baz")
         )
-      ).renameRef("foo", "bar")
+      ).rename("foo", "bar")
 
-      val expected = Struct(
-        List(
-          "a" -> Ref("bar"),
-          "b" -> Ref("baz")
+      val expected = t(
+        prod(
+          "a" := Ref("bar"),
+          "b" := Ref("baz")
         )
       )
 
       actual should equal(expected)
     }
 
-    "Intersection" in {
-      val actual = Intersection(
-        Struct(
-          List(
-            "a" -> Ref("foo"),
-            "b" -> Ref("baz")
+    "Sum" - {
+      "renames members " in {
+        val actual = t(
+          sum(
+            "typeA" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            ),
+            "typeB" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            )
           )
-        ),
-        Ref("foo"),
-        Struct(
-          List(
-            "a" -> Ref("foo"),
-            "b" -> Ref("baz")
+        ).rename("foo", "bar")
+
+        val expected = t(
+          sum(
+            "typeA" := Prod(
+              List(
+                "a" := Ref("bar"),
+                "b" := Ref("baz")
+              )
+            ),
+            "typeB" := Prod(
+              List(
+                "a" := Ref("bar"),
+                "b" := Ref("baz")
+              )
+            )
           )
         )
-      ).renameRef("foo", "bar")
 
-      val expected = Intersection(
-        Struct(
-          List(
-            "a" -> Ref("bar"),
-            "b" -> Ref("baz")
+        actual should equal(expected)
+      }
+      "renames type name of members" in {
+        val actual = t(
+          sum(
+            "typeA" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            ),
+            "typeA" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            )
           )
-        ),
-        Ref("bar"),
-        Struct(
-          List(
-            "a" -> Ref("bar"),
-            "b" -> Ref("baz")
+        ).rename("typeA", "typeC")
+
+        val expected = t(
+          sum(
+            "typeC" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            ),
+            "typeC" := prod(
+              "a" := Ref("foo"),
+              "b" := Ref("baz")
+            )
           )
         )
-      )
 
-      actual should equal(expected)
+        actual should equal(expected)
+      }
     }
   }
 }
