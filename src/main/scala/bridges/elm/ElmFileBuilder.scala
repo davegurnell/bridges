@@ -6,17 +6,17 @@ import unindent._
 
 trait ElmFileBuilder {
   // Given a declaration, returns a tuple with file name and file contents:
-  def buildFile(module: String, decl: Declaration, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): (String, String) =
+  def buildFile(module: String, decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): (String, String) =
     buildFile(module, List(decl), customTypeReplacements)
 
-  def buildFile(module: String, decls: List[Declaration], customTypeReplacements: Map[Ref, TypeReplacement]): (String, String) = {
-    val fileName = decls.headOption.map(_.id).getOrElse("")
+  def buildFile(module: String, decls: List[Decl], customTypeReplacements: Map[Ref, TypeReplacement]): (String, String) = {
+    val fileName = decls.headOption.map(_.name).getOrElse("")
     val foldZero = ("", "", "")
 
-    val typesInFile      = decls.map(_.id)
+    val typesInFile      = decls.map(_.name)
     val replacementTypes = customTypeReplacements.keySet
     val typeImports = decls
-      .flatMap(d ⇒ getDeclarationTypes(d.tpe, d.id))
+      .flatMap(d ⇒ getDeclarationTypes(d.tpe, d.name))
       .distinct
       .filterNot(r ⇒ typesInFile.contains(r.id) || replacementTypes.contains(r))
       .map(r ⇒ s"import $module.${r.id} exposing (..)")
@@ -60,7 +60,7 @@ trait ElmFileBuilder {
   private def getFileComponents(
       module: String,
       customTypeReplacements: Map[Ref, TypeReplacement],
-      decl: Declaration
+      decl: Decl
   ): (String, String, String) = {
     val declaration = Elm.render(decl, customTypeReplacements)
     val decoder     = Elm.decoder(decl, customTypeReplacements)
@@ -72,14 +72,12 @@ trait ElmFileBuilder {
   private def getDeclarationTypes(tpe: Type, parentType: String): List[Ref] = {
     def getIncludeTypes(tpe: Type): List[Ref] =
       tpe match {
-        case r @ Ref(_)       => r :: Nil
-        case Optional(optTpe) => getIncludeTypes(optTpe)
-        case Array(arrTpe)    => getIncludeTypes(arrTpe)
-        case Struct(fields)   => fields.map(_._2).flatMap(getIncludeTypes)
-        case Union(uTpe)      => uTpe.flatMap(getIncludeTypes)
-        case Intersection(_, _, fields) =>
-          fields.fields.map(_._2).flatMap(getIncludeTypes)
-        case _ ⇒ Nil
+        case r @ Ref(_)    => r :: Nil
+        case Opt(optTpe)   => getIncludeTypes(optTpe)
+        case Arr(arrTpe)   => getIncludeTypes(arrTpe)
+        case Prod(fields)  => fields.map(_.tpe).flatMap(getIncludeTypes)
+        case Sum(products) => products.map(_.tpe).flatMap(getIncludeTypes)
+        case _             => Nil
       }
 
     val exclude = Ref(parentType)
