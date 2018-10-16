@@ -1,8 +1,8 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
 
-scalaVersion       in ThisBuild := "2.12.6"
-crossScalaVersions in ThisBuild := Seq("2.12.6")
+scalaVersion       in ThisBuild := "2.12.7"
+crossScalaVersions in ThisBuild := Seq("2.12.7")
 
 scalacOptions ++= Seq(
   "-feature",
