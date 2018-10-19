@@ -3,57 +3,57 @@ package bridges.elm
 import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.core._
-import bridges.syntax._
+import bridges.core.syntax._
 import org.scalatest._
 
 class ElmRendererSpec extends FreeSpec with Matchers {
   "Color" in {
-    Elm.render(declaration[Color]) shouldBe "type alias Color = { red: Int, green: Int, blue: Int }"
+    Elm.render(decl[Color]) shouldBe "type alias Color = { red: Int, green: Int, blue: Int }"
   }
 
   "Circle" in {
-    Elm.render(declaration[Circle]) shouldBe "type alias Circle = { radius: Float, color: Color }"
+    Elm.render(decl[Circle]) shouldBe "type alias Circle = { radius: Float, color: Color }"
   }
 
   "Rectangle" in {
-    Elm.render(declaration[Rectangle]) shouldBe "type alias Rectangle = { width: Float, height: Float, color: Color }"
+    Elm.render(decl[Rectangle]) shouldBe "type alias Rectangle = { width: Float, height: Float, color: Color }"
   }
 
   "Shape" in {
-    Elm.render(declaration[Shape]) shouldBe """type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape"""
+    Elm.render(decl[Shape]) shouldBe """type Shape = Circle Float Color | Rectangle Float Float Color | ShapeGroup Shape Shape"""
   }
 
   "Alpha" in {
-    Elm.render(declaration[Alpha]) shouldBe "type alias Alpha = { name: String, char: Char, bool: Bool }"
+    Elm.render(decl[Alpha]) shouldBe "type alias Alpha = { name: String, char: Char, bool: Bool }"
   }
 
   "ArrayClass" in {
-    Elm.render(declaration[ArrayClass]) shouldBe """type alias ArrayClass = { aList: (List String), optField: (Maybe Float) }"""
+    Elm.render(decl[ArrayClass]) shouldBe """type alias ArrayClass = { aList: (List String), optField: (Maybe Float) }"""
   }
 
   "Numeric" in {
-    Elm.render(declaration[Numeric]) shouldBe """type alias Numeric = { double: Float, float: Float, int: Int }"""
+    Elm.render(decl[Numeric]) shouldBe """type alias Numeric = { double: Float, float: Float, int: Int }"""
   }
 
   "ClassOrObject" in {
-    Elm.render(declaration[ClassOrObject]) shouldBe """type ClassOrObject = MyClass Int | MyObject"""
+    Elm.render(decl[ClassOrObject]) shouldBe """type ClassOrObject = MyClass Int | MyObject"""
   }
 
   "NestedClassOrObject" in {
-    Elm.render(declaration[NestedClassOrObject]) shouldBe """type NestedClassOrObject = MyClass Int | MyObject"""
+    Elm.render(decl[NestedClassOrObject]) shouldBe """type NestedClassOrObject = MyClass Int | MyObject"""
   }
 
   "Navigation" in {
-    Elm.render(declaration[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
+    Elm.render(decl[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
   }
 
   "ExternalReferences" in {
-    Elm.render(declaration[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
+    Elm.render(decl[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
   }
 
   "ClassUUID" - {
     "Without any specific override" in {
-      Elm.render(declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: UUID }"""
+      Elm.render(decl[ClassUUID]) shouldBe """type alias ClassUUID = { a: UUID }"""
     }
 
     "providing a type override map" in {
@@ -61,20 +61,20 @@ class ElmRendererSpec extends FreeSpec with Matchers {
         Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
       )
 
-      Elm.render(declaration[ClassUUID], customTypeReplacements) shouldBe """type alias ClassUUID = { a: Uuid }"""
+      Elm.render(decl[ClassUUID], customTypeReplacements) shouldBe """type alias ClassUUID = { a: Uuid }"""
     }
 
     "using override to treat UUID as a String" in {
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)
 
-      Elm.render(declaration[ClassUUID]) shouldBe """type alias ClassUUID = { a: String }"""
+      Elm.render(decl[ClassUUID]) shouldBe """type alias ClassUUID = { a: String }"""
     }
   }
 
   "ClassDate" - {
     "Without any specific override" in {
-      Elm.render(declaration[ClassDate]) shouldBe """type alias ClassDate = { a: Date }"""
+      Elm.render(decl[ClassDate]) shouldBe """type alias ClassDate = { a: Date }"""
     }
 
     "providing a type override map" in {
@@ -82,24 +82,24 @@ class ElmRendererSpec extends FreeSpec with Matchers {
         Ref("Date") → TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
       )
 
-      Elm.render(declaration[ClassDate], customTypeReplacements) shouldBe """type alias ClassDate = { a: Date }"""
+      Elm.render(decl[ClassDate], customTypeReplacements) shouldBe """type alias ClassDate = { a: Date }"""
     }
 
     "using override to treat Date as a String" in {
       implicit val dateEncoder: BasicEncoder[java.util.Date] =
         Encoder.pure(Str)
 
-      Elm.render(declaration[ClassDate]) shouldBe """type alias ClassDate = { a: String }"""
+      Elm.render(decl[ClassDate]) shouldBe """type alias ClassDate = { a: String }"""
     }
   }
 
   "ObjectsOnly" in {
-    Elm.render(declaration[ObjectsOnly]) shouldBe """type ObjectsOnly = ObjectOne | ObjectTwo"""
+    Elm.render(decl[ObjectsOnly]) shouldBe """type ObjectsOnly = ObjectOne | ObjectTwo"""
   }
 
   "ClassWithRefinedType" in {
     import eu.timepit.refined.shapeless.typeable._
 
-    Elm.render(declaration[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
+    Elm.render(decl[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
   }
 }

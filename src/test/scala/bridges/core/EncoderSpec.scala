@@ -2,28 +2,28 @@ package bridges.core
 
 import bridges.SampleTypes._
 import bridges.core.Type._
-import bridges.syntax._
+import bridges.core.syntax._
 import org.scalatest._
 
 class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
-      encode[Char] should be(Character)
-      encode[Int] should be(Num)
-      encode[Float] should be(Floating)
-      encode[Double] should be(Floating)
+      encode[Char] should be(Chr)
+      encode[Int] should be(Intr)
+      encode[Float] should be(Real)
+      encode[Double] should be(Real)
       encode[Boolean] should be(Bool)
     }
 
     "options" in {
-      encode[Option[String]] should be(Optional(Str))
-      encode[Option[Int]] should be(Optional(Num))
+      encode[Option[String]] should be(Opt(Str))
+      encode[Option[Int]] should be(Opt(Intr))
     }
 
     "sequences" in {
-      encode[Seq[String]] should be(Array(Str))
-      encode[Set[Set[Int]]] should be(Array(Array(Num)))
+      encode[Seq[String]] should be(Arr(Str))
+      encode[Set[Set[Int]]] should be(Arr(Arr(Intr)))
     }
 
     "value classes" in {
@@ -31,40 +31,53 @@ class EncoderSpec extends FreeSpec with Matchers {
     }
 
     "a class with UUID member" in {
-      encode[ClassUUID] should be(Struct("a" -> Ref("UUID")))
+      encode[ClassUUID] should be(
+        prod(
+          "a" := Ref("UUID")
+        )
+      )
     }
 
     "a class with Date member" in {
-      encode[ClassDate] should be(Struct("a" -> Ref("Date")))
+      encode[ClassDate] should be(
+        prod(
+          "a" := Ref("Date")
+        )
+      )
     }
 
     "case classes" in {
-      encode[Pair] should be(Struct("a" -> Str, "b" -> Num))
+      encode[Pair] should be(
+        prod(
+          "a" := Str,
+          "b" := Intr
+        )
+      )
     }
 
     "sealed types" in {
       encode[OneOrOther] should be(
-        discUnion(
-          ("One", Ref("One"), Struct("value"     -> Str)),
-          ("Other", Ref("Other"), Struct("value" -> Num))
+        sum(
+          "One" := prod("value" := Str),
+          "Other" := prod("value" := Intr)
         )
       )
     }
 
     "sealed types with objects" in {
       encode[ClassOrObject] should be(
-        discUnion(
-          ("MyClass", Ref("MyClass"), Struct("value" → Num)),
-          ("MyObject", Ref("MyObject"), Struct(Nil))
+        sum(
+          "MyClass" := prod("value" := Intr),
+          "MyObject" := prod()
         )
       )
     }
 
     "sealed types with objects in nested objects" in {
       encode[NestedClassOrObject] should be(
-        discUnion(
-          ("MyClass", Ref("MyClass"), Struct("value" → Num)),
-          ("MyObject", Ref("MyObject"), Struct(Nil))
+        sum(
+          "MyClass" := prod("value" := Intr),
+          "MyObject" := prod()
         )
       )
     }
@@ -74,114 +87,136 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[One] should be(Str)
+
       encode[OneOrOther] should be(
-        discUnion(
-          ("One", Str, Struct("value"            → Str)),
-          ("Other", Ref("Other"), Struct("value" → Num))
+        sum(
+          "One" := prod("value" := Str),
+          "Other" := prod("value" := Intr)
         )
       )
     }
 
     "sealed types with intermediate types and indirect recursion" in {
       encode[Shape] should be(
-        discUnion(
-          (
-            "Circle",
-            Ref("Circle"),
-            Struct("radius" -> Floating, "color" -> Ref("Color"))
+        sum(
+          "Circle" := prod(
+            "radius" := Real,
+            "color" := Ref("Color")
           ),
-          (
-            "Rectangle",
-            Ref("Rectangle"),
-            Struct(
-              "width"  -> Floating,
-              "height" -> Floating,
-              "color"  -> Ref("Color")
-            )
+          "Rectangle" := prod(
+            "width" := Real,
+            "height" := Real,
+            "color" := Ref("Color")
           ),
-          (
-            "ShapeGroup",
-            Ref("ShapeGroup"),
-            Struct("leftShape" -> Ref("Shape"), "rightShape" -> Ref("Shape"))
+          "ShapeGroup" := prod(
+            "leftShape" := Ref("Shape"),
+            "rightShape" := Ref("Shape")
           )
         )
       )
+
       encode[Circle] should be(
-        Struct("radius" -> Floating, "color" -> Ref("Color"))
-      )
-      encode[Rectangle] should be(
-        Struct(
-          "width"  -> Floating,
-          "height" -> Floating,
-          "color"  -> Ref("Color")
+        prod(
+          "radius" := Real,
+          "color" := Ref("Color")
         )
       )
+
+      encode[Rectangle] should be(
+        prod(
+          "width" := Real,
+          "height" := Real,
+          "color" := Ref("Color")
+        )
+      )
+
       encode[ShapeGroup] should be(
-        Struct("leftShape" -> Ref("Shape"), "rightShape" -> Ref("Shape"))
+        prod(
+          "leftShape" := Ref("Shape"),
+          "rightShape" := Ref("Shape")
+        )
       )
     }
 
     "recursive types with direct recursion on same type" in {
       encode[Navigation] should be(
-        discUnion(
-          (
-            "Node",
-            Ref("Node"),
-            Struct("name" -> Str, "children" -> Array(Ref("Navigation")))
+        sum(
+          "Node" := prod(
+            "name" := Str,
+            "children" := Arr(Ref("Navigation"))
           ),
-          (
-            "NodeList",
-            Ref("NodeList"),
-            Struct("all" -> Array(Ref("Navigation")))
+          "NodeList" := prod(
+            "all" := Arr(Ref("Navigation"))
           )
         )
       )
-      encode[NodeList] should be(Struct("all" -> Array(Ref("Navigation"))))
+
+      encode[NodeList] should be(
+        prod(
+          "all" := Arr(Ref("Navigation"))
+        )
+      )
+
       encode[Node] should be(
-        Struct("name" -> Str, "children" -> Array(Ref("Navigation")))
+        prod(
+          "name" := Str,
+          "children" := Arr(Ref("Navigation"))
+        )
       )
     }
 
     "types with specific parameters" in {
       encode[Alpha] should be(
-        Struct("name" -> Str, "char" -> Character, "bool" → Bool)
+        prod(
+          "name" := Str,
+          "char" := Chr,
+          "bool" := Bool
+        )
       )
+
       encode[ArrayClass] should be(
-        Struct("aList" -> Array(Str), "optField" -> Optional(Floating))
+        prod(
+          "aList" := Arr(Str),
+          "optField" := Opt(Real)
+        )
       )
       encode[Numeric] should be(
-        Struct("double" -> Floating, "float" -> Floating, "int" → Num)
+        prod(
+          "double" := Real,
+          "float" := Real,
+          "int" := Intr
+        )
       )
     }
 
     "class that references other case classes" in {
       encode[ExternalReferences] should be(
-        Struct("color" -> Ref("Color"), "nav" -> Ref("Navigation"))
+        prod(
+          "color" := Ref("Color"),
+          "nav" := Ref("Navigation")
+        )
       )
     }
 
     "pure objects ADT" in {
       encode[ObjectsOnly] should be(
-        discUnion(
-          (
-            "ObjectOne",
-            Ref("ObjectOne"),
-            Struct()
-          ),
-          (
-            "ObjectTwo",
-            Ref("ObjectTwo"),
-            Struct()
-          )
+        sum(
+          "ObjectOne" := prod(),
+          "ObjectTwo" := prod()
         )
       )
     }
 
     "refined types and class containing them" in {
       encode[RefinedString] should be(Str)
-      encode[RefinedInt] should be(Num)
-      encode[RefinedChar] should be(Character)
-      encode[ClassWithRefinedType] should be(Struct("name" -> Str))
+      encode[RefinedInt] should be(Intr)
+      encode[RefinedChar] should be(Chr)
+
+      //Note that the import is required or it fails!
+      import eu.timepit.refined.shapeless.typeable._
+      encode[ClassWithRefinedType] should be(
+        prod("name" := Str)
+      )
     }
 
     "we can override uuid as string" in {
@@ -189,25 +224,32 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[ClassUUID] should be(
-        Struct("a" -> Str)
+        prod("a" := Str)
       )
     }
   }
 
-  "declaration[A]" - {
+  "decl[A]" - {
     "value classes" in {
-      declaration[Value] should be("Value" := Str)
+      decl[Value] should be(
+        "Value" := Str
+      )
     }
 
     "case classes" in {
-      declaration[Pair] should be("Pair" := Struct("a" -> Str, "b" -> Num))
+      decl[Pair] should be(
+        "Pair" := prod(
+          "a" := Str,
+          "b" := Intr
+        )
+      )
     }
 
     "sealed types" in {
-      declaration[OneOrOther] should be(
-        "OneOrOther" := discUnion(
-          ("One", Ref("One"), Struct("value"     → Str)),
-          ("Other", Ref("Other"), Struct("value" → Num))
+      decl[OneOrOther] should be(
+        "OneOrOther" := sum(
+          "One" := prod("value" := Str),
+          "Other" := prod("value" := Intr)
         )
       )
     }
@@ -217,19 +259,27 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[One] should be(Str)
-      declaration[OneOrOther] should be(
-        "OneOrOther" := discUnion(
-          ("One", Str, Struct("value"            → Str)),
-          ("Other", Ref("Other"), Struct("value" → Num))
+
+      decl[OneOrOther] should be(
+        "OneOrOther" := sum(
+          "One" := prod(
+            "value" := Str
+          ),
+          "Other" := prod(
+            "value" := Intr
+          )
         )
       )
     }
 
     "class with refined type" in {
+      // Note that the import is required or it fails!
       import eu.timepit.refined.shapeless.typeable._
 
-      declaration[ClassWithRefinedType] should be(
-        "ClassWithRefinedType" := Struct("name" -> Str)
+      decl[ClassWithRefinedType] should be(
+        "ClassWithRefinedType" := prod(
+          "name" := Str
+        )
       )
     }
   }
