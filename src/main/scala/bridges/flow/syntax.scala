@@ -6,14 +6,14 @@ import shapeless.{ Lazy, Typeable }
 object syntax extends RenamableSyntax {
   import FlowType._
 
-  def encode[A: Encoder]: FlowType =
-    from(Encoder[A].encode)
+  def encode[A](implicit encoder: FlowEncoder[A]): FlowType =
+    encoder.encode
 
   def typeName[A](implicit typeable: Typeable[A]): String =
     typeable.describe.takeWhile(c ⇒ c != '[' && c != '.').mkString
 
-  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): FlowDecl =
-    DeclF(typeName[A], encoder.value.encode).map(FlowType.from)
+  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[FlowEncoder[A]]): FlowDecl =
+    DeclF(typeName[A], encoder.value.encode)
 
   def struct(fields: FlowDecl*): FlowType =
     Struct(fields.toList)

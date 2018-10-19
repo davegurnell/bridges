@@ -63,10 +63,18 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "Optional of Array" in {
-    Flow.render("Foo" := Opt(Arr(Str))) shouldBe """export type Foo = ?string[];"""
+    Flow.render("Foo" := Arr(Str).?) shouldBe """export type Foo = ?string[];"""
   }
 
   "Array of Optional" in {
-    Flow.render("Foo" := Arr(Opt(Str))) shouldBe """export type Foo = (?string)[];"""
+    Flow.render("Foo" := Arr(Str.?)) shouldBe """export type Foo = (?string)[];"""
+  }
+
+  "Union of Union" in {
+    Flow.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe """export type A = B | C | D;"""
+  }
+
+  "Inter of Inter" in {
+    Flow.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe """export type A = B & C & D;"""
   }
 }

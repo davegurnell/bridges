@@ -34,6 +34,12 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit val intEncoder: BasicEncoder[Int] =
     pure(Intr)
 
+  implicit val longEncoder: Encoder[Long] =
+    pure(Intr)
+
+  implicit val bigDecimalEncoder: Encoder[BigDecimal] =
+    pure(Intr)
+
   implicit val doubleEncoder: BasicEncoder[Double] =
     pure(Real)
 

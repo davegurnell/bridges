@@ -6,14 +6,14 @@ import shapeless.{ Lazy, Typeable }
 object syntax extends RenamableSyntax {
   import TsType._
 
-  def encode[A: Encoder]: TsType =
-    from(Encoder[A].encode)
+  def encode[A](implicit encoder: TsEncoder[A]): TsType =
+    encoder.encode
 
   def typeName[A](implicit typeable: Typeable[A]): String =
     typeable.describe.takeWhile(c ⇒ c != '[' && c != '.').mkString
 
-  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): TsDecl =
-    DeclF(typeName[A], encoder.value.encode).map(TsType.from)
+  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[TsEncoder[A]]): TsDecl =
+    DeclF(typeName[A], encoder.value.encode)
 
   def struct(fields: TsDecl*): Struct =
     Struct(fields.toList)
