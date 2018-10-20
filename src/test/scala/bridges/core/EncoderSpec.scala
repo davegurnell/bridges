@@ -198,6 +198,22 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
 
+    "mutually recursive types" in {
+      encode[TypeOne] should be(
+        prod(
+          "name" := Str,
+          "values" := Arr(Ref("TypeTwo"))
+        )
+      )
+
+      encode[TypeTwo] should be(
+        sum(
+         "OptionOne" := prod("value" := Intr),
+         "OptionTwo" := prod("value" := Ref("TypeOne"))
+        )
+      )
+    }
+
     "pure objects ADT" in {
       encode[ObjectsOnly] should be(
         sum(
