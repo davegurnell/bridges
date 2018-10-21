@@ -186,6 +186,22 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
     }
   }
 
+  "Recursive" in {
+    Elm.encoder(decl[Recursive]) shouldBe
+    i"""
+      encoderRecursive : Recursive -> Encode.Value
+      encoderRecursive obj = Encode.object [ ("head", Encode.int obj.head), ("tail", Maybe.withDefault Encode.null (Maybe.map encoderRecursive obj.tail)) ]
+      """
+  }
+
+  "Recursive2" in {
+    Elm.encoder(decl[Recursive2]) shouldBe
+    i"""
+      encoderRecursive2 : Recursive2 -> Encode.Value
+      encoderRecursive2 obj = Encode.object [ ("head", Encode.int obj.head), ("tail", Encode.list (List.map encoderRecursive2 obj.tail)) ]
+      """
+  }
+
   "ObjectsOnly" in {
     Elm.encoder(decl[ObjectsOnly]) shouldBe
     i"""

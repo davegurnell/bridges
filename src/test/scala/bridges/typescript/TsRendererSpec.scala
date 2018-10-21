@@ -1,7 +1,6 @@
 package bridges.typescript
 
 import bridges.SampleTypes._
-import bridges.typescript._
 import bridges.typescript.syntax._
 import org.scalatest._
 
@@ -52,6 +51,14 @@ class TsRendererSpec extends FreeSpec with Matchers {
 
   "ClassDate" in {
     Typescript.render(decl[ClassDate]) shouldBe """export type ClassDate = { a: Date };"""
+  }
+
+  "Recursive" in {
+    Typescript.render(decl[Recursive]) shouldBe """export type Recursive = { head: number, tail: Recursive | null };"""
+  }
+
+  "Recursive2" in {
+    Typescript.render(decl[Recursive2]) shouldBe """export type Recursive2 = { head: number, tail: Recursive2[] };"""
   }
 
   "ExternalReferences" in {

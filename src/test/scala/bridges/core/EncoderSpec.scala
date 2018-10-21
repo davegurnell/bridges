@@ -4,6 +4,7 @@ import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.core.syntax._
 import org.scalatest._
+import shapeless.{ Generic, LabelledGeneric, TypeCase, Typeable }
 
 class EncoderSpec extends FreeSpec with Matchers {
   "encode[A]" - {
@@ -208,8 +209,24 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       encode[TypeTwo] should be(
         sum(
-         "OptionOne" := prod("value" := Intr),
-         "OptionTwo" := prod("value" := Ref("TypeOne"))
+          "OptionOne" := prod("value" := Intr),
+          "OptionTwo" := prod("value" := Ref("TypeOne"))
+        )
+      )
+    }
+
+    "self-recursive type" in {
+      encode[Recursive] should be(
+        prod(
+          "head" := Intr,
+          "tail" := Opt(Ref("Recursive"))
+        )
+      )
+
+      encode[Recursive2] should be(
+        prod(
+          "head" := Intr,
+          "tail" := Arr(Ref("Recursive2"))
         )
       )
     }

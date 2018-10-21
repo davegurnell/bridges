@@ -1,7 +1,9 @@
 package bridges.typescript
 
 import bridges.core.{ DeclF, Encoder, RenamableSyntax }
-import shapeless.{ Lazy, Typeable }
+import bridges.core.syntax.getCleanTagName
+import shapeless.Lazy
+import scala.reflect.runtime.universe.WeakTypeTag
 
 object syntax extends RenamableSyntax {
   import TsType._
@@ -9,11 +11,8 @@ object syntax extends RenamableSyntax {
   def encode[A: Encoder]: TsType =
     from(Encoder[A].encode)
 
-  def typeName[A](implicit typeable: Typeable[A]): String =
-    typeable.describe.takeWhile(c ⇒ c != '[' && c != '.').mkString
-
-  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[Encoder[A]]): TsDecl =
-    DeclF(typeName[A], encoder.value.encode).map(TsType.from)
+  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[Encoder[A]]): TsDecl =
+    DeclF(getCleanTagName[A], encoder.value.encode).map(TsType.from)
 
   def struct(fields: TsDecl*): Struct =
     Struct(fields.toList)
