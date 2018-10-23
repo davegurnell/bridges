@@ -179,7 +179,7 @@ We use the [git flow](https://github.com/nvie/gitflow) branching model:
 
 Travis is configured to publish as follows:
 
-- releases from release tags woth the format `x.y.z`;
+- releases from release tags with the format `x.y.z`;
 - snapshots from non-PR commits to `develop`.
 
 The `git.baseVersion` line in `build.sbt` should be
