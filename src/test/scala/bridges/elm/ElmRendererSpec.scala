@@ -47,6 +47,19 @@ class ElmRendererSpec extends FreeSpec with Matchers {
     Elm.render(decl[Navigation]) shouldBe """type Navigation = Node String (List Navigation) | NodeList (List Navigation)"""
   }
 
+  "TypeOne and TypeTwo" in {
+    Elm.render(decl[TypeOne]) shouldBe """type alias TypeOne = { name: String, values: (List TypeTwo) }"""
+    Elm.render(decl[TypeTwo]) shouldBe """type TypeTwo = OptionOne Int | OptionTwo TypeOne"""
+  }
+
+  "Recursive" in {
+    Elm.render(decl[Recursive]) shouldBe """type alias Recursive = { head: Int, tail: (Maybe Recursive) }"""
+  }
+
+  "Recursive2" in {
+    Elm.render(decl[Recursive2]) shouldBe """type alias Recursive2 = { head: Int, tail: (List Recursive2) }"""
+  }
+
   "ExternalReferences" in {
     Elm.render(decl[ExternalReferences]) shouldBe """type alias ExternalReferences = { color: Color, nav: Navigation }"""
   }

@@ -3,6 +3,7 @@ package bridges.core
 import bridges.core.syntax._
 import eu.timepit.refined.api._
 import scala.language.higherKinds
+import scala.reflect.runtime.universe.WeakTypeTag
 import shapeless._
 import shapeless.labelled.FieldType
 
@@ -116,10 +117,10 @@ trait EncoderInstances0 extends EncoderConstructors {
 
   implicit def genericBasicEncoder[A](
       implicit
-      typeable: Typeable[A],
-      low: LowPriority
+      low: LowPriority,
+      tpeTag: WeakTypeTag[A]
   ): BasicEncoder[A] =
-    pure(Ref(typeName[A]))
+    pure(Ref(getCleanTagName[A]))
 }
 
 trait EncoderConstructors {

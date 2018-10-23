@@ -1,7 +1,9 @@
 package bridges.flow
 
 import bridges.core._
-import shapeless.{ Lazy, Typeable }
+import bridges.core.syntax.getCleanTagName
+import shapeless.Lazy
+import scala.reflect.runtime.universe.WeakTypeTag
 
 object syntax extends RenamableSyntax {
   import FlowType._
@@ -9,11 +11,8 @@ object syntax extends RenamableSyntax {
   def encode[A](implicit encoder: FlowEncoder[A]): FlowType =
     encoder.encode
 
-  def typeName[A](implicit typeable: Typeable[A]): String =
-    typeable.describe.takeWhile(c ⇒ c != '[' && c != '.').mkString
-
-  def decl[A](implicit typeable: Typeable[A], encoder: Lazy[FlowEncoder[A]]): FlowDecl =
-    DeclF(typeName[A], encoder.value.encode)
+  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[FlowEncoder[A]]): FlowDecl =
+    DeclF(getCleanTagName[A], encoder.value.encode)
 
   def struct(fields: FlowDecl*): FlowType =
     Struct(fields.toList)
