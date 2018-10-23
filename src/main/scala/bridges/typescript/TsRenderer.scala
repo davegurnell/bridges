@@ -36,7 +36,7 @@ trait TsRenderer extends Renderer[TsType] {
     s"""${field.name}: ${renderType(field.tpe)}"""
 
   private def renderParens(outer: TsType)(inner: TsType): String =
-    if (precedence(outer) >= precedence(inner)) {
+    if (precedence(outer) > precedence(inner)) {
       s"(${renderType(inner)})"
     } else {
       renderType(inner)

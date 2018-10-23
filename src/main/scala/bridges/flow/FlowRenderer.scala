@@ -38,7 +38,7 @@ trait FlowRenderer extends Renderer[FlowType] {
     s"""${field.name}: ${renderType(field.tpe)}"""
 
   private def renderParens(outer: FlowType)(inner: FlowType): String =
-    if (precedence(outer) >= precedence(inner)) {
+    if (precedence(outer) > precedence(inner)) {
       s"(${renderType(inner)})"
     } else {
       renderType(inner)

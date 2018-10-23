@@ -1,6 +1,7 @@
 package bridges.typescript
 
 import bridges.SampleTypes._
+import bridges.typescript.TsType._
 import bridges.typescript.syntax._
 import org.scalatest._
 
@@ -67,5 +68,13 @@ class TsRendererSpec extends FreeSpec with Matchers {
 
   "ObjectsOnly" in {
     Typescript.render(decl[ObjectsOnly]) shouldBe """export type ObjectsOnly = { type: "ObjectOne" } | { type: "ObjectTwo" };"""
+  }
+
+  "Union of Union" in {
+    Typescript.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe """export type A = B | C | D;"""
+  }
+
+  "Inter of Inter" in {
+    Typescript.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe """export type A = B & C & D;"""
   }
 }

@@ -8,11 +8,11 @@ import scala.reflect.runtime.universe.WeakTypeTag
 object syntax extends RenamableSyntax {
   import FlowType._
 
-  def encode[A: Encoder]: FlowType =
-    from(Encoder[A].encode)
+  def encode[A](implicit encoder: FlowEncoder[A]): FlowType =
+    encoder.encode
 
-  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[Encoder[A]]): FlowDecl =
-    DeclF(getCleanTagName[A], encoder.value.encode).map(FlowType.from)
+  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[FlowEncoder[A]]): FlowDecl =
+    DeclF(getCleanTagName[A], encoder.value.encode)
 
   def struct(fields: FlowDecl*): FlowType =
     Struct(fields.toList)

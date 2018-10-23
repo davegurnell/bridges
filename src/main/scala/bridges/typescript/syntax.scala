@@ -8,11 +8,11 @@ import scala.reflect.runtime.universe.WeakTypeTag
 object syntax extends RenamableSyntax {
   import TsType._
 
-  def encode[A: Encoder]: TsType =
-    from(Encoder[A].encode)
+  def encode[A](implicit encoder: TsEncoder[A]): TsType =
+    encoder.encode
 
-  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[Encoder[A]]): TsDecl =
-    DeclF(getCleanTagName[A], encoder.value.encode).map(TsType.from)
+  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[TsEncoder[A]]): TsDecl =
+    DeclF(getCleanTagName[A], encoder.value.encode)
 
   def struct(fields: TsDecl*): Struct =
     Struct(fields.toList)
