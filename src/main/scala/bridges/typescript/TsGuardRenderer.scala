@@ -3,16 +3,9 @@ package bridges.typescript
 import bridges.core.{ DeclF, Renderer }
 import unindent._
 
-object TsGuardRenderer
-    extends TsGuardRenderer(
-      predName = id => s"""is${id}""",
-      guardName = id => s"""as${id}"""
-    )
+object TsGuardRenderer extends TsGuardRenderer(predName = id => s"""is${id}""", guardName = id => s"""as${id}""")
 
-abstract class TsGuardRenderer(
-    predName: String => String,
-    guardName: String => String
-) extends Renderer[TsType] {
+abstract class TsGuardRenderer(predName: String => String, guardName: String => String) extends Renderer[TsType] {
   import TsType._
   import TsGuardExpr._
 
