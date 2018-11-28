@@ -48,11 +48,12 @@ object TsType {
   final case object Real                        extends TsType
   final case object Bool                        extends TsType
   final case object Null                        extends TsType
-  final case class StrLit(value: String)        extends TsType
-  final case class ChrLit(value: Char)          extends TsType
-  final case class IntrLit(value: Int)          extends TsType
-  final case class RealLit(value: Double)       extends TsType
-  final case class BoolLit(value: Boolean)      extends TsType
+  sealed abstract class TsLiteralType           extends TsType
+  final case class StrLit(value: String)        extends TsLiteralType
+  final case class ChrLit(value: Char)          extends TsLiteralType
+  final case class IntrLit(value: Int)          extends TsLiteralType
+  final case class RealLit(value: Double)       extends TsLiteralType
+  final case class BoolLit(value: Boolean)      extends TsLiteralType
   final case class Arr(tpe: TsType)             extends TsType
   final case class Struct(fields: List[TsDecl]) extends TsType
   final case class Inter(types: List[TsType])   extends TsType
