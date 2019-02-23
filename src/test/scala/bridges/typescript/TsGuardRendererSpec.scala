@@ -14,10 +14,12 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
         return typeof v.red === "number" && typeof v.green === "number" && typeof v.blue === "number";
       }
 
-      export function asColor(v: any): ?Color {
-        return isColor(v)
-          ? v as Color
-          : throw new Error("Expected Color, received " + JSON.stringify(v, null, 2));
+      export function asColor(v: any): Color {
+        if(isColor(v)) {
+          return v as Color;
+        } else {
+          throw new Error("Expected Color, received " + JSON.stringify(v, null, 2));
+        }
       }
       """
     }
@@ -72,10 +74,11 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ArrayClass" in {
+    println(TsGuardRenderer.renderPred(decl[ArrayClass]))
     TsGuardRenderer.renderPred(decl[ArrayClass]) shouldBe {
       i"""
       export function isArrayClass(v: any): boolean {
-        return Array.isArray(v.aList) && v.aList.reduce((a, i) -> (a && typeof i === "string")) && (typeof v.optField === "number" || v.optField === null);
+        return Array.isArray(v.aList) && v.aList.map((i) => (typeof i === "string")).reduce((a, b) => (a && b)) && (typeof v.optField === "number" || v.optField === null);
       }
       """
     }
@@ -115,7 +118,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TsGuardRenderer.renderPred(decl[Navigation]) shouldBe {
       i"""
       export function isNavigation(v: any): boolean {
-        return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.reduce((a, i) -> (a && isNavigation(i))) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.reduce((a, i) -> (a && isNavigation(i))) : false;
+        return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : false;
       }
       """
     }
@@ -155,7 +158,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TsGuardRenderer.renderPred(decl[Recursive2]) shouldBe {
       i"""
       export function isRecursive2(v: any): boolean {
-        return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.reduce((a, i) -> (a && isRecursive2(i)));
+        return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.map((i) => isRecursive2(i)).reduce((a, b) => (a && b));
       }
       """
     }
