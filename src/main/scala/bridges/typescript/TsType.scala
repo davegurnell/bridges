@@ -11,33 +11,6 @@ sealed abstract class TsType extends Product with Serializable {
 
   def &(that: TsType): TsType =
     Inter(List(this, that))
-
-  def renameRef(from: String, to: String): TsType =
-    this match {
-      case Ref(`from`)    => Ref(to)
-      case tpe: Ref       => tpe
-      case tpe @ Str      => tpe
-      case tpe @ Chr      => tpe
-      case tpe @ Intr     => tpe
-      case tpe @ Real     => tpe
-      case tpe @ Bool     => tpe
-      case tpe @ Null     => tpe
-      case tpe: StrLit    => tpe
-      case tpe: ChrLit    => tpe
-      case tpe: IntrLit   => tpe
-      case tpe: RealLit   => tpe
-      case tpe: BoolLit   => tpe
-      case Arr(tpe)       => Arr(tpe.renameRef(from, to))
-      case Struct(fields) => Struct(fields.map(renameDecl(from, to)))
-      case Inter(types)   => Inter(types.map(_.renameRef(from, to)))
-      case Union(types)   => Union(types.map(_.renameRef(from, to)))
-    }
-
-  def renameDecl[A <: TsType](from: String, to: String)(decl: DeclF[A]): DeclF[A] =
-    DeclF(
-      if (decl.name == from) to else decl.name,
-      decl.tpe.renameRef(from, to).asInstanceOf[A]
-    )
 }
 
 object TsType {
@@ -80,4 +53,27 @@ object TsType {
       case DeclF(name, tpe) =>
         Struct(("type" := StrLit(name)) +: translateProd(tpe.fields).fields)
     })
+
+  implicit val rename: Rename[TsType] =
+    Rename.pure { (value, from, to) =>
+      value match {
+        case Ref(`from`)    => Ref(to)
+        case tpe: Ref       => tpe
+        case tpe @ Str      => tpe
+        case tpe @ Chr      => tpe
+        case tpe @ Intr     => tpe
+        case tpe @ Real     => tpe
+        case tpe @ Bool     => tpe
+        case tpe @ Null     => tpe
+        case tpe: StrLit    => tpe
+        case tpe: ChrLit    => tpe
+        case tpe: IntrLit   => tpe
+        case tpe: RealLit   => tpe
+        case tpe: BoolLit   => tpe
+        case Arr(tpe)       => Arr(tpe.rename(from, to))
+        case Struct(fields) => Struct(fields.map(_.rename(from, to)))
+        case Inter(types)   => Inter(types.map(_.rename(from, to)))
+        case Union(types)   => Union(types.map(_.rename(from, to)))
+      }
+    }
 }
