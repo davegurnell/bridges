@@ -4,6 +4,11 @@ Generate bindings for Scala types in other programming languages.
 
 Copyright 2017-2018 Dave Gurnell. Licensed [Apache 2.0][license].
 
+Maintainers:
+
+ - Dave Gurnell (Flow and Typescript support)
+ - Pere Villega (Elm support)
+
 [![Build Status](https://travis-ci.org/davegurnell/bridges.svg?branch=develop)](https://travis-ci.org/davegurnell/bridges)
 [![Coverage status](https://img.shields.io/codecov/c/github/davegurnell/bridges/develop.svg)](https://codecov.io/github/davegurnell/bridges)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.davegurnell/bridges_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.davegurnell/bridges_2.12)
@@ -179,7 +184,7 @@ We use the [git flow](https://github.com/nvie/gitflow) branching model:
 
 Travis is configured to publish as follows:
 
-- releases from release tags woth the format `x.y.z`;
+- releases from release tags with the format `x.y.z`;
 - snapshots from non-PR commits to `develop`.
 
 The `git.baseVersion` line in `build.sbt` should be

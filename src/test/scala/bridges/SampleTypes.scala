@@ -73,6 +73,10 @@ object SampleTypes {
   final case class OptionOne(value: Int)     extends TypeTwo
   final case class OptionTwo(value: TypeOne) extends TypeTwo
 
+  // Self-recursive type
+  final case class Recursive(head: Int, tail: Option[Recursive])
+  final case class Recursive2(head: Int, tail: List[Recursive2])
+
   sealed trait ObjectsOnly
   final case object ObjectOne extends ObjectsOnly
   final case object ObjectTwo extends ObjectsOnly

@@ -58,6 +58,14 @@ class FlowRendererSpec extends FreeSpec with Matchers {
     Flow.render(decl[ExternalReferences]) shouldBe """export type ExternalReferences = { color: Color, nav: Navigation };"""
   }
 
+  "Recursive" in {
+    Flow.render(decl[Recursive]) shouldBe """export type Recursive = { head: number, tail: ?Recursive };"""
+  }
+
+  "Recursive2" in {
+    Flow.render(decl[Recursive2]) shouldBe """export type Recursive2 = { head: number, tail: Recursive2[] };"""
+  }
+
   "ObjectsOnly" in {
     Flow.render(decl[ObjectsOnly]) shouldBe """export type ObjectsOnly = { type: "ObjectOne" } | { type: "ObjectTwo" };"""
   }

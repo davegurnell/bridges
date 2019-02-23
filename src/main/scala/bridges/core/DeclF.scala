@@ -1,7 +1,5 @@
 package bridges.core
 
-import shapeless.{ Lazy, Typeable }
-
 /** A named declaration. Either top-level or a field in a sum, product, or struct.
   *
   * We define type aliases for DeclF in
