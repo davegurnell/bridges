@@ -25,10 +25,12 @@ abstract class TsGuardRenderer(predName: String => String, guardName: String => 
 
   def renderGuard(decl: TsDecl): String =
     i"""
-    export function ${guardName(decl.name)}(v: any): ?${decl.name} {
-      return ${predName(decl.name)}(v)
-        ? v as ${decl.name}
-        : throw new Error("Expected ${decl.name}, received " + JSON.stringify(v, null, 2));
+    export function ${guardName(decl.name)}(v: any): ${decl.name} {
+      if(${predName(decl.name)}(v)) {
+        return v as ${decl.name};
+      } else {
+        throw new Error("Expected ${decl.name}, received " + JSON.stringify(v, null, 2));
+      }
     }
     """
 
@@ -55,7 +57,10 @@ abstract class TsGuardRenderer(predName: String => String, guardName: String => 
     }
 
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
-    and(call(dot(ref("Array"), "isArray"), expr), call(dot(expr, "reduce"), func(List("a", "i"), and(ref("a"), isType(ref("i"), tpe)))))
+    and(
+      call(dot(ref("Array"), "isArray"), expr),
+      call(dot(call(dot(expr, "map"), func(List("i"), isType(ref("i"), tpe))), "reduce"), func(List("a", "b"), and(ref("a"), ref("b"))))
+    )
 
   private def isStruct(expr: TsGuardExpr, fields: List[TsDecl]): TsGuardExpr =
     fields
