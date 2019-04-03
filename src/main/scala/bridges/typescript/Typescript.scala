@@ -1,3 +1,3 @@
 package bridges.typescript
 
-object Typescript extends TsRenderer(TsTypeRenderer, TsGuardRenderer)
+object Typescript extends TsTypeRenderer(true)
