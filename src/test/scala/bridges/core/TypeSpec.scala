@@ -36,15 +36,15 @@ class TypeSpec extends FreeSpec with Matchers {
     "Prod" in {
       val actual = t(
         prod(
-          "a" := Ref("foo"),
-          "b" := Ref("baz")
+          "a" -> Ref("foo"),
+          "b" -> Ref("baz")
         )
       ).rename("foo", "bar")
 
       val expected = t(
         prod(
-          "a" := Ref("bar"),
-          "b" := Ref("baz")
+          "a" -> Ref("bar"),
+          "b" -> Ref("baz")
         )
       )
 
@@ -55,29 +55,29 @@ class TypeSpec extends FreeSpec with Matchers {
       "renames members " in {
         val actual = t(
           sum(
-            "typeA" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeA" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             ),
-            "typeB" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeB" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             )
           )
         ).rename("foo", "bar")
 
         val expected = t(
           sum(
-            "typeA" := Prod(
+            "typeA" -> Prod(
               List(
-                "a" := Ref("bar"),
-                "b" := Ref("baz")
+                "a" -> Ref("bar"),
+                "b" -> Ref("baz")
               )
             ),
-            "typeB" := Prod(
+            "typeB" -> Prod(
               List(
-                "a" := Ref("bar"),
-                "b" := Ref("baz")
+                "a" -> Ref("bar"),
+                "b" -> Ref("baz")
               )
             )
           )
@@ -88,26 +88,26 @@ class TypeSpec extends FreeSpec with Matchers {
       "renames type name of members" in {
         val actual = t(
           sum(
-            "typeA" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeA" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             ),
-            "typeA" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeA" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             )
           )
         ).rename("typeA", "typeC")
 
         val expected = t(
           sum(
-            "typeC" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeC" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             ),
-            "typeC" := prod(
-              "a" := Ref("foo"),
-              "b" := Ref("baz")
+            "typeC" -> prod(
+              "a" -> Ref("foo"),
+              "b" -> Ref("baz")
             )
           )
         )

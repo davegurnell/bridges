@@ -14,7 +14,10 @@ object syntax extends RenamableSyntax {
   def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[TsEncoder[A]]): TsDecl =
     DeclF(getCleanTagName[A], encoder.value.encode)
 
-  def struct(fields: TsDecl*): Struct =
+  def decl(name: String, params: String*)(tpe: TsType): TsDecl =
+    DeclF(name, params.toList, tpe)
+
+  def struct(fields: (String, TsType)*): Struct =
     Struct(fields.toList)
 
   def union(types: TsType*): Union =
@@ -22,6 +25,9 @@ object syntax extends RenamableSyntax {
 
   def inter(types: TsType*): Inter =
     Inter(types.toList)
+
+  def ref(name: String, params: TsType*): Ref =
+    Ref(name, params.toList)
 
   implicit class StringDeclOps(str: String) {
     def :=[A](tpe: A): DeclF[A] =

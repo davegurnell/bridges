@@ -13,7 +13,7 @@ trait ElmJsonEncoder {
       case Sum(products) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
-          products.map(encodeSumType(_, customTypeReplacements)).mkString("\n      ")
+          products.map { case (name, prod) => encodeSumType(name, prod, customTypeReplacements) }.mkString("\n      ")
 
         i"""
             encoder${decl.name} : ${decl.name} -> Encode.Value
@@ -30,12 +30,12 @@ trait ElmJsonEncoder {
             """
     }
 
-  private def encodeSumType(prod: DeclF[Type.Prod], customTypeReplacements: Map[Ref, TypeReplacement]): String = {
-    val refName  = Ref(prod.name)
-    val mainType = customTypeReplacements.get(refName).map(_.newType).getOrElse(prod.name)
+  private def encodeSumType(name: String, tpe: Prod, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
+    val refName  = Ref(name)
+    val mainType = customTypeReplacements.get(refName).map(_.newType).getOrElse(name)
 
-    val params        = prod.tpe.fields.map(_.name).mkString(" ")
-    val paramsEncoder = prod.tpe.fields.map(encodeField(_, "", customTypeReplacements))
+    val params        = tpe.fields.map { case (name, tpe) => name }.mkString(" ")
+    val paramsEncoder = tpe.fields.map { case (name, tpe) => encodeField(name, tpe, "", customTypeReplacements) }
 
     val caseEncoder = if (params.isEmpty) mainType else s"$mainType $params"
     val bodyEncoder =
@@ -47,26 +47,29 @@ trait ElmJsonEncoder {
 
   private def encodeType(tpe: Type, objectName: String, fieldName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     tpe match {
-      case r @ Ref(id) => customTypeReplacements.get(r).map(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
-      case Str         => s"Encode.string $fieldName"
-      case Chr         => s"Encode.string $fieldName"
-      case Intr        => s"Encode.int $fieldName"
-      case Real        => s"Encode.float $fieldName"
-      case Bool        => s"Encode.bool $fieldName"
+      case r @ Ref(id, _) => customTypeReplacements.get(r).map(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
+      case Str            => s"Encode.string $fieldName"
+      case Chr            => s"Encode.string $fieldName"
+      case Intr           => s"Encode.int $fieldName"
+      case Real           => s"Encode.float $fieldName"
+      case Bool           => s"Encode.bool $fieldName"
       case Opt(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " + encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
-      case Arr(arrTpe)  => "Encode.list (List.map " + encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
-      case Prod(fields) => fields.map(encodeField(_, objectName, customTypeReplacements)).mkString("Encode.object [ ", ", ", " ]")
-      case _: Sum       => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
+      case Arr(arrTpe) => "Encode.list (List.map " + encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
+      case Prod(fields) =>
+        fields
+          .map { case (name, tpe) => encodeField(name, tpe, objectName, customTypeReplacements) }
+          .mkString("Encode.object [ ", ", ", " ]")
+      case _: Sum => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
     }
 
-  private def encodeField(field: Decl, objectName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
+  private def encodeField(name: String, tpe: Type, objectName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val typeFieldName =
-      if (objectName.isEmpty) field.name else s"$objectName.${field.name}"
+      if (objectName.isEmpty) name else s"$objectName.${name}"
 
-    val encoding = encodeType(field.tpe, objectName, typeFieldName, customTypeReplacements)
+    val encoding = encodeType(tpe, objectName, typeFieldName, customTypeReplacements)
 
-    s"""("${field.name}", $encoding)"""
+    s"""("${name}", $encoding)"""
   }
 
 }

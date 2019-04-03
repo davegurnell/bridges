@@ -7,11 +7,14 @@ trait FlowRenderer extends Renderer[FlowType] {
   import FlowType._
 
   def render(decl: FlowDecl): String =
-    s"""export type ${decl.name} = ${renderType(decl.tpe)};"""
+    s"""export type ${renderParams(decl.name, decl.params)} = ${renderType(decl.tpe)};"""
+
+  private def renderParams(name: String, params: List[String]): String =
+    if (params.isEmpty) name else params.mkString(s"$name<", ", ", ">")
 
   private def renderType(tpe: FlowType): String =
     tpe match {
-      case Ref(id)            => id
+      case Ref(id, params)    => renderRef(id, params)
       case Str                => "string"
       case Chr                => "string"
       case Intr               => "number"
@@ -31,11 +34,14 @@ trait FlowRenderer extends Renderer[FlowType] {
       case tpe @ Union(types) => types.map(renderParens(tpe)).mkString(" | ")
     }
 
-  private def renderStruct(fields: List[FlowDecl]): String =
+  private def renderRef(name: String, params: List[FlowType]): String =
+    if (params.isEmpty) name else params.map(renderType).mkString(s"$name<", ", ", ">")
+
+  private def renderStruct(fields: List[(String, FlowType)]): String =
     fields.map(renderField).mkString("{ ", ", ", " }")
 
-  private def renderField(field: FlowDecl): String =
-    s"""${field.name}: ${renderType(field.tpe)}"""
+  private def renderField(field: (String, FlowType)): String =
+    s"""${field._1}: ${renderType(field._2)}"""
 
   private def renderParens(outer: FlowType)(inner: FlowType): String =
     if (precedence(outer) > precedence(inner)) {
