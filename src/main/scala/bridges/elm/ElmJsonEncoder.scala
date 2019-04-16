@@ -47,7 +47,7 @@ trait ElmJsonEncoder {
 
   private def encodeType(tpe: Type, objectName: String, fieldName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     tpe match {
-      case r @ Ref(id, _) => customTypeReplacements.get(r).map(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
+      case r @ Ref(id, _) => customTypeReplacements.get(r).flatMap(_.encoder).getOrElse(s"encoder$id") + s" $fieldName"
       case Str            => s"Encode.string $fieldName"
       case Chr            => s"Encode.string $fieldName"
       case Intr           => s"Encode.int $fieldName"
@@ -65,11 +65,11 @@ trait ElmJsonEncoder {
 
   private def encodeField(name: String, tpe: Type, objectName: String, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val typeFieldName =
-      if (objectName.isEmpty) name else s"$objectName.${name}"
+      if (objectName.isEmpty) name else s"$objectName.$name"
 
     val encoding = encodeType(tpe, objectName, typeFieldName, customTypeReplacements)
 
-    s"""("${name}", $encoding)"""
+    s"""("$name", $encoding)"""
   }
 
 }

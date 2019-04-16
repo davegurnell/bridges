@@ -49,7 +49,7 @@ trait ElmJsonDecoder {
 
   private def decodeType(tpe: Type, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     tpe match {
-      case r @ Ref(id, _) => customTypeReplacements.get(r).map(_.decoder).getOrElse(s"""(Decode.lazy (\\_ -> decoder$id))""")
+      case r @ Ref(id, _) => customTypeReplacements.get(r).flatMap(_.decoder).getOrElse(s"""(Decode.lazy (\\_ -> decoder$id))""")
       case Str            => "Decode.string"
       case Chr            => "Decode.string"
       case Intr           => "Decode.int"

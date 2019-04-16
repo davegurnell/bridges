@@ -7,12 +7,16 @@ trait ElmRenderer extends Renderer[Type] {
   def render(decl: Decl): String =
     render(decl, Map.empty)
 
-  def render(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String =
+  def render(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
+    val genericsAsElmReplacement = decl.params.map(k ⇒ Ref(k) → TypeReplacement(k.toLowerCase)).toMap
+    val newTypeReplacements      = customTypeReplacements ++ genericsAsElmReplacement
+    val genericsDefinition       = genericsAsElmReplacement.valuesIterator.map(_.newType).mkString(" ").trim
     decl.tpe match {
       case Sum(products) ⇒
-        s"type ${decl.name} = ${products.map { case (name, prod) => renderSumType(name, prod, customTypeReplacements) }.mkString(" | ")}"
-      case other ⇒ s"type alias ${decl.name} = ${renderType(other, customTypeReplacements)}"
+        s"type ${decl.name} $genericsDefinition= ${products.map { case (name, prod) => renderSumType(name, prod, newTypeReplacements) }.mkString(" | ")}"
+      case other ⇒ s"type alias ${decl.name} $genericsDefinition= ${renderType(other, newTypeReplacements)}"
     }
+  }
 
   private def renderSumType(name: String, prod: Prod, customTypeReplacements: Map[Ref, TypeReplacement]) = {
     val refName  = Ref(name)
@@ -37,5 +41,5 @@ trait ElmRenderer extends Renderer[Type] {
     }
 
   private def renderField(name: String, tpe: Type, customTypeReplacements: Map[Ref, TypeReplacement]): String =
-    s"""${name}: ${renderType(tpe, customTypeReplacements)}"""
+    s"""$name: ${renderType(tpe, customTypeReplacements)}"""
 }

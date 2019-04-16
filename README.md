@@ -177,6 +177,8 @@ you need to do the following:
    the name of the product instance as a `String`.
    If you use [Circe](https://circe.github.io/circe/),
    see [this link](https://github.com/circe/circe/pull/429).
+   
+NOTE: automatic encoder and decoder generation doesn't work for types with Generics. You will need to manually create your own.    
 
 ### Working with Refined types
 
