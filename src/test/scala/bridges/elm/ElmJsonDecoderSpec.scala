@@ -233,4 +233,46 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
            """
   }
 
+  "ClassWithGeneric" in {
+    val productDef  = prod("first" → Ref("A"), "second" → Ref("B"), "third" → Ref("C"))
+    val declaration = decl("ClassWithGeneric", "A", "B", "C")(productDef)
+    Elm.decoder(declaration) shouldBe
+    i"""
+    decoderClassWithGeneric : (Decode.Decoder a) -> (Decode.Decoder b) -> (Decode.Decoder c) -> Decode.Decoder (ClassWithGeneric a b c)
+    decoderClassWithGeneric decoderA decoderB decoderC = decode ClassWithGeneric |> required "first" (Decode.lazy (\\_ -> decoderA)) |> required "second" (Decode.lazy (\\_ -> decoderB)) |> required "third" (Decode.lazy (\\_ -> decoderC))
+    """
+  }
+
+  "ClassWithGeneric2" in {
+    val productDef  = prod("first" → Ref("A"))
+    val declaration = decl("ClassWithGeneric2", "A")(productDef)
+    Elm.decoder(declaration) shouldBe
+    i"""
+    decoderClassWithGeneric2 : (Decode.Decoder a) -> Decode.Decoder (ClassWithGeneric2 a)
+    decoderClassWithGeneric2 decoderA = decode ClassWithGeneric2 |> required "first" (Decode.lazy (\\_ -> decoderA))
+    """
+  }
+
+  "SumWithGeneric" in {
+    val sumDef = sum(
+      "First"  -> prod("f" → Ref("A")),
+      "Second" -> prod("s" → Ref("B")),
+      "Third"  -> prod("t" → Ref("C"))
+    )
+    val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
+    Elm.decoder(declaration) shouldBe
+    i"""
+     decoderSumWithGeneric : (Decode.Decoder a) -> (Decode.Decoder b) -> (Decode.Decoder c) -> Decode.Decoder (SumWithGeneric a b c)
+     decoderSumWithGeneric decoderA decoderB decoderC = Decode.field "type" Decode.string |> Decode.andThen decoderSumWithGenericTpe decoderA decoderB decoderC
+
+     decoderSumWithGenericTpe : (Decode.Decoder a) -> (Decode.Decoder b) -> (Decode.Decoder c) -> String -> Decode.Decoder (SumWithGeneric a b c)
+     decoderSumWithGenericTpe decoderA decoderB decoderC tpe =
+        case tpe of
+           "First" -> decode First |> required "f" (Decode.lazy (\\_ -> decoderA))
+           "Second" -> decode Second |> required "s" (Decode.lazy (\\_ -> decoderB))
+           "Third" -> decode Third |> required "t" (Decode.lazy (\\_ -> decoderC))
+           _ -> Decode.fail ("Unexpected type for SumWithGeneric: " ++ tpe)
+     """
+  }
+
 }

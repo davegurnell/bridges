@@ -13,6 +13,13 @@ object Rename {
       override def apply(value: A, from: String, to: String): A =
         func(value, from, to)
     }
+
+  implicit def pairRename[A](implicit aRename: Rename[A]): Rename[(String, A)] =
+    Rename.pure { (pair, from, to) =>
+      pair match {
+        case (name, a) => (if (name == from) to else name, aRename(a, from, to))
+      }
+    }
 }
 
 trait RenamableSyntax {

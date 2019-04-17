@@ -6,15 +6,15 @@ import bridges.typescript.syntax._
 import org.scalatest._
 import unindent._
 
-class TsGuardRendererSpec extends FreeSpec with Matchers {
+class TypescriptGuardSpec extends FreeSpec with Matchers {
   "Color" in {
-    TsGuardRenderer.render(decl[Color]) shouldBe {
+    TypescriptGuard.render(decl[Color]) shouldBe {
       i"""
-      export function isColor(v: any): boolean {
+      export const isColor = (v: any): boolean => {
         return typeof v.red === "number" && typeof v.green === "number" && typeof v.blue === "number";
       }
 
-      export function asColor(v: any): Color {
+      export const asColor = (v: any): Color => {
         if(isColor(v)) {
           return v as Color;
         } else {
@@ -24,9 +24,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
       """
     }
 
-    TsGuardRenderer.renderPred(decl[Color]) shouldBe {
+    TypescriptGuard.renderPred(decl[Color]) shouldBe {
       i"""
-      export function isColor(v: any): boolean {
+      export const isColor = (v: any): boolean => {
         return typeof v.red === "number" && typeof v.green === "number" && typeof v.blue === "number";
       }
       """
@@ -34,9 +34,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Circle" in {
-    TsGuardRenderer.renderPred(decl[Circle]) shouldBe {
+    TypescriptGuard.renderPred(decl[Circle]) shouldBe {
       i"""
-      export function isCircle(v: any): boolean {
+      export const isCircle = (v: any): boolean => {
         return typeof v.radius === "number" && isColor(v.color);
       }
       """
@@ -44,9 +44,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Rectangle" in {
-    TsGuardRenderer.renderPred(decl[Rectangle]) shouldBe {
+    TypescriptGuard.renderPred(decl[Rectangle]) shouldBe {
       i"""
-      export function isRectangle(v: any): boolean {
+      export const isRectangle = (v: any): boolean => {
         return typeof v.width === "number" && typeof v.height === "number" && isColor(v.color);
       }
       """
@@ -54,9 +54,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Shape" in {
-    TsGuardRenderer.renderPred(decl[Shape]) shouldBe {
+    TypescriptGuard.renderPred(decl[Shape]) shouldBe {
       i"""
-      export function isShape(v: any): boolean {
+      export const isShape = (v: any): boolean => {
         return v.type === "Circle" ? typeof v.radius === "number" && isColor(v.color) : v.type === "Rectangle" ? typeof v.width === "number" && typeof v.height === "number" && isColor(v.color) : v.type === "ShapeGroup" ? isShape(v.leftShape) && isShape(v.rightShape) : false;
       }
       """
@@ -64,9 +64,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Alpha" in {
-    TsGuardRenderer.renderPred(decl[Alpha]) shouldBe {
+    TypescriptGuard.renderPred(decl[Alpha]) shouldBe {
       i"""
-      export function isAlpha(v: any): boolean {
+      export const isAlpha = (v: any): boolean => {
         return typeof v.name === "string" && typeof v.char === "string" && typeof v.bool === "boolean";
       }
       """
@@ -74,10 +74,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ArrayClass" in {
-    println(TsGuardRenderer.renderPred(decl[ArrayClass]))
-    TsGuardRenderer.renderPred(decl[ArrayClass]) shouldBe {
+    TypescriptGuard.renderPred(decl[ArrayClass]) shouldBe {
       i"""
-      export function isArrayClass(v: any): boolean {
+      export const isArrayClass = (v: any): boolean => {
         return Array.isArray(v.aList) && v.aList.map((i) => (typeof i === "string")).reduce((a, b) => (a && b)) && (typeof v.optField === "number" || v.optField === null);
       }
       """
@@ -85,9 +84,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Numeric" in {
-    TsGuardRenderer.renderPred(decl[Numeric]) shouldBe {
+    TypescriptGuard.renderPred(decl[Numeric]) shouldBe {
       i"""
-      export function isNumeric(v: any): boolean {
+      export const isNumeric = (v: any): boolean => {
         return typeof v.double === "number" && typeof v.float === "number" && typeof v.int === "number";
       }
       """
@@ -95,9 +94,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassOrObject" in {
-    TsGuardRenderer.renderPred(decl[ClassOrObject]) shouldBe {
+    TypescriptGuard.renderPred(decl[ClassOrObject]) shouldBe {
       i"""
-      export function isClassOrObject(v: any): boolean {
+      export const isClassOrObject = (v: any): boolean => {
         return v.type === "MyClass" ? typeof v.value === "number" : v.type === "MyObject" ? true : false;
       }
       """
@@ -105,9 +104,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "NestedClassOrObject" in {
-    TsGuardRenderer.renderPred(decl[NestedClassOrObject]) shouldBe {
+    TypescriptGuard.renderPred(decl[NestedClassOrObject]) shouldBe {
       i"""
-      export function isNestedClassOrObject(v: any): boolean {
+      export const isNestedClassOrObject = (v: any): boolean => {
         return v.type === "MyClass" ? typeof v.value === "number" : v.type === "MyObject" ? true : false;
       }
       """
@@ -115,9 +114,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Navigation" in {
-    TsGuardRenderer.renderPred(decl[Navigation]) shouldBe {
+    TypescriptGuard.renderPred(decl[Navigation]) shouldBe {
       i"""
-      export function isNavigation(v: any): boolean {
+      export const isNavigation = (v: any): boolean => {
         return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : false;
       }
       """
@@ -125,9 +124,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassUUID" in {
-    TsGuardRenderer.renderPred(decl[ClassUUID]) shouldBe {
+    TypescriptGuard.renderPred(decl[ClassUUID]) shouldBe {
       i"""
-      export function isClassUUID(v: any): boolean {
+      export const isClassUUID = (v: any): boolean => {
         return isUUID(v.a);
       }
       """
@@ -135,9 +134,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassDate" in {
-    TsGuardRenderer.renderPred(decl[ClassDate]) shouldBe {
+    TypescriptGuard.renderPred(decl[ClassDate]) shouldBe {
       i"""
-      export function isClassDate(v: any): boolean {
+      export const isClassDate = (v: any): boolean => {
         return isDate(v.a);
       }
       """
@@ -145,9 +144,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Recursive" in {
-    TsGuardRenderer.renderPred(decl[Recursive]) shouldBe {
+    TypescriptGuard.renderPred(decl[Recursive]) shouldBe {
       i"""
-      export function isRecursive(v: any): boolean {
+      export const isRecursive = (v: any): boolean => {
         return typeof v.head === "number" && (isRecursive(v.tail) || v.tail === null);
       }
       """
@@ -155,9 +154,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Recursive2" in {
-    TsGuardRenderer.renderPred(decl[Recursive2]) shouldBe {
+    TypescriptGuard.renderPred(decl[Recursive2]) shouldBe {
       i"""
-      export function isRecursive2(v: any): boolean {
+      export const isRecursive2 = (v: any): boolean => {
         return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.map((i) => isRecursive2(i)).reduce((a, b) => (a && b));
       }
       """
@@ -165,9 +164,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ExternalReferences" in {
-    TsGuardRenderer.renderPred(decl[ExternalReferences]) shouldBe {
+    TypescriptGuard.renderPred(decl[ExternalReferences]) shouldBe {
       i"""
-      export function isExternalReferences(v: any): boolean {
+      export const isExternalReferences = (v: any): boolean => {
         return isColor(v.color) && isNavigation(v.nav);
       }
       """
@@ -175,9 +174,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "ObjectsOnly" in {
-    TsGuardRenderer.renderPred(decl[ObjectsOnly]) shouldBe {
+    TypescriptGuard.renderPred(decl[ObjectsOnly]) shouldBe {
       i"""
-      export function isObjectsOnly(v: any): boolean {
+      export const isObjectsOnly = (v: any): boolean => {
         return v.type === "ObjectOne" ? true : v.type === "ObjectTwo" ? true : false;
       }
       """
@@ -185,9 +184,9 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Union of Union" in {
-    TsGuardRenderer.renderPred("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
+    TypescriptGuard.renderPred("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
       i"""
-      export function isA(v: any): boolean {
+      export const isA = (v: any): boolean => {
         return isB(v) || isC(v) || isD(v);
       }
       """
@@ -195,12 +194,31 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
   }
 
   "Inter of Inter" in {
-    TsGuardRenderer.renderPred("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
+    TypescriptGuard.renderPred("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
       i"""
-      export function isA(v: any): boolean {
+      export const isA = (v: any): boolean => {
         return isB(v) && isC(v) && isD(v);
       }
       """
     }
   }
+
+  "Generic Decl" in {
+    TypescriptGuard.render(decl("Pair", "A", "B")(struct("a" -> Ref("A"), "b" -> Ref("B")))) shouldBe {
+      i"""
+      export const isPair = (isA: (v: any) => A, isB: (v: any) => B) => (v: any): boolean => {
+        return isA(v.a) && isB(v.b);
+      }
+
+      export const asPair = (isA: (v: any) => A, isB: (v: any) => B) => (v: any): Pair => {
+        if(isPair(isA, isB)(v)) {
+          return v as Pair;
+        } else {
+          throw new Error("Expected Pair, received " + JSON.stringify(v, null, 2));
+        }
+      }
+      """
+    }
+  }
+
 }

@@ -1,19 +1,23 @@
 package bridges.typescript
 
-import bridges.core.Renderer
+import bridges.core.{ DeclF, Renderer }
 import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
-
-object TsTypeRenderer extends TsTypeRenderer(true)
 
 abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   import TsType._
 
   def render(decl: TsDecl): String =
-    s"${if (exportAll) "export type" else "type"} ${decl.name} = ${renderType(decl.tpe)};"
+    decl match {
+      case DeclF(name, params, TsType.Struct(fields)) =>
+        s"${if (exportAll) "export interface" else "interface"} ${renderParams(name, params)} ${renderStructAsInterface(fields)}"
+
+      case DeclF(name, params, tpe) =>
+        s"${if (exportAll) "export type" else "type"} ${renderParams(name, params)} = ${renderType(tpe)};"
+    }
 
   private def renderType(tpe: TsType): String =
     tpe match {
-      case Ref(id)            => id
+      case Ref(id, params)    => renderRef(id, params)
       case Str                => "string"
       case Chr                => "string"
       case Intr               => "number"
@@ -31,11 +35,20 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case tpe @ Union(types) => types.map(renderParens(tpe)).mkString(" | ")
     }
 
-  private def renderStruct(fields: List[TsDecl]): String =
+  private def renderParams(name: String, params: List[String]): String =
+    if (params.isEmpty) name else params.mkString(s"$name<", ", ", ">")
+
+  private def renderRef(name: String, params: List[TsType]): String =
+    if (params.isEmpty) name else params.map(renderType).mkString(s"$name<", ", ", ">")
+
+  private def renderStruct(fields: List[(String, TsType)]): String =
     fields.map(renderField).mkString("{ ", ", ", " }")
 
-  private def renderField(field: TsDecl): String =
-    s"""${field.name}: ${renderType(field.tpe)}"""
+  private def renderStructAsInterface(fields: List[(String, TsType)]): String =
+    fields.map(renderField).mkString("{\n  ", ";\n  ", ";\n}")
+
+  private def renderField(field: (String, TsType)): String =
+    s"""${field._1}: ${renderType(field._2)}"""
 
   private def renderParens(outer: TsType)(inner: TsType): String =
     if (precedence(outer) > precedence(inner)) {

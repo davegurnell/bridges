@@ -82,16 +82,11 @@ object SampleTypes {
   final case object ObjectTwo extends ObjectsOnly
 
   // Custom declaration of a intermediate structure
-  val customErrorMsg = "ErrorMessage" := prod(
-      "error" := Ref("ErrorMessage")
-    )
-
-  val customWarningMsg = "WarningMessage" := prod(
-      "warning" := Ref("WarningMessage")
-    )
-
   val customDeclaration: Decl =
-    "Message" := sum(customErrorMsg, customWarningMsg)
+    "Message" := sum(
+      "ErrorMessage"   -> prod("error"   -> Ref("ErrorMessage")),
+      "WarningMessage" -> prod("warning" -> Ref("WarningMessage"))
+    )
 
   final case class ClassWithRefinedType(name: RefinedString)
 }
