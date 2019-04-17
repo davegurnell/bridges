@@ -212,4 +212,42 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
             ObjectTwo -> Encode.object [ ("type", Encode.string "ObjectTwo") ]
       """
   }
+
+  "ClassWithGeneric" in {
+    val productDef  = prod("first" → Ref("A"), "second" → Ref("B"), "third" → Ref("C"))
+    val declaration = decl("ClassWithGeneric", "A", "B", "C")(productDef)
+    Elm.encoder(declaration) shouldBe
+    i"""
+      encoderClassWithGeneric : (a -> Encode.Value) -> (b -> Encode.Value) -> (c -> Encode.Value) -> ClassWithGeneric a b c -> Encode.Value
+      encoderClassWithGeneric encoderA encoderB encoderC obj = Encode.object [ ("first", encoderA obj.first), ("second", encoderB obj.second), ("third", encoderC obj.third) ]
+      """
+  }
+
+  "ClassWithGeneric2" in {
+    val productDef  = prod("first" → Ref("A"))
+    val declaration = decl("ClassWithGeneric2", "A")(productDef)
+    Elm.encoder(declaration) shouldBe
+    i"""
+      encoderClassWithGeneric2 : (a -> Encode.Value) -> ClassWithGeneric2 a -> Encode.Value
+      encoderClassWithGeneric2 encoderA obj = Encode.object [ ("first", encoderA obj.first) ]
+      """
+  }
+
+  "SumWithGeneric" in {
+    val sumDef = sum(
+      "First"  -> prod("f" → Ref("A")),
+      "Second" -> prod("s" → Ref("B")),
+      "Third"  -> prod("t" → Ref("C"))
+    )
+    val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
+    Elm.encoder(declaration) shouldBe
+    i"""
+      encoderSumWithGeneric : (a -> Encode.Value) -> (b -> Encode.Value) -> (c -> Encode.Value) -> SumWithGeneric a b c -> Encode.Value
+      encoderSumWithGeneric encoderA encoderB encoderC tpe =
+         case tpe of
+            First f -> Encode.object [ ("f", encoderA f), ("type", Encode.string "First") ]
+            Second s -> Encode.object [ ("s", encoderB s), ("type", Encode.string "Second") ]
+            Third t -> Encode.object [ ("t", encoderC t), ("type", Encode.string "Third") ]
+      """
+  }
 }

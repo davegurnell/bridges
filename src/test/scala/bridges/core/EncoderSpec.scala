@@ -34,7 +34,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "a class with UUID member" in {
       encode[ClassUUID] should be(
         prod(
-          "a" := Ref("UUID")
+          "a" -> Ref("UUID")
         )
       )
     }
@@ -42,7 +42,7 @@ class EncoderSpec extends FreeSpec with Matchers {
     "a class with Date member" in {
       encode[ClassDate] should be(
         prod(
-          "a" := Ref("Date")
+          "a" -> Ref("Date")
         )
       )
     }
@@ -50,8 +50,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "case classes" in {
       encode[Pair] should be(
         prod(
-          "a" := Str,
-          "b" := Intr
+          "a" -> Str,
+          "b" -> Intr
         )
       )
     }
@@ -59,8 +59,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       encode[OneOrOther] should be(
         sum(
-          "One" := prod("value" := Str),
-          "Other" := prod("value" := Intr)
+          "One"   -> prod("value" -> Str),
+          "Other" -> prod("value" -> Intr)
         )
       )
     }
@@ -68,8 +68,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types with objects" in {
       encode[ClassOrObject] should be(
         sum(
-          "MyClass" := prod("value" := Intr),
-          "MyObject" := prod()
+          "MyClass"  -> prod("value" -> Intr),
+          "MyObject" -> prod()
         )
       )
     }
@@ -77,8 +77,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types with objects in nested objects" in {
       encode[NestedClassOrObject] should be(
         sum(
-          "MyClass" := prod("value" := Intr),
-          "MyObject" := prod()
+          "MyClass"  -> prod("value" -> Intr),
+          "MyObject" -> prod()
         )
       )
     }
@@ -91,8 +91,8 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       encode[OneOrOther] should be(
         sum(
-          "One" := prod("value" := Str),
-          "Other" := prod("value" := Intr)
+          "One"   -> prod("value" -> Str),
+          "Other" -> prod("value" -> Intr)
         )
       )
     }
@@ -100,41 +100,41 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types with intermediate types and indirect recursion" in {
       encode[Shape] should be(
         sum(
-          "Circle" := prod(
-            "radius" := Real,
-            "color" := Ref("Color")
+          "Circle" -> prod(
+            "radius" -> Real,
+            "color"  -> Ref("Color")
           ),
-          "Rectangle" := prod(
-            "width" := Real,
-            "height" := Real,
-            "color" := Ref("Color")
+          "Rectangle" -> prod(
+            "width"  -> Real,
+            "height" -> Real,
+            "color"  -> Ref("Color")
           ),
-          "ShapeGroup" := prod(
-            "leftShape" := Ref("Shape"),
-            "rightShape" := Ref("Shape")
+          "ShapeGroup" -> prod(
+            "leftShape"  -> Ref("Shape"),
+            "rightShape" -> Ref("Shape")
           )
         )
       )
 
       encode[Circle] should be(
         prod(
-          "radius" := Real,
-          "color" := Ref("Color")
+          "radius" -> Real,
+          "color"  -> Ref("Color")
         )
       )
 
       encode[Rectangle] should be(
         prod(
-          "width" := Real,
-          "height" := Real,
-          "color" := Ref("Color")
+          "width"  -> Real,
+          "height" -> Real,
+          "color"  -> Ref("Color")
         )
       )
 
       encode[ShapeGroup] should be(
         prod(
-          "leftShape" := Ref("Shape"),
-          "rightShape" := Ref("Shape")
+          "leftShape"  -> Ref("Shape"),
+          "rightShape" -> Ref("Shape")
         )
       )
     }
@@ -142,26 +142,26 @@ class EncoderSpec extends FreeSpec with Matchers {
     "recursive types with direct recursion on same type" in {
       encode[Navigation] should be(
         sum(
-          "Node" := prod(
-            "name" := Str,
-            "children" := Arr(Ref("Navigation"))
+          "Node" -> prod(
+            "name"     -> Str,
+            "children" -> Arr(Ref("Navigation"))
           ),
-          "NodeList" := prod(
-            "all" := Arr(Ref("Navigation"))
+          "NodeList" -> prod(
+            "all" -> Arr(Ref("Navigation"))
           )
         )
       )
 
       encode[NodeList] should be(
         prod(
-          "all" := Arr(Ref("Navigation"))
+          "all" -> Arr(Ref("Navigation"))
         )
       )
 
       encode[Node] should be(
         prod(
-          "name" := Str,
-          "children" := Arr(Ref("Navigation"))
+          "name"     -> Str,
+          "children" -> Arr(Ref("Navigation"))
         )
       )
     }
@@ -169,23 +169,23 @@ class EncoderSpec extends FreeSpec with Matchers {
     "types with specific parameters" in {
       encode[Alpha] should be(
         prod(
-          "name" := Str,
-          "char" := Chr,
-          "bool" := Bool
+          "name" -> Str,
+          "char" -> Chr,
+          "bool" -> Bool
         )
       )
 
       encode[ArrayClass] should be(
         prod(
-          "aList" := Arr(Str),
-          "optField" := Opt(Real)
+          "aList"    -> Arr(Str),
+          "optField" -> Opt(Real)
         )
       )
       encode[Numeric] should be(
         prod(
-          "double" := Real,
-          "float" := Real,
-          "int" := Intr
+          "double" -> Real,
+          "float"  -> Real,
+          "int"    -> Intr
         )
       )
     }
@@ -193,8 +193,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "class that references other case classes" in {
       encode[ExternalReferences] should be(
         prod(
-          "color" := Ref("Color"),
-          "nav" := Ref("Navigation")
+          "color" -> Ref("Color"),
+          "nav"   -> Ref("Navigation")
         )
       )
     }
@@ -202,15 +202,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     "mutually recursive types" in {
       encode[TypeOne] should be(
         prod(
-          "name" := Str,
-          "values" := Arr(Ref("TypeTwo"))
+          "name"   -> Str,
+          "values" -> Arr(Ref("TypeTwo"))
         )
       )
 
       encode[TypeTwo] should be(
         sum(
-          "OptionOne" := prod("value" := Intr),
-          "OptionTwo" := prod("value" := Ref("TypeOne"))
+          "OptionOne" -> prod("value" -> Intr),
+          "OptionTwo" -> prod("value" -> Ref("TypeOne"))
         )
       )
     }
@@ -218,15 +218,15 @@ class EncoderSpec extends FreeSpec with Matchers {
     "self-recursive type" in {
       encode[Recursive] should be(
         prod(
-          "head" := Intr,
-          "tail" := Opt(Ref("Recursive"))
+          "head" -> Intr,
+          "tail" -> Opt(Ref("Recursive"))
         )
       )
 
       encode[Recursive2] should be(
         prod(
-          "head" := Intr,
-          "tail" := Arr(Ref("Recursive2"))
+          "head" -> Intr,
+          "tail" -> Arr(Ref("Recursive2"))
         )
       )
     }
@@ -234,8 +234,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "pure objects ADT" in {
       encode[ObjectsOnly] should be(
         sum(
-          "ObjectOne" := prod(),
-          "ObjectTwo" := prod()
+          "ObjectOne" -> prod(),
+          "ObjectTwo" -> prod()
         )
       )
     }
@@ -248,7 +248,7 @@ class EncoderSpec extends FreeSpec with Matchers {
       //Note that the import is required or it fails!
       import eu.timepit.refined.shapeless.typeable._
       encode[ClassWithRefinedType] should be(
-        prod("name" := Str)
+        prod("name" -> Str)
       )
     }
 
@@ -257,7 +257,7 @@ class EncoderSpec extends FreeSpec with Matchers {
         Encoder.pure(Str)
 
       encode[ClassUUID] should be(
-        prod("a" := Str)
+        prod("a" -> Str)
       )
     }
   }
@@ -272,8 +272,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "case classes" in {
       decl[Pair] should be(
         "Pair" := prod(
-          "a" := Str,
-          "b" := Intr
+          "a" -> Str,
+          "b" -> Intr
         )
       )
     }
@@ -281,8 +281,8 @@ class EncoderSpec extends FreeSpec with Matchers {
     "sealed types" in {
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-          "One" := prod("value" := Str),
-          "Other" := prod("value" := Intr)
+          "One"   -> prod("value" -> Str),
+          "Other" -> prod("value" -> Intr)
         )
       )
     }
@@ -295,11 +295,11 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-          "One" := prod(
-            "value" := Str
+          "One" -> prod(
+            "value" -> Str
           ),
-          "Other" := prod(
-            "value" := Intr
+          "Other" -> prod(
+            "value" -> Intr
           )
         )
       )
@@ -311,7 +311,7 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       decl[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := prod(
-          "name" := Str
+          "name" -> Str
         )
       )
     }

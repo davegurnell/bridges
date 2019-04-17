@@ -37,7 +37,7 @@ trait ElmFileBuilder {
         "import Json.Decode.Pipeline exposing (..)"
       else ""
 
-    val customImports = customTypeReplacements.values.filter(td ⇒ decoders.contains(td.newType)).map(_.imports).mkString("\n")
+    val customImports = customTypeReplacements.values.filter(td ⇒ decoders.contains(td.newType)).flatMap(_.imports).mkString("\n")
 
     val imports = typeImports + customImports
 
@@ -72,11 +72,11 @@ trait ElmFileBuilder {
   private def getDeclarationTypes(tpe: Type, parentType: String): List[Ref] = {
     def getIncludeTypes(tpe: Type): List[Ref] =
       tpe match {
-        case r @ Ref(_)    => r :: Nil
+        case r: Ref        => r :: Nil
         case Opt(optTpe)   => getIncludeTypes(optTpe)
         case Arr(arrTpe)   => getIncludeTypes(arrTpe)
-        case Prod(fields)  => fields.map(_.tpe).flatMap(getIncludeTypes)
-        case Sum(products) => products.map(_.tpe).flatMap(getIncludeTypes)
+        case Prod(fields)  => fields.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
+        case Sum(products) => products.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
         case _             => Nil
       }
 

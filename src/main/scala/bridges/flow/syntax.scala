@@ -14,7 +14,10 @@ object syntax extends RenamableSyntax {
   def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[FlowEncoder[A]]): FlowDecl =
     DeclF(getCleanTagName[A], encoder.value.encode)
 
-  def struct(fields: FlowDecl*): FlowType =
+  def decl(name: String, params: String*)(tpe: FlowType): FlowDecl =
+    DeclF(name, params.toList, tpe)
+
+  def struct(fields: (String, FlowType)*): FlowType =
     Struct(fields.toList)
 
   def union(types: FlowType*): FlowType =
@@ -22,6 +25,9 @@ object syntax extends RenamableSyntax {
 
   def inter(types: FlowType*): FlowType =
     Inter(types.toList)
+
+  def ref(name: String, params: FlowType*): Ref =
+    Ref(name, params.toList)
 
   implicit class StringDeclOps(str: String) {
     def :=[A](tpe: A): DeclF[A] =

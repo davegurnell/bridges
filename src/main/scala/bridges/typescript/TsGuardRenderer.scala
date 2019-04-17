@@ -3,9 +3,10 @@ package bridges.typescript
 import bridges.core.{ DeclF, Renderer }
 import unindent._
 
-object TsGuardRenderer extends TsGuardRenderer(predName = id => s"""is${id}""", guardName = id => s"""as${id}""")
-
-abstract class TsGuardRenderer(predName: String => String, guardName: String => String) extends Renderer[TsType] {
+abstract class TsGuardRenderer(
+    predName: String => String = id => s"""is${id}""",
+    guardName: String => String = id => s"""as${id}"""
+) extends Renderer[TsType] {
   import TsType._
   import TsGuardExpr._
 
@@ -17,43 +18,70 @@ abstract class TsGuardRenderer(predName: String => String, guardName: String => 
     """
 
   def renderPred(decl: TsDecl): String =
-    i"""
-    export function ${predName(decl.name)}(v: any): boolean {
-      return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
+    decl match {
+      case DeclF(name, Nil, tpe) =>
+        i"""
+        export const ${predName(decl.name)} = (v: any): boolean => {
+          return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
+        }
+        """
+
+      case DeclF(name, params, tpe) =>
+        i"""
+        export const ${predName(decl.name)} = (${renderParamPreds(params)}) => (v: any): boolean => {
+          return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
+        }
+        """
     }
-    """
 
   def renderGuard(decl: TsDecl): String =
-    i"""
-    export function ${guardName(decl.name)}(v: any): ${decl.name} {
-      if(${predName(decl.name)}(v)) {
-        return v as ${decl.name};
-      } else {
-        throw new Error("Expected ${decl.name}, received " + JSON.stringify(v, null, 2));
-      }
+    decl match {
+      case DeclF(name, Nil, tpe) =>
+        i"""
+        export const ${guardName(name)} = (v: any): ${name} => {
+          if(${predName(name)}(v)) {
+            return v as ${name};
+          } else {
+            throw new Error("Expected ${name}, received " + JSON.stringify(v, null, 2));
+          }
+        }
+        """
+
+      case DeclF(name, params, tpe) =>
+        i"""
+        export const ${guardName(name)} = (${renderParamPreds(params)}) => (v: any): ${name} => {
+          if(${predName(name)}(${params.map(predName).mkString(", ")})(v)) {
+            return v as ${name};
+          } else {
+            throw new Error("Expected ${name}, received " + JSON.stringify(v, null, 2));
+          }
+        }
+        """
     }
-    """
+
+  def renderParamPreds(params: List[String]): String =
+    params.map(param => s"${predName(param)}: (v: any) => ${param}").mkString(", ")
 
   import TsGuardExpr._
 
   private def isType(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     tpe match {
-      case TsType.Ref(id)        => call(ref(predName(id)), expr)
-      case TsType.Str            => eql(typeof(expr), lit("string"))
-      case TsType.Chr            => eql(typeof(expr), lit("string"))
-      case TsType.Intr           => eql(typeof(expr), lit("number"))
-      case TsType.Real           => eql(typeof(expr), lit("number"))
-      case TsType.Bool           => eql(typeof(expr), lit("boolean"))
-      case TsType.StrLit(value)  => eql(expr, lit(value))
-      case TsType.ChrLit(value)  => eql(expr, lit(value.toString))
-      case TsType.IntrLit(value) => eql(expr, lit(value))
-      case TsType.RealLit(value) => eql(expr, lit(value))
-      case TsType.BoolLit(value) => eql(expr, lit(value))
-      case TsType.Null           => eql(expr, nullLit)
-      case TsType.Arr(tpe)       => isArray(expr, tpe)
-      case TsType.Struct(fields) => isStruct(expr, fields)
-      case TsType.Inter(types)   => isAll(expr, types)
-      case TsType.Union(types)   => isUnion(expr, types)
+      case TsType.Ref(id, params) => call(ref(predName(id)), expr)
+      case TsType.Str             => eql(typeof(expr), lit("string"))
+      case TsType.Chr             => eql(typeof(expr), lit("string"))
+      case TsType.Intr            => eql(typeof(expr), lit("number"))
+      case TsType.Real            => eql(typeof(expr), lit("number"))
+      case TsType.Bool            => eql(typeof(expr), lit("boolean"))
+      case TsType.StrLit(value)   => eql(expr, lit(value))
+      case TsType.ChrLit(value)   => eql(expr, lit(value.toString))
+      case TsType.IntrLit(value)  => eql(expr, lit(value))
+      case TsType.RealLit(value)  => eql(expr, lit(value))
+      case TsType.BoolLit(value)  => eql(expr, lit(value))
+      case TsType.Null            => eql(expr, nullLit)
+      case TsType.Arr(tpe)        => isArray(expr, tpe)
+      case TsType.Struct(fields)  => isStruct(expr, fields)
+      case TsType.Inter(types)    => isAll(expr, types)
+      case TsType.Union(types)    => isUnion(expr, types)
     }
 
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
@@ -62,9 +90,9 @@ abstract class TsGuardRenderer(predName: String => String, guardName: String => 
       call(dot(call(dot(expr, "map"), func(List("i"), isType(ref("i"), tpe))), "reduce"), func(List("a", "b"), and(ref("a"), ref("b"))))
     )
 
-  private def isStruct(expr: TsGuardExpr, fields: List[TsDecl]): TsGuardExpr =
+  private def isStruct(expr: TsGuardExpr, fields: List[(String, TsType)]): TsGuardExpr =
     fields
-      .map { case DeclF(name, tpe) => isType(dot(expr, name), tpe) }
+      .map { case (name, tpe) => isType(dot(expr, name), tpe) }
       .reduceLeftOption(and)
       .getOrElse(lit(true))
 
@@ -109,7 +137,7 @@ abstract class TsGuardRenderer(predName: String => String, guardName: String => 
       tpe match {
         case TsType.Struct(fields) =>
           fields.collectFirst {
-            case decl @ DeclF("type", TsType.StrLit(name)) =>
+            case decl @ ("type", TsType.StrLit(name)) =>
               (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 
