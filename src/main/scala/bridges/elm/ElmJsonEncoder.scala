@@ -4,31 +4,36 @@ import bridges.core._
 import bridges.core.Type._
 import unindent._
 
-trait ElmJsonEncoder {
+trait ElmJsonEncoder extends ElmUtils {
   def encoder(decls: List[Decl], customTypeReplacements: Map[Ref, TypeReplacement]): String =
     decls.map(encoder(_, customTypeReplacements)).mkString("\n\n")
 
-  def encoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String =
+  def encoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String = {
+    val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val definitionsForGenerics                    = genericsDefinition.map(s ⇒ s"($s -> Encode.Value) -> ").foldLeft("")((acc, b) ⇒ s"$acc$b")
+    val methodsForGenerics                        = genericsDefinition.map(s ⇒ s"encoder${s.toUpperCase}").foldLeft("")((acc, b) ⇒ s"$acc $b")
     decl.tpe match {
       case Sum(products) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
-          products.map { case (name, prod) => encodeSumType(name, prod, customTypeReplacements) }.mkString("\n      ")
+          products.map { case (name, prod) => encodeSumType(name, prod, newTypeReplacements) }.mkString("\n      ")
 
         i"""
-            encoder${decl.name} : ${decl.name} -> Encode.Value
-            encoder${decl.name} tpe =
+            encoder${decl.name} : $definitionsForGenerics${decl.name}$genericsInType -> Encode.Value
+            encoder${decl.name}$methodsForGenerics tpe =
                case tpe of
                   $body
             """
       case other ⇒
-        val body = encodeType(other, "obj", decl.name, customTypeReplacements)
+        val body = encodeType(other, "obj", decl.name, newTypeReplacements)
 
         i"""
-            encoder${decl.name} : ${decl.name} -> Encode.Value
-            encoder${decl.name} obj = $body
+            encoder${decl.name} : $definitionsForGenerics${decl.name}$genericsInType -> Encode.Value
+            encoder${decl.name}$methodsForGenerics obj = $body
             """
     }
+  }
 
   private def encodeSumType(name: String, tpe: Prod, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val refName  = Ref(name)

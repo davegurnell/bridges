@@ -4,33 +4,40 @@ import bridges.core._
 import bridges.core.Type._
 import unindent._
 
-trait ElmJsonDecoder {
+trait ElmJsonDecoder extends ElmUtils {
   def decoder(decls: List[Decl], customTypeReplacements: Map[Ref, TypeReplacement]): String =
     decls.map(decoder(_, customTypeReplacements)).mkString("\n\n")
 
-  def decoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String =
+  def decoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String = {
+    val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val nameWithGenerics                          = if (genericsInType.isEmpty) decl.name else s"(${decl.name}$genericsInType)"
+    val definitionsForGenerics                    = genericsDefinition.map(s ⇒ s"(Decode.Decoder $s) -> ").foldLeft("")((acc, b) ⇒ s"$acc$b")
+    val methodsForGenerics                        = genericsDefinition.map(s ⇒ s"decoder${s.toUpperCase}").foldLeft("")((acc, b) ⇒ s"$acc $b")
+
     decl.tpe match {
       case Sum(products) ⇒
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
-        val body = products.map { case (name, prod) => decodeSumType(name, prod, customTypeReplacements) }.mkString("\n      ")
+        val body = products.map { case (name, prod) => decodeSumType(name, prod, newTypeReplacements) }.mkString("\n      ")
         i"""
-            decoder${decl.name} : Decode.Decoder ${decl.name}
-            decoder${decl.name} = Decode.field "type" Decode.string |> Decode.andThen decoder${decl.name}Tpe
+            decoder${decl.name} : ${definitionsForGenerics}Decode.Decoder $nameWithGenerics
+            decoder${decl.name}$methodsForGenerics = Decode.field "type" Decode.string |> Decode.andThen decoder${decl.name}Tpe$methodsForGenerics
 
-            decoder${decl.name}Tpe : String -> Decode.Decoder ${decl.name}
-            decoder${decl.name}Tpe tpe =
+            decoder${decl.name}Tpe : ${definitionsForGenerics}String -> Decode.Decoder $nameWithGenerics
+            decoder${decl.name}Tpe$methodsForGenerics tpe =
                case tpe of
                   $body
                   _ -> Decode.fail ("Unexpected type for ${decl.name}: " ++ tpe)
             """
       case other ⇒
-        val body = decodeType(other, customTypeReplacements)
+        val body = decodeType(other, newTypeReplacements)
 
         i"""
-            decoder${decl.name} : Decode.Decoder ${decl.name}
-            decoder${decl.name} = decode ${decl.name} $body
+            decoder${decl.name} : ${definitionsForGenerics}Decode.Decoder $nameWithGenerics
+            decoder${decl.name}$methodsForGenerics = decode ${decl.name} $body
             """
     }
+  }
 
   private def decodeSumType(name: String, prod: Prod, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val refName  = Ref(name)

@@ -119,7 +119,13 @@ class ElmRendererSpec extends FreeSpec with Matchers {
   "ClassWithGeneric" in {
     val productDef  = prod("first" → Ref("A"), "second" → Ref("B"), "third" → Ref("C"))
     val declaration = decl("ClassWithGeneric", "A", "B", "C")(productDef)
-    Elm.render(declaration) shouldBe """type alias ClassWithGeneric a b c= { first: a, second: b, third: c }"""
+    Elm.render(declaration) shouldBe """type alias ClassWithGeneric a b c = { first: a, second: b, third: c }"""
+  }
+
+  "ClassWithGeneric2" in {
+    val productDef  = prod("first" → Ref("A"))
+    val declaration = decl("ClassWithGeneric2", "A")(productDef)
+    Elm.render(declaration) shouldBe """type alias ClassWithGeneric2 a = { first: a }"""
   }
 
   "SumWithGeneric" in {
@@ -129,6 +135,6 @@ class ElmRendererSpec extends FreeSpec with Matchers {
       "Third"  -> prod("t" → Ref("C"))
     )
     val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
-    Elm.render(declaration) shouldBe """type SumWithGeneric a b c= First a | Second b | Third c"""
+    Elm.render(declaration) shouldBe """type SumWithGeneric a b c = First a | Second b | Third c"""
   }
 }

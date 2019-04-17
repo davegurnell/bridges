@@ -3,18 +3,17 @@ package bridges.elm
 import bridges.core._
 import bridges.core.Type._
 
-trait ElmRenderer extends Renderer[Type] {
+trait ElmRenderer extends Renderer[Type] with ElmUtils {
   def render(decl: Decl): String =
     render(decl, Map.empty)
 
   def render(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
-    val genericsAsElmReplacement = decl.params.map(k ⇒ Ref(k) → TypeReplacement(k.toLowerCase)).toMap
-    val newTypeReplacements      = customTypeReplacements ++ genericsAsElmReplacement
-    val genericsDefinition       = genericsAsElmReplacement.valuesIterator.map(_.newType).mkString(" ").trim
+    val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
     decl.tpe match {
       case Sum(products) ⇒
-        s"type ${decl.name} $genericsDefinition= ${products.map { case (name, prod) => renderSumType(name, prod, newTypeReplacements) }.mkString(" | ")}"
-      case other ⇒ s"type alias ${decl.name} $genericsDefinition= ${renderType(other, newTypeReplacements)}"
+        s"type ${decl.name}$genericsInType = ${products.map { case (name, prod) => renderSumType(name, prod, newTypeReplacements) }.mkString(" | ")}"
+      case other ⇒ s"type alias ${decl.name}$genericsInType = ${renderType(other, newTypeReplacements)}"
     }
   }
 
