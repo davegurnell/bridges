@@ -42,6 +42,8 @@ git.gitTagToVersionNumber := {
   case _             => None
 }
 
+git.gitUncommittedChanges := true
+
 // Publishing
 
 publishMavenStyle := true
