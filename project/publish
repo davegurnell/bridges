@@ -32,9 +32,15 @@ end
 # Forcing a change to the root directory, if not there already
 Dir.chdir(File.absolute_path(File.join(File.dirname(__FILE__), "..")))
 
+puts "---"
+puts "Running 'git describe'"
+exec("git describe")
+
+puts "---"
 puts "Running 'sbt version'"
 exec("sbt version")
 
 # Go, go, go
+puts "---"
 puts "Running 'sbt release'"
 exec("sbt release")
