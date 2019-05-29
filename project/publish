@@ -23,9 +23,10 @@ unless ENV['PUBLISH'] == 'true'
 end
 
 branch = ENV['TRAVIS_BRANCH']
+pr = ENV['TRAVIS_PULL_REQUEST']
 
-unless branch == "master" || branch =~ /^(\d+\.\d+\.\d+)$/
-  puts "Only deploying for `master` branch and version tags. Exiting!"
+unless branch =~ /^(\d+\.\d+\.\d+)$/ || (branch == "master" && ENV['TRAVIS_PULL_REQUEST'] == 'false')
+  puts "Exiting. Only publishing on master or version tags when not part of a pull request."
   exit 0
 end
 
