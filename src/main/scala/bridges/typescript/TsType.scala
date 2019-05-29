@@ -14,6 +14,8 @@ sealed abstract class TsType extends Product with Serializable {
 }
 
 object TsType {
+  final case class Field(name: String, tpe: TsType, optional: Boolean = false)
+
   final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
   final case object Str                                        extends TsType
   final case object Chr                                        extends TsType
@@ -27,11 +29,11 @@ object TsType {
   final case class RealLit(value: Double)                      extends TsType
   final case class BoolLit(value: Boolean)                     extends TsType
   final case class Arr(tpe: TsType)                            extends TsType
-  final case class Struct(fields: List[(String, TsType)])      extends TsType
+  final case class Struct(fields: List[Field])                 extends TsType
   final case class Inter(types: List[TsType])                  extends TsType
   final case class Union(types: List[TsType])                  extends TsType
 
-  def from(tpe: Type): TsType =
+  def from(tpe: Type)(implicit config: TsEncoderConfig): TsType =
     tpe match {
       case Type.Ref(id, params) => Ref(id, params.map(from))
       case Type.Str             => Str
@@ -45,14 +47,28 @@ object TsType {
       case Type.Sum(products)   => translateSum(products)
     }
 
-  private def translateProd(fields: List[(String, Type)]): Struct =
-    Struct(fields.map { case (name, tpe) => (name, from(tpe)) })
+  private def translateProd(fields: List[(String, Type)])(implicit config: TsEncoderConfig): Struct =
+    Struct(fields.map { case (name, tpe) => Field(name, from(tpe), keyIsOptional(tpe)) })
 
-  private def translateSum(products: List[(String, Type.Prod)]): Union =
+  private def translateSum(products: List[(String, Type.Prod)])(implicit config: TsEncoderConfig): Union =
     Union(products.map {
       case (name, tpe) =>
-        Struct(("type" -> StrLit(name)) +: translateProd(tpe.fields).fields)
+        Struct(Field("type", StrLit(name)) +: translateProd(tpe.fields).fields)
     })
+
+  private def keyIsOptional(tpe: Type)(implicit config: TsEncoderConfig): Boolean =
+    tpe match {
+      case _: Type.Opt if config.optionalFields => true
+      case _                                    => false
+    }
+
+  private implicit val fieldRename: Rename[Field] =
+    Rename.pure { (field, from, to) =>
+      field.copy(
+        name = if (field.name == from) to else field.name,
+        tpe = field.tpe.rename(from, to)
+      )
+    }
 
   implicit val rename: Rename[TsType] =
     Rename.pure { (value, from, to) =>

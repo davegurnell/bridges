@@ -41,14 +41,16 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   private def renderRef(name: String, params: List[TsType]): String =
     if (params.isEmpty) name else params.map(renderType).mkString(s"$name<", ", ", ">")
 
-  private def renderStruct(fields: List[(String, TsType)]): String =
+  private def renderStruct(fields: List[TsType.Field]): String =
     fields.map(renderField).mkString("{ ", ", ", " }")
 
-  private def renderStructAsInterface(fields: List[(String, TsType)]): String =
+  private def renderStructAsInterface(fields: List[TsType.Field]): String =
     fields.map(renderField).mkString("{\n  ", ";\n  ", ";\n}")
 
-  private def renderField(field: (String, TsType)): String =
-    s"""${field._1}: ${renderType(field._2)}"""
+  private def renderField(field: TsType.Field): String = {
+    val optFlag = if (field.optional) "?" else ""
+    s"""${field.name}${optFlag}: ${renderType(field.tpe)}"""
+  }
 
   private def renderParens(outer: TsType)(inner: TsType): String =
     if (precedence(outer) > precedence(inner)) {

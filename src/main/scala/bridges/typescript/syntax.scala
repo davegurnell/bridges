@@ -4,6 +4,7 @@ import bridges.core.{ DeclF, Encoder, RenamableSyntax }
 import bridges.core.syntax.getCleanTagName
 import shapeless.Lazy
 import scala.reflect.runtime.universe.WeakTypeTag
+import scala.language.implicitConversions
 
 object syntax extends RenamableSyntax {
   import TsType._
@@ -17,8 +18,25 @@ object syntax extends RenamableSyntax {
   def decl(name: String, params: String*)(tpe: TsType): TsDecl =
     DeclF(name, params.toList, tpe)
 
-  def struct(fields: (String, TsType)*): Struct =
+  def struct(fields: Field*): Struct =
     Struct(fields.toList)
+
+  implicit class StringFieldOps(name: String) {
+    def -->(tpe: TsType): Field =
+      Field(name, tpe, optional = false)
+
+    def -?>(tpe: TsType): Field =
+      Field(name, tpe, optional = true)
+  }
+
+  @deprecated("Use --> instead of ->", "0.16.0")
+  implicit def pairToField(pair: (String, TsType)): Field = {
+    val (name, tpe) = pair
+    Field(name, tpe, optional = false)
+  }
+
+  def field(name: String, optional: Boolean = false)(tpe: TsType): Field =
+    Field(name, tpe, optional)
 
   def union(types: TsType*): Union =
     Union(types.toList)

@@ -68,7 +68,7 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       i"""
       export interface ArrayClass {
         aList: string[];
-        optField: number | null;
+        optField?: number | null;
       }
       """
     }
@@ -135,7 +135,7 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       i"""
       export interface Recursive {
         head: number;
-        tail: Recursive | null;
+        tail?: Recursive | null;
       }
       """
     }
@@ -188,11 +188,18 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
   }
 
   "Generic Decl" in {
-    Typescript.render(decl("Pair", "A", "B")(struct("a" -> Ref("A"), "b" -> Ref("B")))) shouldBe {
+    Typescript.render(
+      decl("Pair", "A", "B")(
+        struct(
+          "a" --> Ref("A"),
+          "b" -?> Ref("B")
+        )
+      )
+    ) shouldBe {
       i"""
       export interface Pair<A, B> {
         a: A;
-        b: B;
+        b?: B;
       }
       """
     }

@@ -15,6 +15,6 @@ object TsEncoder {
       override val encode = tpe
     }
 
-  implicit def from[A](implicit encoder: Encoder[A]): TsEncoder[A] =
+  implicit def from[A](implicit encoder: Encoder[A], config: TsEncoderConfig): TsEncoder[A] =
     pure(TsType.from(encoder.encode))
 }
