@@ -177,8 +177,8 @@ you need to do the following:
    the name of the product instance as a `String`.
    If you use [Circe](https://circe.github.io/circe/),
    see [this link](https://github.com/circe/circe/pull/429).
-   
-NOTE: automatic encoder and decoder generation doesn't work for types with Generics. You will need to manually create your own.    
+
+NOTE: automatic encoder and decoder generation doesn't work for types with Generics. You will need to manually create your own.
 
 ### Working with Refined types
 
@@ -197,55 +197,15 @@ You can still override the default encoder with your own higher-precedence encod
 
 You can see an example of this in tests for class `ClassWithRefinedType`.
 
-
 ## Developing
 
-We use the [git flow](https://github.com/nvie/gitflow) branching model:
+(NOTE: We no longer use the [git flow](https://github.com/nvie/gitflow) branching model.)
 
-- most development happens on feature branches called `feature/foo`;
-- complete features are PR'd onto `develop`;
-- releases are tagged and merged to `master`.
+Develop on feature branches and PR completed features to master.
 
-Travis is configured to publish as follows:
+Travis is configured to publish releases from there:
 
-- releases from release tags with the format `x.y.z`;
-- snapshots from non-PR commits to `develop`.
-
-The `git.baseVersion` line in `build.sbt` should be
-kept up-to-date with the *next* non-snapshot release number.
-
-### Example: Publishing a Release
-
-This development, versioning, and publishing process is a WIP.
-TODO: Investigate using git-release to automate some of this:
-
-~~~bash
-# Start with a clean Git (everything committed).
-
-# Switch to develop branch:
-$ git checkout develop
-
-# Ensure you're up-to-date with Github:
-$ git pull
-$ git pull --tags
-
-# See what versions we've released before.
-# Work out what version you're releasing next:
-$ git tag --list
-
-# Start a release:
-$ git flow release start x.y.z
-
-# Finish the release, updating master and develop and creating the x.y.z tag:
-$ git flow release finish x.y.z
-
-# Modify build.sbt and update git.baseVersion to x.(y+1).z:
-$ git checkout develop
-$ myeditor build.sbt # etc...
-
-# Push to Github. Travis will publish the release and a new snapshot:
-$ git push --all
-$ git push --tags
-~~~
+- if the current commit is tagged with the format `x.y.z`, Travis publishes to Sonatype Releases;
+- for any other commit, Travis publishes to Sonatype Snapshots.
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0
