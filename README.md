@@ -199,13 +199,8 @@ You can see an example of this in tests for class `ClassWithRefinedType`.
 
 ## Developing
 
-(NOTE: We no longer use the [git flow](https://github.com/nvie/gitflow) branching model.)
-
-Develop on feature branches and PR completed features to master.
-
-Travis is configured to publish releases from there:
-
-- if the current commit is tagged with the format `x.y.z`, Travis publishes to Sonatype Releases;
-- for any other commit, Travis publishes to Sonatype Snapshots.
+- Development should be completed on feature branches and submitted by PR to master.
+- Commits to master are published as snapshot builds.
+- Tags of the form `x.y.z` are published as release builds.
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0
