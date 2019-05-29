@@ -23,18 +23,18 @@ unless ENV['PUBLISH'] == 'true'
 end
 
 branch = ENV['TRAVIS_BRANCH']
-version = nil
 
 unless branch == "master" || branch =~ /^(\d+\.\d+\.\d+)$/
   puts "Only deploying for `master` branch and version tags. Exiting!"
   exit 0
-else
-  version = $1
-  puts "Version branch detected: #{version}" if version
 end
 
 # Forcing a change to the root directory, if not there already
 Dir.chdir(File.absolute_path(File.join(File.dirname(__FILE__), "..")))
 
+puts "Running 'sbt version'"
+exec("sbt version")
+
 # Go, go, go
+puts "Running 'sbt release'"
 exec("sbt release")
