@@ -61,7 +61,7 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ArrayClass]) shouldBe {
       i"""
       export const isArrayClass = (v: any): v is ArrayClass => {
-        return "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b) && "optField" in v && (typeof v.optField === "number" || v.optField === null);
+        return "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b) && (!("optField" in v) || typeof v.optField === "number" || v.optField === null);
       }
       """
     }
@@ -131,7 +131,7 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Recursive]) shouldBe {
       i"""
       export const isRecursive = (v: any): v is Recursive => {
-        return "head" in v && typeof v.head === "number" && "tail" in v && (isRecursive(v.tail) || v.tail === null);
+        return "head" in v && typeof v.head === "number" && (!("tail" in v) || isRecursive(v.tail) || v.tail === null);
       }
       """
     }
@@ -188,10 +188,17 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
   }
 
   "Generic Decl" in {
-    TypescriptGuard.render(decl("Pair", "A", "B")(struct("a" -> Ref("A"), "b" -> Ref("B")))) shouldBe {
+    TypescriptGuard.render(
+      decl("Pair", "A", "B")(
+        struct(
+          "a" --> Ref("A"),
+          "b" -?> Ref("B")
+        )
+      )
+    ) shouldBe {
       i"""
       export const isPair = <A, B>(isA: (v: any) => boolean, isB: (v: any) => boolean) => (v: any): v is Pair<A, B> => {
-        return "a" in v && isA(v.a) && "b" in v && isB(v.b);
+        return "a" in v && isA(v.a) && (!("b" in v) || isB(v.b));
       }
       """
     }

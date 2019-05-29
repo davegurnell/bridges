@@ -67,9 +67,16 @@ abstract class TsGuardRenderer(
       call(dot(call(dot(expr, "map"), func(List("i"), isType(ref("i"), tpe))), "reduce"), func(List("a", "b"), and(ref("a"), ref("b"))))
     )
 
-  private def isStruct(expr: TsGuardExpr, fields: List[(String, TsType)]): TsGuardExpr =
+  private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr =
     fields
-      .map { case (name, tpe) => and(in(name, expr), isType(dot(expr, name), tpe)) }
+      .map {
+        case Field(name, tpe, optional) =>
+          if (optional) {
+            or(not(in(name, expr)), isType(dot(expr, name), tpe))
+          } else {
+            and(in(name, expr), isType(dot(expr, name), tpe))
+          }
+      }
       .reduceLeftOption(and)
       .getOrElse(lit(true))
 
@@ -114,7 +121,7 @@ abstract class TsGuardRenderer(
       tpe match {
         case TsType.Struct(fields) =>
           fields.collectFirst {
-            case decl @ ("type", TsType.StrLit(name)) =>
+            case decl @ Field("type", TsType.StrLit(name), _) =>
               (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 

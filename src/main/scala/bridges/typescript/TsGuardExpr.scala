@@ -12,6 +12,7 @@ object TsGuardExpr {
   final case class Call(func: TsGuardExpr, args: List[TsGuardExpr])                     extends TsGuardExpr
   final case class Func(args: List[String], body: TsGuardExpr)                          extends TsGuardExpr
   final case class Cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr) extends TsGuardExpr
+  final case class Not(expr: TsGuardExpr)                                               extends TsGuardExpr
   final case class And(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
   final case class Or(lhs: TsGuardExpr, rhs: TsGuardExpr)                               extends TsGuardExpr
   final case class Eql(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
@@ -53,6 +54,9 @@ object TsGuardExpr {
   def cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr): TsGuardExpr =
     Cond(test, trueArm, falseArm)
 
+  def not(expr: TsGuardExpr): TsGuardExpr =
+    Not(expr)
+
   def and(lhs: TsGuardExpr, rhs: TsGuardExpr): TsGuardExpr =
     And(lhs, rhs)
 
@@ -76,6 +80,7 @@ object TsGuardExpr {
       case Call(func, args) => s"""${r(func)}(${args.map(render).mkString(", ")})"""
       case Func(args, body) => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
       case Cond(c, t, f)    => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
+      case Not(expr)        => s"""!${r(expr)}"""
       case And(lhs, rhs)    => s"""${r(lhs)} && ${r(rhs)}"""
       case Or(lhs, rhs)     => s"""${r(lhs)} || ${r(rhs)}"""
       case Eql(lhs, rhs)    => s"""${r(lhs)} === ${r(rhs)}"""
@@ -96,6 +101,7 @@ object TsGuardExpr {
       case _: Dot    => 1000
       case _: Lit    => 1000
       case _: Call   => 1000
+      case _: Not    => 950
       case _: Typeof => 900
       case _: Eql    => 700
       case _: In     => 700
