@@ -26,9 +26,9 @@ branch = ENV['TRAVIS_BRANCH']
 version = nil
 
 unless branch =~ /^(\d+\.\d+\.\d+)$/ ||
-  (branch == "develop" && ENV['TRAVIS_PULL_REQUEST'] == 'false')
+  (branch == "master" && ENV['TRAVIS_PULL_REQUEST'] == 'false')
 
-  puts "Only deploying for `develop` branch and version tags. Exiting!"
+  puts "Only deploying for `master` branch and version tags. Exiting!"
   exit 0
 else
   version = $1

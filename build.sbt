@@ -34,6 +34,7 @@ enablePlugins(GitVersioning)
 
 // The next (upcoming) version:
 // git.baseVersion := "0.14.0"
+git.useGitDescribe := true
 
 val ReleaseTag = """^([\d\.]+)$""".r
 
