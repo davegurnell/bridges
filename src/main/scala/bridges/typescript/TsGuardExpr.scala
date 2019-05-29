@@ -70,7 +70,7 @@ object TsGuardExpr {
       case Lit(value)       => value
       case Typeof(expr)     => s"""typeof ${r(expr)}"""
       case Call(func, args) => s"""${r(func)}(${args.map(render).mkString(", ")})"""
-      case Func(args, body) => s"""(${args.mkString(", ")}) => ${r(body)}"""
+      case Func(args, body) => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
       case Cond(c, t, f)    => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
       case And(lhs, rhs)    => s"""${r(lhs)} && ${r(rhs)}"""
       case Or(lhs, rhs)     => s"""${r(lhs)} || ${r(rhs)}"""

@@ -77,7 +77,7 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
     TypescriptGuard.renderPred(decl[ArrayClass]) shouldBe {
       i"""
       export const isArrayClass = (v: any): boolean => {
-        return Array.isArray(v.aList) && v.aList.map((i) => (typeof i === "string")).reduce((a, b) => (a && b)) && (typeof v.optField === "number" || v.optField === null);
+        return Array.isArray(v.aList) && v.aList.map((i: any) => (typeof i === "string")).reduce((a: any, b: any) => (a && b)) && (typeof v.optField === "number" || v.optField === null);
       }
       """
     }
@@ -117,7 +117,7 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
     TypescriptGuard.renderPred(decl[Navigation]) shouldBe {
       i"""
       export const isNavigation = (v: any): boolean => {
-        return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : false;
+        return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => (a && b)) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => (a && b)) : false;
       }
       """
     }
@@ -157,7 +157,7 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
     TypescriptGuard.renderPred(decl[Recursive2]) shouldBe {
       i"""
       export const isRecursive2 = (v: any): boolean => {
-        return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.map((i) => isRecursive2(i)).reduce((a, b) => (a && b));
+        return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.map((i: any) => isRecursive2(i)).reduce((a: any, b: any) => (a && b));
       }
       """
     }
