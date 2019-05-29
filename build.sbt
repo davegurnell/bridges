@@ -31,9 +31,8 @@ libraryDependencies ++= Seq(
 //   - http://caryrobbins.com/dev/sbt-publishing/
 
 enablePlugins(GitVersioning)
+enablePlugins(GitBranchPrompt)
 
-// The next (upcoming) version:
-// git.baseVersion := "0.14.0"
 git.useGitDescribe := true
 
 val ReleaseTag = """^([\d\.]+)$""".r
@@ -42,19 +41,6 @@ git.gitTagToVersionNumber := {
   case ReleaseTag(v) => Some(v)
   case _             => None
 }
-
-// git.formattedShaVersion := {
-//   // val suffix = git.makeUncommittedSignifierSuffix(
-//   //   git.gitUncommittedChanges.value,
-//   //   git.uncommittedSignifier.value)
-
-//   git.gitHeadCommit.value.map(_.substring(0, 7)).map { sha =>
-//     // s"${git.baseVersion.value}-${sha}-SNAPSHOT"
-
-//     // Actually let's not put the SHA in there... we'll end up with hundreds of excess snapshots:
-//     s"${git.baseVersion.value}-SNAPSHOT"
-//   }
-// }
 
 // Publishing
 
