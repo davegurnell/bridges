@@ -33,16 +33,19 @@ libraryDependencies ++= Seq(
 enablePlugins(GitVersioning)
 enablePlugins(GitBranchPrompt)
 
+// Use "1.2.3-4-aabbccdde-SNAPSHOT" versnining:
 git.useGitDescribe := true
 
+// Put "-SNAPSHOT" on a commit if it's not a tag:
+git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty
+
+// This is what release tags look like:
 val ReleaseTag = """^([\d\.]+)$""".r
 
 git.gitTagToVersionNumber := {
   case ReleaseTag(v) => Some(v)
   case _             => None
 }
-
-git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty
 
 // Publishing
 
