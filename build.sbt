@@ -30,30 +30,6 @@ libraryDependencies ++= Seq(
 //   - https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
 //   - http://caryrobbins.com/dev/sbt-publishing/
 
-enablePlugins(GitVersioning)
-
-git.baseVersion := "0.14.0"
-
-val ReleaseTag = """^([\d\.]+)$""".r
-
-git.gitTagToVersionNumber := {
-  case ReleaseTag(v) => Some(v)
-  case _             => None
-}
-
-git.formattedShaVersion := {
-  // val suffix = git.makeUncommittedSignifierSuffix(
-  //   git.gitUncommittedChanges.value,
-  //   git.uncommittedSignifier.value)
-
-  git.gitHeadCommit.value.map(_.substring(0, 7)).map { sha =>
-    // s"${git.baseVersion.value}-${sha}-SNAPSHOT"
-
-    // Actually let's not put the SHA in there... we'll end up with hundreds of excess snapshots:
-    s"${git.baseVersion.value}-SNAPSHOT"
-  }
-}
-
 // Publishing
 
 publishMavenStyle := true
