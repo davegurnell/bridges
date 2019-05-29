@@ -42,7 +42,7 @@ git.gitTagToVersionNumber := {
   case _             => None
 }
 
-git.gitUncommittedChanges := true
+git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty
 
 // Publishing
 
