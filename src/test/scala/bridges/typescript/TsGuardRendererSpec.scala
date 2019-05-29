@@ -10,173 +10,157 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
   "Color" in {
     TypescriptGuard.render(decl[Color]) shouldBe {
       i"""
-      export const isColor = (v: any): boolean => {
-        return typeof v.red === "number" && typeof v.green === "number" && typeof v.blue === "number";
-      }
-
-      export const asColor = (v: any): Color => {
-        if(isColor(v)) {
-          return v as Color;
-        } else {
-          throw new Error("Expected Color, received " + JSON.stringify(v, null, 2));
-        }
-      }
-      """
-    }
-
-    TypescriptGuard.renderPred(decl[Color]) shouldBe {
-      i"""
-      export const isColor = (v: any): boolean => {
-        return typeof v.red === "number" && typeof v.green === "number" && typeof v.blue === "number";
+      export const isColor = (v: any): v is Color => {
+        return "red" in v && typeof v.red === "number" && "green" in v && typeof v.green === "number" && "blue" in v && typeof v.blue === "number";
       }
       """
     }
   }
 
   "Circle" in {
-    TypescriptGuard.renderPred(decl[Circle]) shouldBe {
+    TypescriptGuard.render(decl[Circle]) shouldBe {
       i"""
-      export const isCircle = (v: any): boolean => {
-        return typeof v.radius === "number" && isColor(v.color);
+      export const isCircle = (v: any): v is Circle => {
+        return "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color);
       }
       """
     }
   }
 
   "Rectangle" in {
-    TypescriptGuard.renderPred(decl[Rectangle]) shouldBe {
+    TypescriptGuard.render(decl[Rectangle]) shouldBe {
       i"""
-      export const isRectangle = (v: any): boolean => {
-        return typeof v.width === "number" && typeof v.height === "number" && isColor(v.color);
+      export const isRectangle = (v: any): v is Rectangle => {
+        return "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color);
       }
       """
     }
   }
 
   "Shape" in {
-    TypescriptGuard.renderPred(decl[Shape]) shouldBe {
+    TypescriptGuard.render(decl[Shape]) shouldBe {
       i"""
-      export const isShape = (v: any): boolean => {
-        return v.type === "Circle" ? typeof v.radius === "number" && isColor(v.color) : v.type === "Rectangle" ? typeof v.width === "number" && typeof v.height === "number" && isColor(v.color) : v.type === "ShapeGroup" ? isShape(v.leftShape) && isShape(v.rightShape) : false;
+      export const isShape = (v: any): v is Shape => {
+        return v.type === "Circle" ? "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color) : v.type === "Rectangle" ? "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color) : v.type === "ShapeGroup" ? "leftShape" in v && isShape(v.leftShape) && "rightShape" in v && isShape(v.rightShape) : false;
       }
       """
     }
   }
 
   "Alpha" in {
-    TypescriptGuard.renderPred(decl[Alpha]) shouldBe {
+    TypescriptGuard.render(decl[Alpha]) shouldBe {
       i"""
-      export const isAlpha = (v: any): boolean => {
-        return typeof v.name === "string" && typeof v.char === "string" && typeof v.bool === "boolean";
+      export const isAlpha = (v: any): v is Alpha => {
+        return "name" in v && typeof v.name === "string" && "char" in v && typeof v.char === "string" && "bool" in v && typeof v.bool === "boolean";
       }
       """
     }
   }
 
   "ArrayClass" in {
-    TypescriptGuard.renderPred(decl[ArrayClass]) shouldBe {
+    TypescriptGuard.render(decl[ArrayClass]) shouldBe {
       i"""
-      export const isArrayClass = (v: any): boolean => {
-        return Array.isArray(v.aList) && v.aList.map((i) => (typeof i === "string")).reduce((a, b) => (a && b)) && (typeof v.optField === "number" || v.optField === null);
+      export const isArrayClass = (v: any): v is ArrayClass => {
+        return "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b) && "optField" in v && (typeof v.optField === "number" || v.optField === null);
       }
       """
     }
   }
 
   "Numeric" in {
-    TypescriptGuard.renderPred(decl[Numeric]) shouldBe {
+    TypescriptGuard.render(decl[Numeric]) shouldBe {
       i"""
-      export const isNumeric = (v: any): boolean => {
-        return typeof v.double === "number" && typeof v.float === "number" && typeof v.int === "number";
+      export const isNumeric = (v: any): v is Numeric => {
+        return "double" in v && typeof v.double === "number" && "float" in v && typeof v.float === "number" && "int" in v && typeof v.int === "number";
       }
       """
     }
   }
 
   "ClassOrObject" in {
-    TypescriptGuard.renderPred(decl[ClassOrObject]) shouldBe {
+    TypescriptGuard.render(decl[ClassOrObject]) shouldBe {
       i"""
-      export const isClassOrObject = (v: any): boolean => {
-        return v.type === "MyClass" ? typeof v.value === "number" : v.type === "MyObject" ? true : false;
+      export const isClassOrObject = (v: any): v is ClassOrObject => {
+        return v.type === "MyClass" ? "value" in v && typeof v.value === "number" : v.type === "MyObject" ? true : false;
       }
       """
     }
   }
 
   "NestedClassOrObject" in {
-    TypescriptGuard.renderPred(decl[NestedClassOrObject]) shouldBe {
+    TypescriptGuard.render(decl[NestedClassOrObject]) shouldBe {
       i"""
-      export const isNestedClassOrObject = (v: any): boolean => {
-        return v.type === "MyClass" ? typeof v.value === "number" : v.type === "MyObject" ? true : false;
+      export const isNestedClassOrObject = (v: any): v is NestedClassOrObject => {
+        return v.type === "MyClass" ? "value" in v && typeof v.value === "number" : v.type === "MyObject" ? true : false;
       }
       """
     }
   }
 
   "Navigation" in {
-    TypescriptGuard.renderPred(decl[Navigation]) shouldBe {
+    TypescriptGuard.render(decl[Navigation]) shouldBe {
       i"""
-      export const isNavigation = (v: any): boolean => {
-        return v.type === "Node" ? typeof v.name === "string" && Array.isArray(v.children) && v.children.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : v.type === "NodeList" ? Array.isArray(v.all) && v.all.map((i) => isNavigation(i)).reduce((a, b) => (a && b)) : false;
+      export const isNavigation = (v: any): v is Navigation => {
+        return v.type === "Node" ? "name" in v && typeof v.name === "string" && "children" in v && Array.isArray(v.children) && v.children.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : v.type === "NodeList" ? "all" in v && Array.isArray(v.all) && v.all.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : false;
       }
       """
     }
   }
 
   "ClassUUID" in {
-    TypescriptGuard.renderPred(decl[ClassUUID]) shouldBe {
+    TypescriptGuard.render(decl[ClassUUID]) shouldBe {
       i"""
-      export const isClassUUID = (v: any): boolean => {
-        return isUUID(v.a);
+      export const isClassUUID = (v: any): v is ClassUUID => {
+        return "a" in v && isUUID(v.a);
       }
       """
     }
   }
 
   "ClassDate" in {
-    TypescriptGuard.renderPred(decl[ClassDate]) shouldBe {
+    TypescriptGuard.render(decl[ClassDate]) shouldBe {
       i"""
-      export const isClassDate = (v: any): boolean => {
-        return isDate(v.a);
+      export const isClassDate = (v: any): v is ClassDate => {
+        return "a" in v && isDate(v.a);
       }
       """
     }
   }
 
   "Recursive" in {
-    TypescriptGuard.renderPred(decl[Recursive]) shouldBe {
+    TypescriptGuard.render(decl[Recursive]) shouldBe {
       i"""
-      export const isRecursive = (v: any): boolean => {
-        return typeof v.head === "number" && (isRecursive(v.tail) || v.tail === null);
+      export const isRecursive = (v: any): v is Recursive => {
+        return "head" in v && typeof v.head === "number" && "tail" in v && (isRecursive(v.tail) || v.tail === null);
       }
       """
     }
   }
 
   "Recursive2" in {
-    TypescriptGuard.renderPred(decl[Recursive2]) shouldBe {
+    TypescriptGuard.render(decl[Recursive2]) shouldBe {
       i"""
-      export const isRecursive2 = (v: any): boolean => {
-        return typeof v.head === "number" && Array.isArray(v.tail) && v.tail.map((i) => isRecursive2(i)).reduce((a, b) => (a && b));
+      export const isRecursive2 = (v: any): v is Recursive2 => {
+        return "head" in v && typeof v.head === "number" && "tail" in v && Array.isArray(v.tail) && v.tail.map((i: any) => isRecursive2(i)).reduce((a: any, b: any) => a && b);
       }
       """
     }
   }
 
   "ExternalReferences" in {
-    TypescriptGuard.renderPred(decl[ExternalReferences]) shouldBe {
+    TypescriptGuard.render(decl[ExternalReferences]) shouldBe {
       i"""
-      export const isExternalReferences = (v: any): boolean => {
-        return isColor(v.color) && isNavigation(v.nav);
+      export const isExternalReferences = (v: any): v is ExternalReferences => {
+        return "color" in v && isColor(v.color) && "nav" in v && isNavigation(v.nav);
       }
       """
     }
   }
 
   "ObjectsOnly" in {
-    TypescriptGuard.renderPred(decl[ObjectsOnly]) shouldBe {
+    TypescriptGuard.render(decl[ObjectsOnly]) shouldBe {
       i"""
-      export const isObjectsOnly = (v: any): boolean => {
+      export const isObjectsOnly = (v: any): v is ObjectsOnly => {
         return v.type === "ObjectOne" ? true : v.type === "ObjectTwo" ? true : false;
       }
       """
@@ -184,9 +168,9 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
   }
 
   "Union of Union" in {
-    TypescriptGuard.renderPred("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
+    TypescriptGuard.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
       i"""
-      export const isA = (v: any): boolean => {
+      export const isA = (v: any): v is A => {
         return isB(v) || isC(v) || isD(v);
       }
       """
@@ -194,9 +178,9 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
   }
 
   "Inter of Inter" in {
-    TypescriptGuard.renderPred("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
+    TypescriptGuard.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
       i"""
-      export const isA = (v: any): boolean => {
+      export const isA = (v: any): v is A => {
         return isB(v) && isC(v) && isD(v);
       }
       """
@@ -206,16 +190,8 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
   "Generic Decl" in {
     TypescriptGuard.render(decl("Pair", "A", "B")(struct("a" -> Ref("A"), "b" -> Ref("B")))) shouldBe {
       i"""
-      export const isPair = (isA: (v: any) => A, isB: (v: any) => B) => (v: any): boolean => {
-        return isA(v.a) && isB(v.b);
-      }
-
-      export const asPair = (isA: (v: any) => A, isB: (v: any) => B) => (v: any): Pair => {
-        if(isPair(isA, isB)(v)) {
-          return v as Pair;
-        } else {
-          throw new Error("Expected Pair, received " + JSON.stringify(v, null, 2));
-        }
+      export const isPair = <A, B>(isA: (v: any) => boolean, isB: (v: any) => boolean) => (v: any): v is Pair<A, B> => {
+        return "a" in v && isA(v.a) && "b" in v && isB(v.b);
       }
       """
     }

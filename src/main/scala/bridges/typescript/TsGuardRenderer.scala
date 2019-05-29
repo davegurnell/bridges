@@ -11,60 +11,37 @@ abstract class TsGuardRenderer(
   import TsGuardExpr._
 
   def render(decl: TsDecl): String =
-    i"""
-    ${renderPred(decl)}
-
-    ${renderGuard(decl)}
-    """
-
-  def renderPred(decl: TsDecl): String =
     decl match {
       case DeclF(name, Nil, tpe) =>
         i"""
-        export const ${predName(decl.name)} = (v: any): boolean => {
+        export const ${predName(decl.name)} = (v: any): v is ${name} => {
           return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
         }
         """
 
       case DeclF(name, params, tpe) =>
+        val tparams = renderParamTypes(params)
+        val vparams = renderParamPreds(params)
         i"""
-        export const ${predName(decl.name)} = (${renderParamPreds(params)}) => (v: any): boolean => {
+        export const ${predName(decl.name)} = ${tparams}(${vparams}) => (v: any): v is ${name}${tparams} => {
           return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
         }
         """
     }
 
-  def renderGuard(decl: TsDecl): String =
-    decl match {
-      case DeclF(name, Nil, tpe) =>
-        i"""
-        export const ${guardName(name)} = (v: any): ${name} => {
-          if(${predName(name)}(v)) {
-            return v as ${name};
-          } else {
-            throw new Error("Expected ${name}, received " + JSON.stringify(v, null, 2));
-          }
-        }
-        """
-
-      case DeclF(name, params, tpe) =>
-        i"""
-        export const ${guardName(name)} = (${renderParamPreds(params)}) => (v: any): ${name} => {
-          if(${predName(name)}(${params.map(predName).mkString(", ")})(v)) {
-            return v as ${name};
-          } else {
-            throw new Error("Expected ${name}, received " + JSON.stringify(v, null, 2));
-          }
-        }
-        """
+  def renderParamTypes(params: List[String]): String =
+    if (params.isEmpty) {
+      ""
+    } else {
+      params.mkString("<", ", ", ">")
     }
 
   def renderParamPreds(params: List[String]): String =
-    params.map(param => s"${predName(param)}: (v: any) => ${param}").mkString(", ")
+    params.map(param => s"${predName(param)}: (v: any) => boolean").mkString(", ")
 
   import TsGuardExpr._
 
-  private def isType(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
+  def isType(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     tpe match {
       case TsType.Ref(id, params) => call(ref(predName(id)), expr)
       case TsType.Str             => eql(typeof(expr), lit("string"))
@@ -92,7 +69,7 @@ abstract class TsGuardRenderer(
 
   private def isStruct(expr: TsGuardExpr, fields: List[(String, TsType)]): TsGuardExpr =
     fields
-      .map { case (name, tpe) => isType(dot(expr, name), tpe) }
+      .map { case (name, tpe) => and(in(name, expr), isType(dot(expr, name), tpe)) }
       .reduceLeftOption(and)
       .getOrElse(lit(true))
 

@@ -15,6 +15,7 @@ object TsGuardExpr {
   final case class And(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
   final case class Or(lhs: TsGuardExpr, rhs: TsGuardExpr)                               extends TsGuardExpr
   final case class Eql(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
+  final case class In(key: String, expr: TsGuardExpr)                                   extends TsGuardExpr
 
   def ref(name: String): TsGuardExpr =
     Ref(name)
@@ -61,6 +62,9 @@ object TsGuardExpr {
   def eql(lhs: TsGuardExpr, rhs: TsGuardExpr): TsGuardExpr =
     Eql(lhs, rhs)
 
+  def in(key: String, expr: TsGuardExpr): TsGuardExpr =
+    In(key, expr)
+
   def render(expr: TsGuardExpr): String = {
     val r = renderParens(expr) _
 
@@ -70,11 +74,12 @@ object TsGuardExpr {
       case Lit(value)       => value
       case Typeof(expr)     => s"""typeof ${r(expr)}"""
       case Call(func, args) => s"""${r(func)}(${args.map(render).mkString(", ")})"""
-      case Func(args, body) => s"""(${args.mkString(", ")}) => ${r(body)}"""
+      case Func(args, body) => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
       case Cond(c, t, f)    => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
       case And(lhs, rhs)    => s"""${r(lhs)} && ${r(rhs)}"""
       case Or(lhs, rhs)     => s"""${r(lhs)} || ${r(rhs)}"""
       case Eql(lhs, rhs)    => s"""${r(lhs)} === ${r(rhs)}"""
+      case In(key, expr)    => s"""${r(lit(key))} in ${r(expr)}"""
     }
   }
 
@@ -91,11 +96,12 @@ object TsGuardExpr {
       case _: Dot    => 1000
       case _: Lit    => 1000
       case _: Call   => 1000
-      case _: Func   => 1000
       case _: Typeof => 900
       case _: Eql    => 700
+      case _: In     => 700
       case _: And    => 600
       case _: Or     => 500
       case _: Cond   => 400
+      case _: Func   => 300
     }
 }
