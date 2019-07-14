@@ -18,6 +18,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   private def renderType(tpe: TsType): String =
     tpe match {
       case Ref(id, params)    => renderRef(id, params)
+      case Any                => "any"
       case Str                => "string"
       case Chr                => "string"
       case Intr               => "number"
@@ -62,6 +63,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   private def precedence(tpe: TsType): Int =
     tpe match {
       case _: Ref     => 1000
+      case _ @Any     => 1000
       case _ @Str     => 1000
       case _ @Chr     => 1000
       case _ @Intr    => 1000

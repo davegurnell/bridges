@@ -6,7 +6,7 @@ import bridges.typescript.syntax._
 import org.scalatest._
 import unindent._
 
-class TypescriptGuardSpec extends FreeSpec with Matchers {
+class TsGuardRendererSpec extends FreeSpec with Matchers {
   "Color" in {
     TypescriptGuard.render(decl[Color]) shouldBe {
       i"""
@@ -197,11 +197,36 @@ class TypescriptGuardSpec extends FreeSpec with Matchers {
       )
     ) shouldBe {
       i"""
-      export const isPair = <A, B>(isA: (v: any) => boolean, isB: (v: any) => boolean) => (v: any): v is Pair<A, B> => {
+      export const isPair = <A, B>(isA: (a: any) => boolean, isB: (b: any) => boolean) => (v: any): v is Pair<A, B> => {
         return "a" in v && isA(v.a) && (!("b" in v) || isB(v.b));
       }
       """
     }
   }
 
+  "Applications of Generics" in {
+    TypescriptGuard.render(decl("Cell")(ref("Pair", Str, Intr))) shouldBe {
+      i"""
+      export const isCell = (v: any): v is Cell => {
+        return isPair((a0: any) => typeof a0 === "string", (a1: any) => typeof a1 === "number")(v);
+      }
+      """
+    }
+
+    TypescriptGuard.render(decl("Same", "A")(ref("Pair", ref("A"), ref("A")))) shouldBe {
+      i"""
+      export const isSame = <A>(isA: (a: any) => boolean) => (v: any): v is Same<A> => {
+        return isPair((a0: any) => isA(a0), (a1: any) => isA(a1))(v);
+      }
+      """
+    }
+
+    TypescriptGuard.render(decl("AnyPair")(ref("Pair", Any, Any))) shouldBe {
+      i"""
+      export const isAnyPair = (v: any): v is AnyPair => {
+        return isPair((a0: any) => true, (a1: any) => true)(v);
+      }
+      """
+    }
+  }
 }

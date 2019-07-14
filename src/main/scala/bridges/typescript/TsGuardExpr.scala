@@ -48,8 +48,8 @@ object TsGuardExpr {
   def call(func: TsGuardExpr, args: TsGuardExpr*): TsGuardExpr =
     Call(func, args.toList)
 
-  def func(args: List[String], body: TsGuardExpr): TsGuardExpr =
-    Func(args, body)
+  def func(args: String*)(body: TsGuardExpr): TsGuardExpr =
+    Func(args.toList, body)
 
   def cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr): TsGuardExpr =
     Cond(test, trueArm, falseArm)
