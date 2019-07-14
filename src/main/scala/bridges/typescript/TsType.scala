@@ -17,6 +17,7 @@ object TsType {
   final case class Field(name: String, tpe: TsType, optional: Boolean = false)
 
   final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
+  final case object Any                                        extends TsType
   final case object Str                                        extends TsType
   final case object Chr                                        extends TsType
   final case object Intr                                       extends TsType
@@ -77,6 +78,7 @@ object TsType {
 
       value match {
         case Ref(id, params) => Ref(renameId(id), params.map(_.rename(from, to)))
+        case Any             => Any
         case tpe @ Str       => tpe
         case tpe @ Chr       => tpe
         case tpe @ Intr      => tpe

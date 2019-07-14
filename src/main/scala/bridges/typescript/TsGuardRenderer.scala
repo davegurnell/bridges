@@ -37,34 +37,46 @@ abstract class TsGuardRenderer(
     }
 
   def renderParamPreds(params: List[String]): String =
-    params.map(param => s"${predName(param)}: (v: any) => boolean").mkString(", ")
+    params.map(param => s"${predName(param)}: (${param.toLowerCase}: any) => boolean").mkString(", ")
 
   import TsGuardExpr._
 
-  def isType(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
+  def guardFunc(pair: (TsType, Int)): TsGuardExpr = {
+    val (tpe, index) = pair
+    val arg          = "a" + index
+    func(arg)(isType(ref(arg), tpe))
+  }
+
+  def isType(arg: TsGuardExpr, tpe: TsType): TsGuardExpr =
     tpe match {
-      case TsType.Ref(id, params) => call(ref(predName(id)), expr)
-      case TsType.Str             => eql(typeof(expr), lit("string"))
-      case TsType.Chr             => eql(typeof(expr), lit("string"))
-      case TsType.Intr            => eql(typeof(expr), lit("number"))
-      case TsType.Real            => eql(typeof(expr), lit("number"))
-      case TsType.Bool            => eql(typeof(expr), lit("boolean"))
-      case TsType.StrLit(value)   => eql(expr, lit(value))
-      case TsType.ChrLit(value)   => eql(expr, lit(value.toString))
-      case TsType.IntrLit(value)  => eql(expr, lit(value))
-      case TsType.RealLit(value)  => eql(expr, lit(value))
-      case TsType.BoolLit(value)  => eql(expr, lit(value))
-      case TsType.Null            => eql(expr, nullLit)
-      case TsType.Arr(tpe)        => isArray(expr, tpe)
-      case TsType.Struct(fields)  => isStruct(expr, fields)
-      case TsType.Inter(types)    => isAll(expr, types)
-      case TsType.Union(types)    => isUnion(expr, types)
+      case TsType.Ref(id, Nil) =>
+        call(ref(predName(id)), arg)
+
+      case TsType.Ref(id, params) =>
+        call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
+
+      case TsType.Any            => lit(true)
+      case TsType.Str            => eql(typeof(arg), lit("string"))
+      case TsType.Chr            => eql(typeof(arg), lit("string"))
+      case TsType.Intr           => eql(typeof(arg), lit("number"))
+      case TsType.Real           => eql(typeof(arg), lit("number"))
+      case TsType.Bool           => eql(typeof(arg), lit("boolean"))
+      case TsType.StrLit(value)  => eql(arg, lit(value))
+      case TsType.ChrLit(value)  => eql(arg, lit(value.toString))
+      case TsType.IntrLit(value) => eql(arg, lit(value))
+      case TsType.RealLit(value) => eql(arg, lit(value))
+      case TsType.BoolLit(value) => eql(arg, lit(value))
+      case TsType.Null           => eql(arg, nullLit)
+      case TsType.Arr(tpe)       => isArray(arg, tpe)
+      case TsType.Struct(fields) => isStruct(arg, fields)
+      case TsType.Inter(types)   => isAll(arg, types)
+      case TsType.Union(types)   => isUnion(arg, types)
     }
 
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     and(
       call(dot(ref("Array"), "isArray"), expr),
-      call(dot(call(dot(expr, "map"), func(List("i"), isType(ref("i"), tpe))), "reduce"), func(List("a", "b"), and(ref("a"), ref("b"))))
+      call(dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"), func("a", "b")(and(ref("a"), ref("b"))))
     )
 
   private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr =

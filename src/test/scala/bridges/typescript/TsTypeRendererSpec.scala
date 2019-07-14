@@ -205,10 +205,22 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
     }
   }
 
-  "Generic Ref" in {
-    Typescript.render(decl("Numbers")(ref("Pair", Real, Real))) shouldBe {
+  "Applications of Generics" in {
+    Typescript.render(decl("Cell")(ref("Pair", Str, Intr))) shouldBe {
       i"""
-      export type Numbers = Pair<number, number>;
+      export type Cell = Pair<string, number>;
+      """
+    }
+
+    Typescript.render(decl("Same", "A")(ref("Pair", ref("A"), ref("A")))) shouldBe {
+      i"""
+      export type Same<A> = Pair<A, A>;
+      """
+    }
+
+    Typescript.render(decl("AnyPair")(ref("Pair", Any, Any))) shouldBe {
+      i"""
+      export type AnyPair = Pair<any, any>;
       """
     }
   }
