@@ -224,4 +224,18 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Numeric types" in {
+    Typescript.render(decl[NumericTypes]) shouldBe {
+      i"""
+      export interface NumericTypes {
+        int: number;
+        long: number;
+        float: number;
+        double: number;
+        bigDecimal: number;
+      }
+      """
+    }
+  }
 }

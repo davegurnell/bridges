@@ -137,4 +137,10 @@ class ElmRendererSpec extends FreeSpec with Matchers {
     val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
     Elm.render(declaration) shouldBe """type SumWithGeneric a b c = First a | Second b | Third c"""
   }
+
+  "Numeric types" in {
+    Elm.render(decl[NumericTypes]) shouldBe {
+      """type alias NumericTypes = { int: Int, long: Int, float: Float, double: Float, bigDecimal: Float }"""
+    }
+  }
 }

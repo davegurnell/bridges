@@ -316,4 +316,18 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
   }
+
+  "Numeric types" in {
+    decl[NumericTypes] shouldBe {
+      decl("NumericTypes")(
+        prod(
+          "int"        -> Intr,
+          "long"       -> Intr,
+          "float"      -> Real,
+          "double"     -> Real,
+          "bigDecimal" -> Real
+        )
+      )
+    }
+  }
 }

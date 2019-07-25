@@ -33,22 +33,19 @@ class TsEncoderSpec extends FreeSpec with Matchers {
         )
       }
     }
-
-    "ApiVersion regression test" in {
-      case class ServerStatus(
-          version: String,
-          uptime: Int
-      )
-
-      decl[ServerStatus] shouldBe {
-        decl("ServerStatus")(
-          struct(
-            "version" --> Str,
-            "uptime" --> Intr
-          )
-        )
-      }
-    }
   }
 
+  "Numeric types" in {
+    decl[NumericTypes] shouldBe {
+      decl("NumericTypes")(
+        struct(
+          "int" --> Intr,
+          "long" --> Intr,
+          "float" --> Real,
+          "double" --> Real,
+          "bigDecimal" --> Real
+        )
+      )
+    }
+  }
 }

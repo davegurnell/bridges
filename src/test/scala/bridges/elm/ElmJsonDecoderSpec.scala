@@ -275,4 +275,12 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
      """
   }
 
+  "Numeric types" in {
+    Elm.decoder(decl[NumericTypes]) shouldBe {
+      i"""
+      decoderNumericTypes : Decode.Decoder NumericTypes
+      decoderNumericTypes = decode NumericTypes |> required "int" Decode.int |> required "long" Decode.int |> required "float" Decode.float |> required "double" Decode.float |> required "bigDecimal" Decode.float
+      """
+    }
+  }
 }

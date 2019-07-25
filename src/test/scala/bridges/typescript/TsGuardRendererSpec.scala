@@ -229,4 +229,14 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Numeric types" in {
+    TypescriptGuard.render(decl[NumericTypes]) shouldBe {
+      i"""
+      export const isNumericTypes = (v: any): v is NumericTypes => {
+        return "int" in v && typeof v.int === "number" && "long" in v && typeof v.long === "number" && "float" in v && typeof v.float === "number" && "double" in v && typeof v.double === "number" && "bigDecimal" in v && typeof v.bigDecimal === "number";
+      }
+      """
+    }
+  }
 }

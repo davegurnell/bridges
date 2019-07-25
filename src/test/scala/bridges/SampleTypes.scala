@@ -89,4 +89,12 @@ object SampleTypes {
     )
 
   final case class ClassWithRefinedType(name: RefinedString)
+
+  final case class NumericTypes(
+      int: Int,
+      long: Long,
+      float: Float,
+      double: Double,
+      bigDecimal: BigDecimal
+  )
 }

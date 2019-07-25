@@ -183,4 +183,12 @@ class FlowRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Numeric types" in {
+    Flow.render(decl[NumericTypes]) shouldBe {
+      i"""
+      export type NumericTypes = { int: number, long: number, float: number, double: number, bigDecimal: number };
+      """
+    }
+  }
 }

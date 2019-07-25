@@ -249,5 +249,13 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
             Second s -> Encode.object [ ("s", encoderB s), ("type", Encode.string "Second") ]
             Third t -> Encode.object [ ("t", encoderC t), ("type", Encode.string "Third") ]
       """
+
+  "Numeric types" in {
+    Elm.encoder(decl[NumericTypes]) shouldBe {
+      i"""
+      encoderNumericTypes : NumericTypes -> Encode.Value
+      encoderNumericTypes obj = Encode.object [ ("int", Encode.int obj.int), ("long", Encode.int obj.long), ("float", Encode.float obj.float), ("double", Encode.float obj.double), ("bigDecimal", Encode.float obj.bigDecimal) ]
+      """
+    }
   }
 }
