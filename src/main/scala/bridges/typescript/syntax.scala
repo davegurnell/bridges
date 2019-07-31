@@ -38,6 +38,9 @@ object syntax extends RenamableSyntax {
   def field(name: String, optional: Boolean = false)(tpe: TsType): Field =
     Field(name, tpe, optional)
 
+  def tuple(types: TsType*): Tuple =
+    Tuple(types.toList)
+
   def union(types: TsType*): Union =
     Union(types.toList)
 

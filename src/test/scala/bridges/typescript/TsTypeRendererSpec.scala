@@ -238,4 +238,20 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Tuple" in {
+    Typescript.render(decl("Cell")(tuple(Str, Intr))) shouldBe {
+      i"""
+      export type Cell = [string, number];
+      """
+    }
+  }
+
+  "Empty tuple" in {
+    Typescript.render(decl("Empty")(tuple())) shouldBe {
+      i"""
+      export type Empty = [];
+      """
+    }
+  }
 }

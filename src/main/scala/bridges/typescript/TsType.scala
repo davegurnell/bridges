@@ -30,6 +30,7 @@ object TsType {
   final case class RealLit(value: Double)                      extends TsType
   final case class BoolLit(value: Boolean)                     extends TsType
   final case class Arr(tpe: TsType)                            extends TsType
+  final case class Tuple(types: List[TsType])                  extends TsType
   final case class Struct(fields: List[Field])                 extends TsType
   final case class Inter(types: List[TsType])                  extends TsType
   final case class Union(types: List[TsType])                  extends TsType
@@ -91,6 +92,7 @@ object TsType {
         case tpe: RealLit    => tpe
         case tpe: BoolLit    => tpe
         case Arr(tpe)        => Arr(tpe.rename(from, to))
+        case Tuple(types)    => Tuple(types.map(_.rename(from, to)))
         case Struct(fields)  => Struct(fields.map(_.rename(from, to)))
         case Inter(types)    => Inter(types.map(_.rename(from, to)))
         case Union(types)    => Union(types.map(_.rename(from, to)))

@@ -68,6 +68,7 @@ abstract class TsGuardRenderer(
       case TsType.BoolLit(value) => eql(arg, lit(value))
       case TsType.Null           => eql(arg, nullLit)
       case TsType.Arr(tpe)       => isArray(arg, tpe)
+      case TsType.Tuple(types)   => isTuple(arg, types)
       case TsType.Struct(fields) => isStruct(arg, fields)
       case TsType.Inter(types)   => isAll(arg, types)
       case TsType.Union(types)   => isUnion(arg, types)
@@ -78,6 +79,17 @@ abstract class TsGuardRenderer(
       call(dot(ref("Array"), "isArray"), expr),
       call(dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"), func("a", "b")(and(ref("a"), ref("b"))))
     )
+
+  private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr = {
+    val baseChecks = List(
+      call(dot(ref("Array"), "isArray"), expr),
+      eql(dot(expr, "length"), lit(types.length))
+    )
+
+    val itemChecks = types.zipWithIndex.map { case (tpe, idx) => isType(index(expr, idx), tpe) }
+
+    (baseChecks ++ itemChecks).reduceLeft(and)
+  }
 
   private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr =
     fields

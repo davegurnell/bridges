@@ -31,6 +31,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case RealLit(value)     => value.toString
       case BoolLit(value)     => value.toString
       case tpe @ Arr(arg)     => s"""${renderParens(tpe)(arg)}[]"""
+      case Tuple(types)       => types.map(renderType).mkString("[", ", ", "]")
       case Struct(fields)     => renderStruct(fields)
       case tpe @ Inter(types) => types.map(renderParens(tpe)).mkString(" & ")
       case tpe @ Union(types) => types.map(renderParens(tpe)).mkString(" | ")
@@ -76,6 +77,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case _: RealLit => 1000
       case _: BoolLit => 1000
       case _: Arr     => 900
+      case _: Tuple   => 900
       case _: Struct  => 600
       case _: Union   => 400
       case _: Inter   => 200

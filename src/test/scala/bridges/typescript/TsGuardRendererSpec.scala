@@ -239,4 +239,24 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Tuple" in {
+    TypescriptGuard.render(decl("Cell")(tuple(Str, Intr))) shouldBe {
+      i"""
+      export const isCell = (v: any): v is Cell => {
+        return Array.isArray(v) && v.length === 2 && typeof v[0] === "string" && typeof v[1] === "number";
+      }
+      """
+    }
+  }
+
+  "Empty tuple" in {
+    TypescriptGuard.render(decl("Empty")(tuple())) shouldBe {
+      i"""
+      export const isEmpty = (v: any): v is Empty => {
+        return Array.isArray(v) && v.length === 0;
+      }
+      """
+    }
+  }
 }

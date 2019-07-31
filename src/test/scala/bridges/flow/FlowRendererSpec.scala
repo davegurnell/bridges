@@ -191,4 +191,20 @@ class FlowRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Tuple" in {
+    Flow.render(decl("Cell")(tuple(Str, Intr))) shouldBe {
+      i"""
+      export type Cell = [string, number];
+      """
+    }
+  }
+
+  "Empty tuple" in {
+    Flow.render(decl("Empty")(tuple())) shouldBe {
+      i"""
+      export type Empty = [];
+      """
+    }
+  }
 }

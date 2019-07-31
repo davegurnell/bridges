@@ -20,6 +20,9 @@ object syntax extends RenamableSyntax {
   def struct(fields: (String, FlowType)*): FlowType =
     Struct(fields.toList)
 
+  def tuple(types: FlowType*): FlowType =
+    Tuple(types.toList)
+
   def union(types: FlowType*): FlowType =
     Union(types.toList)
 

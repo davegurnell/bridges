@@ -32,6 +32,7 @@ object FlowType {
   final case class BoolLit(value: Boolean)                       extends FlowType
   final case class Opt(tpe: FlowType)                            extends FlowType
   final case class Arr(tpe: FlowType)                            extends FlowType
+  final case class Tuple(types: List[FlowType])                  extends FlowType
   final case class Struct(fields: List[(String, FlowType)])      extends FlowType
   final case class Inter(types: List[FlowType])                  extends FlowType
   final case class Union(types: List[FlowType])                  extends FlowType
@@ -80,6 +81,7 @@ object FlowType {
         case tpe: BoolLit    => tpe
         case Opt(tpe)        => Opt(tpe.rename(from, to))
         case Arr(tpe)        => Arr(tpe.rename(from, to))
+        case Tuple(types)    => Tuple(types.map(_.rename(from, to)))
         case Struct(fields)  => Struct(fields.map(_.rename(from, to)))
         case Inter(types)    => Inter(types.map(_.rename(from, to)))
         case Union(types)    => Union(types.map(_.rename(from, to)))
