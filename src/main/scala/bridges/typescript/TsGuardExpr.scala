@@ -13,6 +13,7 @@ object TsGuardExpr {
   final case class Call(func: TsGuardExpr, args: List[TsGuardExpr])                     extends TsGuardExpr
   final case class Func(args: List[String], body: TsGuardExpr)                          extends TsGuardExpr
   final case class Cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr) extends TsGuardExpr
+  final case class IsNull(expr: TsGuardExpr)                                            extends TsGuardExpr
   final case class Not(expr: TsGuardExpr)                                               extends TsGuardExpr
   final case class And(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
   final case class Or(lhs: TsGuardExpr, rhs: TsGuardExpr)                               extends TsGuardExpr
@@ -58,14 +59,17 @@ object TsGuardExpr {
   def cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr): TsGuardExpr =
     Cond(test, trueArm, falseArm)
 
+  def isnull(expr: TsGuardExpr): TsGuardExpr =
+    IsNull(expr)
+
   def not(expr: TsGuardExpr): TsGuardExpr =
     Not(expr)
 
-  def and(lhs: TsGuardExpr, rhs: TsGuardExpr): TsGuardExpr =
-    And(lhs, rhs)
+  def and(lhs: TsGuardExpr, rhss: TsGuardExpr*): TsGuardExpr =
+    rhss.foldLeft(lhs)(And(_, _))
 
-  def or(lhs: TsGuardExpr, rhs: TsGuardExpr): TsGuardExpr =
-    Or(lhs, rhs)
+  def or(lhs: TsGuardExpr, rhss: TsGuardExpr*): TsGuardExpr =
+    rhss.foldLeft(lhs)(Or(_, _))
 
   def eql(lhs: TsGuardExpr, rhs: TsGuardExpr): TsGuardExpr =
     Eql(lhs, rhs)
@@ -77,19 +81,21 @@ object TsGuardExpr {
     val r = renderParens(expr) _
 
     expr match {
-      case Ref(name)        => name
-      case Dot(obj, name)   => s"""${r(obj)}.${name}"""
-      case Index(obj, idx)  => s"""${r(obj)}[${idx}]"""
-      case Lit(value)       => value
-      case Typeof(expr)     => s"""typeof ${r(expr)}"""
-      case Call(func, args) => s"""${r(func)}(${args.map(render).mkString(", ")})"""
-      case Func(args, body) => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
-      case Cond(c, t, f)    => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
-      case Not(expr)        => s"""!${r(expr)}"""
-      case And(lhs, rhs)    => s"""${r(lhs)} && ${r(rhs)}"""
-      case Or(lhs, rhs)     => s"""${r(lhs)} || ${r(rhs)}"""
-      case Eql(lhs, rhs)    => s"""${r(lhs)} === ${r(rhs)}"""
-      case In(key, expr)    => s"""${r(lit(key))} in ${r(expr)}"""
+      case Ref(name)         => name
+      case Dot(obj, name)    => s"""${r(obj)}.${name}"""
+      case Index(obj, idx)   => s"""${r(obj)}[${idx}]"""
+      case Lit(value)        => value
+      case Typeof(expr)      => s"""typeof ${r(expr)}"""
+      case Call(func, args)  => s"""${r(func)}(${args.map(render).mkString(", ")})"""
+      case Func(args, body)  => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
+      case Cond(c, t, f)     => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
+      case IsNull(expr)      => s"""${r(expr)} == null"""
+      case Not(IsNull(expr)) => s"""${r(expr)} != null"""
+      case Not(expr)         => s"""!${r(expr)}"""
+      case And(lhs, rhs)     => s"""${r(lhs)} && ${r(rhs)}"""
+      case Or(lhs, rhs)      => s"""${r(lhs)} || ${r(rhs)}"""
+      case Eql(lhs, rhs)     => s"""${r(lhs)} === ${r(rhs)}"""
+      case In(key, expr)     => s"""${r(lit(key))} in ${r(expr)}"""
     }
   }
 
@@ -102,18 +108,20 @@ object TsGuardExpr {
 
   private def precedence(tpe: TsGuardExpr): Int =
     tpe match {
-      case _: Ref    => 1000
-      case _: Dot    => 1000
-      case _: Index  => 1000
-      case _: Lit    => 1000
-      case _: Call   => 1000
-      case _: Not    => 950
-      case _: Typeof => 900
-      case _: Eql    => 700
-      case _: In     => 700
-      case _: And    => 600
-      case _: Or     => 500
-      case _: Cond   => 400
-      case _: Func   => 300
+      case _: Ref         => 1000
+      case _: Dot         => 1000
+      case _: Index       => 1000
+      case _: Lit         => 1000
+      case _: Call        => 1000
+      case Not(IsNull(_)) => 700
+      case _: IsNull      => 700
+      case _: Not         => 950
+      case _: Typeof      => 900
+      case _: Eql         => 700
+      case _: In          => 700
+      case _: And         => 600
+      case _: Or          => 500
+      case _: Cond        => 400
+      case _: Func        => 300
     }
 }

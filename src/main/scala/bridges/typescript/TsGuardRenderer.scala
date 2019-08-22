@@ -88,10 +88,12 @@ abstract class TsGuardRenderer(
 
     val itemChecks = types.zipWithIndex.map { case (tpe, idx) => isType(index(expr, idx), tpe) }
 
-    (baseChecks ++ itemChecks).reduceLeft(and)
+    (baseChecks ++ itemChecks).reduceLeft(and(_, _))
   }
 
-  private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr =
+  private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr = {
+    val seed = and(eql(typeof(expr), lit("object")), not(isnull(expr)))
+
     fields
       .map {
         case Field(name, tpe, optional) =>
@@ -101,13 +103,13 @@ abstract class TsGuardRenderer(
             and(in(name, expr), isType(dot(expr, name), tpe))
           }
       }
-      .reduceLeftOption(and)
-      .getOrElse(lit(true))
+      .foldLeft(seed)(and(_, _))
+  }
 
   private def isUnion(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
     types.collectAll { case tpe @ DiscriminatedBy(name, rest) => name -> rest } match {
       case Some(pairs) =>
-        isDiscriminated(expr, pairs)
+        and(eql(typeof(expr), lit("object")), not(isnull(expr)), in("type", expr), isDiscriminated(expr, pairs))
       case None =>
         isAny(expr, types)
     }
@@ -124,13 +126,13 @@ abstract class TsGuardRenderer(
   private def isAny(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
     types
       .map(isType(expr, _))
-      .reduceLeftOption(or)
+      .reduceLeftOption(or(_, _))
       .getOrElse(lit(false))
 
   private def isAll(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
     types
       .map(isType(expr, _))
-      .reduceLeftOption(and)
+      .reduceLeftOption(and(_, _))
       .getOrElse(lit(true))
 
   private implicit class ListOps[A](list: List[A]) {

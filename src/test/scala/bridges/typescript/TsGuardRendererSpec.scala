@@ -11,7 +11,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Color]) shouldBe {
       i"""
       export const isColor = (v: any): v is Color => {
-        return "red" in v && typeof v.red === "number" && "green" in v && typeof v.green === "number" && "blue" in v && typeof v.blue === "number";
+        return typeof v === "object" && v != null && "red" in v && typeof v.red === "number" && "green" in v && typeof v.green === "number" && "blue" in v && typeof v.blue === "number";
       }
       """
     }
@@ -21,7 +21,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Circle]) shouldBe {
       i"""
       export const isCircle = (v: any): v is Circle => {
-        return "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color);
+        return typeof v === "object" && v != null && "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color);
       }
       """
     }
@@ -31,7 +31,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Rectangle]) shouldBe {
       i"""
       export const isRectangle = (v: any): v is Rectangle => {
-        return "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color);
+        return typeof v === "object" && v != null && "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color);
       }
       """
     }
@@ -41,7 +41,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Shape]) shouldBe {
       i"""
       export const isShape = (v: any): v is Shape => {
-        return v.type === "Circle" ? "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color) : v.type === "Rectangle" ? "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color) : v.type === "ShapeGroup" ? "leftShape" in v && isShape(v.leftShape) && "rightShape" in v && isShape(v.rightShape) : false;
+        return typeof v === "object" && v != null && "type" in v && (v.type === "Circle" ? typeof v === "object" && v != null && "radius" in v && typeof v.radius === "number" && "color" in v && isColor(v.color) : v.type === "Rectangle" ? typeof v === "object" && v != null && "width" in v && typeof v.width === "number" && "height" in v && typeof v.height === "number" && "color" in v && isColor(v.color) : v.type === "ShapeGroup" ? typeof v === "object" && v != null && "leftShape" in v && isShape(v.leftShape) && "rightShape" in v && isShape(v.rightShape) : false);
       }
       """
     }
@@ -51,7 +51,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Alpha]) shouldBe {
       i"""
       export const isAlpha = (v: any): v is Alpha => {
-        return "name" in v && typeof v.name === "string" && "char" in v && typeof v.char === "string" && "bool" in v && typeof v.bool === "boolean";
+        return typeof v === "object" && v != null && "name" in v && typeof v.name === "string" && "char" in v && typeof v.char === "string" && "bool" in v && typeof v.bool === "boolean";
       }
       """
     }
@@ -61,7 +61,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ArrayClass]) shouldBe {
       i"""
       export const isArrayClass = (v: any): v is ArrayClass => {
-        return "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b) && (!("optField" in v) || typeof v.optField === "number" || v.optField === null);
+        return typeof v === "object" && v != null && "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b) && (!("optField" in v) || typeof v.optField === "number" || v.optField === null);
       }
       """
     }
@@ -71,7 +71,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Numeric]) shouldBe {
       i"""
       export const isNumeric = (v: any): v is Numeric => {
-        return "double" in v && typeof v.double === "number" && "float" in v && typeof v.float === "number" && "int" in v && typeof v.int === "number";
+        return typeof v === "object" && v != null && "double" in v && typeof v.double === "number" && "float" in v && typeof v.float === "number" && "int" in v && typeof v.int === "number";
       }
       """
     }
@@ -81,7 +81,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ClassOrObject]) shouldBe {
       i"""
       export const isClassOrObject = (v: any): v is ClassOrObject => {
-        return v.type === "MyClass" ? "value" in v && typeof v.value === "number" : v.type === "MyObject" ? true : false;
+        return typeof v === "object" && v != null && "type" in v && (v.type === "MyClass" ? typeof v === "object" && v != null && "value" in v && typeof v.value === "number" : v.type === "MyObject" ? typeof v === "object" && v != null : false);
       }
       """
     }
@@ -91,7 +91,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[NestedClassOrObject]) shouldBe {
       i"""
       export const isNestedClassOrObject = (v: any): v is NestedClassOrObject => {
-        return v.type === "MyClass" ? "value" in v && typeof v.value === "number" : v.type === "MyObject" ? true : false;
+        return typeof v === "object" && v != null && "type" in v && (v.type === "MyClass" ? typeof v === "object" && v != null && "value" in v && typeof v.value === "number" : v.type === "MyObject" ? typeof v === "object" && v != null : false);
       }
       """
     }
@@ -101,7 +101,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Navigation]) shouldBe {
       i"""
       export const isNavigation = (v: any): v is Navigation => {
-        return v.type === "Node" ? "name" in v && typeof v.name === "string" && "children" in v && Array.isArray(v.children) && v.children.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : v.type === "NodeList" ? "all" in v && Array.isArray(v.all) && v.all.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : false;
+        return typeof v === "object" && v != null && "type" in v && (v.type === "Node" ? typeof v === "object" && v != null && "name" in v && typeof v.name === "string" && "children" in v && Array.isArray(v.children) && v.children.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : v.type === "NodeList" ? typeof v === "object" && v != null && "all" in v && Array.isArray(v.all) && v.all.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b) : false);
       }
       """
     }
@@ -111,7 +111,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ClassUUID]) shouldBe {
       i"""
       export const isClassUUID = (v: any): v is ClassUUID => {
-        return "a" in v && isUUID(v.a);
+        return typeof v === "object" && v != null && "a" in v && isUUID(v.a);
       }
       """
     }
@@ -121,7 +121,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ClassDate]) shouldBe {
       i"""
       export const isClassDate = (v: any): v is ClassDate => {
-        return "a" in v && isDate(v.a);
+        return typeof v === "object" && v != null && "a" in v && isDate(v.a);
       }
       """
     }
@@ -131,7 +131,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Recursive]) shouldBe {
       i"""
       export const isRecursive = (v: any): v is Recursive => {
-        return "head" in v && typeof v.head === "number" && (!("tail" in v) || isRecursive(v.tail) || v.tail === null);
+        return typeof v === "object" && v != null && "head" in v && typeof v.head === "number" && (!("tail" in v) || isRecursive(v.tail) || v.tail === null);
       }
       """
     }
@@ -141,7 +141,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Recursive2]) shouldBe {
       i"""
       export const isRecursive2 = (v: any): v is Recursive2 => {
-        return "head" in v && typeof v.head === "number" && "tail" in v && Array.isArray(v.tail) && v.tail.map((i: any) => isRecursive2(i)).reduce((a: any, b: any) => a && b);
+        return typeof v === "object" && v != null && "head" in v && typeof v.head === "number" && "tail" in v && Array.isArray(v.tail) && v.tail.map((i: any) => isRecursive2(i)).reduce((a: any, b: any) => a && b);
       }
       """
     }
@@ -151,7 +151,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ExternalReferences]) shouldBe {
       i"""
       export const isExternalReferences = (v: any): v is ExternalReferences => {
-        return "color" in v && isColor(v.color) && "nav" in v && isNavigation(v.nav);
+        return typeof v === "object" && v != null && "color" in v && isColor(v.color) && "nav" in v && isNavigation(v.nav);
       }
       """
     }
@@ -161,7 +161,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ObjectsOnly]) shouldBe {
       i"""
       export const isObjectsOnly = (v: any): v is ObjectsOnly => {
-        return v.type === "ObjectOne" ? true : v.type === "ObjectTwo" ? true : false;
+        return typeof v === "object" && v != null && "type" in v && (v.type === "ObjectOne" ? typeof v === "object" && v != null : v.type === "ObjectTwo" ? typeof v === "object" && v != null : false);
       }
       """
     }
@@ -198,7 +198,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     ) shouldBe {
       i"""
       export const isPair = <A, B>(isA: (a: any) => boolean, isB: (b: any) => boolean) => (v: any): v is Pair<A, B> => {
-        return "a" in v && isA(v.a) && (!("b" in v) || isB(v.b));
+        return typeof v === "object" && v != null && "a" in v && isA(v.a) && (!("b" in v) || isB(v.b));
       }
       """
     }
@@ -234,7 +234,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[NumericTypes]) shouldBe {
       i"""
       export const isNumericTypes = (v: any): v is NumericTypes => {
-        return "int" in v && typeof v.int === "number" && "long" in v && typeof v.long === "number" && "float" in v && typeof v.float === "number" && "double" in v && typeof v.double === "number" && "bigDecimal" in v && typeof v.bigDecimal === "number";
+        return typeof v === "object" && v != null && "int" in v && typeof v.int === "number" && "long" in v && typeof v.long === "number" && "float" in v && typeof v.float === "number" && "double" in v && typeof v.double === "number" && "bigDecimal" in v && typeof v.bigDecimal === "number";
       }
       """
     }
