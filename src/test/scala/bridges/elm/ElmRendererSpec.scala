@@ -71,7 +71,7 @@ class ElmRendererSpec extends FreeSpec with Matchers {
 
     "providing a type override map" in {
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+        Ref("UUID") -> TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
       )
 
       Elm.render(decl[ClassUUID], customTypeReplacements) shouldBe """type alias ClassUUID = { a: Uuid }"""
@@ -92,7 +92,7 @@ class ElmRendererSpec extends FreeSpec with Matchers {
 
     "providing a type override map" in {
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("Date") → TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
+        Ref("Date") -> TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
       )
 
       Elm.render(decl[ClassDate], customTypeReplacements) shouldBe """type alias ClassDate = { a: Date }"""
@@ -117,22 +117,22 @@ class ElmRendererSpec extends FreeSpec with Matchers {
   }
 
   "ClassWithGeneric" in {
-    val productDef  = prod("first" → Ref("A"), "second" → Ref("B"), "third" → Ref("C"))
+    val productDef  = prod("first" -> Ref("A"), "second" -> Ref("B"), "third" -> Ref("C"))
     val declaration = decl("ClassWithGeneric", "A", "B", "C")(productDef)
     Elm.render(declaration) shouldBe """type alias ClassWithGeneric a b c = { first: a, second: b, third: c }"""
   }
 
   "ClassWithGeneric2" in {
-    val productDef  = prod("first" → Ref("A"))
+    val productDef  = prod("first" -> Ref("A"))
     val declaration = decl("ClassWithGeneric2", "A")(productDef)
     Elm.render(declaration) shouldBe """type alias ClassWithGeneric2 a = { first: a }"""
   }
 
   "SumWithGeneric" in {
     val sumDef = sum(
-      "First"  -> prod("f" → Ref("A")),
-      "Second" -> prod("s" → Ref("B")),
-      "Third"  -> prod("t" → Ref("C"))
+      "First"  -> prod("f" -> Ref("A")),
+      "Second" -> prod("s" -> Ref("B")),
+      "Third"  -> prod("t" -> Ref("C"))
     )
     val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
     Elm.render(declaration) shouldBe """type SumWithGeneric a b c = First a | Second b | Third c"""

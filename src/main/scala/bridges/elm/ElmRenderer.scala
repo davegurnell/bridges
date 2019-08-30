@@ -9,11 +9,11 @@ trait ElmRenderer extends Renderer[Type] with ElmUtils {
 
   def render(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
     val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
-    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) => s"$acc $b")
     decl.tpe match {
-      case Sum(products) ⇒
+      case Sum(products) =>
         s"type ${decl.name}$genericsInType = ${products.map { case (name, prod) => renderSumType(name, prod, newTypeReplacements) }.mkString(" | ")}"
-      case other ⇒ s"type alias ${decl.name}$genericsInType = ${renderType(other, newTypeReplacements)}"
+      case other => s"type alias ${decl.name}$genericsInType = ${renderType(other, newTypeReplacements)}"
     }
   }
 

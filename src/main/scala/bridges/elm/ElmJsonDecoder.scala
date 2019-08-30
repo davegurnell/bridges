@@ -10,13 +10,13 @@ trait ElmJsonDecoder extends ElmUtils {
 
   def decoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String = {
     val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
-    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) => s"$acc $b")
     val nameWithGenerics                          = if (genericsInType.isEmpty) decl.name else s"(${decl.name}$genericsInType)"
-    val definitionsForGenerics                    = genericsDefinition.map(s ⇒ s"(Decode.Decoder $s) -> ").foldLeft("")((acc, b) ⇒ s"$acc$b")
-    val methodsForGenerics                        = genericsDefinition.map(s ⇒ s"decoder${s.toUpperCase}").foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val definitionsForGenerics                    = genericsDefinition.map(s => s"(Decode.Decoder $s) -> ").foldLeft("")((acc, b) => s"$acc$b")
+    val methodsForGenerics                        = genericsDefinition.map(s => s"decoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
 
     decl.tpe match {
-      case Sum(products) ⇒
+      case Sum(products) =>
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body = products.map { case (name, prod) => decodeSumType(name, prod, newTypeReplacements) }.mkString("\n      ")
         i"""
@@ -29,7 +29,7 @@ trait ElmJsonDecoder extends ElmUtils {
                   $body
                   _ -> Decode.fail ("Unexpected type for ${decl.name}: " ++ tpe)
             """
-      case other ⇒
+      case other =>
         val body = decodeType(other, newTypeReplacements)
 
         i"""
@@ -73,9 +73,9 @@ trait ElmJsonDecoder extends ElmUtils {
       s"""required "${name}" ${decodeType(tpe, customTypeReplacements)}"""
 
     tpe match {
-      case Opt(optTpe) ⇒
+      case Opt(optTpe) =>
         s"""optional "${name}" (Decode.maybe ${decodeType(optTpe, customTypeReplacements)}) Nothing"""
-      case other ⇒ decode(other)
+      case other => decode(other)
     }
   }
 }

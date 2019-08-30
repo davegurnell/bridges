@@ -158,7 +158,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
 
     "with overrides" in {
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+        Ref("UUID") -> TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
       )
 
       val fileContent =
@@ -262,7 +262,7 @@ class ElmFileBuilderSpec extends FreeSpec with Matchers {
     "with custom mappings" in {
 
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+        Ref("UUID") -> TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
       )
 
       val fileContent =

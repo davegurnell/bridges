@@ -1,24 +1,32 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
 
-scalaVersion       in ThisBuild := "2.12.7"
-crossScalaVersions in ThisBuild := Seq("2.12.7")
+scalaVersion       in ThisBuild := "2.13.0"
+crossScalaVersions in ThisBuild := Seq("2.12.9", "2.13.0")
 
-scalacOptions ++= Seq(
+val stdOptions = Seq(
   "-feature",
   "-unchecked",
   "-deprecation",
-  "-Xfatal-warnings",
-  "-Ypartial-unification"
+  "-Xfatal-warnings"
 )
+def extraOptions(scalaVersion: String) =
+  CrossVersion.partialVersion(scalaVersion) match {
+    case Some((2, 12)) => Seq(
+        "-Ypartial-unification"
+      )
+    case _ => Seq()
+  }
 
-val refinedVersion = "0.9.0"
+scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
+
+val refinedVersion = "0.9.9"
 
 libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.3",
-  "com.davegurnell"   %% "unindent"           % "1.1.0" exclude("org.typelevel", "scala-library"),
+  "com.davegurnell"   %% "unindent"           % "1.1.1" exclude("org.typelevel", "scala-library"),
   "org.apache.commons" % "commons-lang3"      % "3.5",
-  "org.scalatest"     %% "scalatest"          % "3.0.5" % Test,
+  "org.scalatest"     %% "scalatest"          % "3.0.8" % Test,
   "eu.timepit"        %% "refined"            % refinedVersion % Provided,
   "eu.timepit"        %% "refined-shapeless"  % refinedVersion % Provided
 )
