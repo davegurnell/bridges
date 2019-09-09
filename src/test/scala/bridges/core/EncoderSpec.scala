@@ -330,4 +330,17 @@ class EncoderSpec extends FreeSpec with Matchers {
       )
     }
   }
+
+  "Map" in {
+    decl[Map[String, Int]] shouldBe decl("Map")(dict(Str, Intr))
+    decl[Map[String, Pair]] shouldBe decl("Map")(
+      dict(
+        Str,
+        prod(
+          "a" -> Str,
+          "b" -> Intr
+        )
+      )
+    )
+  }
 }

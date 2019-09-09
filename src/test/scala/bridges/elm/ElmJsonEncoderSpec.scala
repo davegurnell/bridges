@@ -281,4 +281,13 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Dictionary types" in {
+    Elm.encoder(decl[Map[String, Int]]) shouldBe {
+      i"""
+      encoderMap : Map -> Encode.Value
+      encoderMap obj = (Encode.dict Encode.string Map Encode.int Map)
+      """
+    }
+  }
 }

@@ -3,6 +3,7 @@ package bridges.flow
 import bridges.core._
 import bridges.core.syntax.getCleanTagName
 import shapeless.Lazy
+import scala.language.implicitConversions
 import scala.reflect.runtime.universe.WeakTypeTag
 
 object syntax extends RenamableSyntax {
@@ -17,8 +18,28 @@ object syntax extends RenamableSyntax {
   def decl(name: String, params: String*)(tpe: FlowType): FlowDecl =
     DeclF(name, params.toList, tpe)
 
-  def struct(fields: (String, FlowType)*): FlowType =
+  def struct(fields: FlowField*): Struct =
     Struct(fields.toList)
+
+  implicit class StringFieldOps(name: String) {
+    def -->(tpe: FlowType): FlowField =
+      FlowField(name, tpe, optional = false)
+
+    def -?>(tpe: FlowType): FlowField =
+      FlowField(name, tpe, optional = true)
+  }
+
+  @deprecated("Use --> instead of ->", "0.16.0")
+  implicit def pairToField(pair: (String, FlowType)): FlowField = {
+    val (name, tpe) = pair
+    FlowField(name, tpe, optional = false)
+  }
+
+  def field(name: String, optional: Boolean = false)(tpe: FlowType): FlowField =
+    FlowField(name, tpe, optional)
+
+  def restField(name: String, keyType: FlowType)(valueType: FlowType): FlowRestField =
+    FlowRestField(name, keyType, valueType)
 
   def tuple(types: FlowType*): FlowType =
     Tuple(types.toList)
@@ -28,6 +49,12 @@ object syntax extends RenamableSyntax {
 
   def inter(types: FlowType*): FlowType =
     Inter(types.toList)
+
+  def arr(tpe: FlowType): FlowType =
+    Arr(tpe)
+
+  def dict(keyType: FlowType, valueType: FlowType): FlowType =
+    Struct(Nil, Some(FlowRestField("key", keyType, valueType)))
 
   def ref(name: String, params: FlowType*): Ref =
     Ref(name, params.toList)

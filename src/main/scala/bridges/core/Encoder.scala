@@ -53,6 +53,9 @@ trait EncoderInstances2 extends EncoderInstances1 {
   implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
     pure(Opt(enc.encode))
 
+  implicit def mapEncoder[A, B](implicit aEnc: BasicEncoder[A], bEnc: Encoder[B]): BasicEncoder[Map[A, B]] =
+    pure(Dict(aEnc.encode, bEnc.encode))
+
   implicit def traversableEncoder[F[_] <: Iterable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
     pure(Arr(enc.encode))
 

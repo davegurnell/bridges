@@ -259,4 +259,29 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Structs with rest fields" in {
+    TypescriptGuard.render(decl("Dict")(dict(Str, Intr))) shouldBe {
+      i"""
+      export const isDict = (v: any): v is Dict => {
+        return typeof v === "object" && v != null && Object.keys(v).every((k: any) => typeof k === "string" && typeof v[k] === "number");
+      }
+      """
+    }
+
+    TypescriptGuard.render(
+      decl("Dict")(
+        struct(
+          "a" --> Str,
+          "b" -?> Intr
+        ).withRest(Str, Bool, "c")
+      )
+    ) shouldBe {
+      i"""
+      export const isDict = (v: any): v is Dict => {
+        return typeof v === "object" && v != null && "a" in v && typeof v.a === "string" && (!("b" in v) || typeof v.b === "number") && Object.keys(v).every((k: any) => ["a", "b"].includes(k) || typeof k === "string" && typeof v[k] === "boolean");
+      }
+      """
+    }
+  }
 }

@@ -14,35 +14,46 @@ trait FlowRenderer extends Renderer[FlowType] {
 
   private def renderType(tpe: FlowType): String =
     tpe match {
-      case Ref(id, params)    => renderRef(id, params)
-      case Str                => "string"
-      case Chr                => "string"
-      case Intr               => "number"
-      case Real               => "number"
-      case Bool               => "boolean"
-      case Null               => "null"
-      case Undefined          => "undefined"
-      case StrLit(value)      => s""""${escape(value)}""""
-      case ChrLit(value)      => s""""${escape(value.toString)}""""
-      case IntrLit(value)     => value.toString
-      case RealLit(value)     => value.toString
-      case BoolLit(value)     => value.toString
-      case tpe @ Opt(arg)     => s"""?${renderParens(tpe)(arg)}"""
-      case tpe @ Arr(arg)     => s"""${renderParens(tpe)(arg)}[]"""
-      case Tuple(types)       => types.map(renderType).mkString("[", ", ", "]")
-      case Struct(fields)     => renderStruct(fields)
-      case tpe @ Inter(types) => types.map(renderParens(tpe)).mkString(" & ")
-      case tpe @ Union(types) => types.map(renderParens(tpe)).mkString(" | ")
+      case Ref(id, params)      => renderRef(id, params)
+      case Str                  => "string"
+      case Chr                  => "string"
+      case Intr                 => "number"
+      case Real                 => "number"
+      case Bool                 => "boolean"
+      case Null                 => "null"
+      case Undefined            => "undefined"
+      case StrLit(value)        => s""""${escape(value)}""""
+      case ChrLit(value)        => s""""${escape(value.toString)}""""
+      case IntrLit(value)       => value.toString
+      case RealLit(value)       => value.toString
+      case BoolLit(value)       => value.toString
+      case tpe @ Opt(arg)       => s"""?${renderParens(tpe)(arg)}"""
+      case tpe @ Arr(arg)       => s"""${renderParens(tpe)(arg)}[]"""
+      case Tuple(types)         => types.map(renderType).mkString("[", ", ", "]")
+      case Struct(fields, rest) => renderStruct(fields, rest)
+      case tpe @ Inter(types)   => types.map(renderParens(tpe)).mkString(" & ")
+      case tpe @ Union(types)   => types.map(renderParens(tpe)).mkString(" | ")
     }
 
   private def renderRef(name: String, params: List[FlowType]): String =
     if (params.isEmpty) name else params.map(renderType).mkString(s"$name<", ", ", ">")
 
-  private def renderStruct(fields: List[(String, FlowType)]): String =
-    fields.map(renderField).mkString("{ ", ", ", " }")
+  private def renderStruct(fields: List[FlowField], rest: Option[FlowRestField]): String =
+    (fields.map(renderField) ++ rest.toList.map(renderRestField)).mkString("{ ", ", ", " }")
 
-  private def renderField(field: (String, FlowType)): String =
-    s"""${field._1}: ${renderType(field._2)}"""
+  private def renderField(field: FlowField): String =
+    field match {
+      case FlowField(name, tpe, false) =>
+        s"""${name}: ${renderType(tpe)}"""
+
+      case FlowField(name, tpe, true) =>
+        s"""${name}?: ${renderType(tpe)}"""
+    }
+
+  private def renderRestField(field: FlowRestField): String = {
+    val FlowRestField(name, keyType, valueType) = field
+    s"""[${name}: ${renderType(keyType)}]: ${renderType(valueType)}"""
+  }
 
   private def renderParens(outer: FlowType)(inner: FlowType): String =
     if (precedence(outer) > precedence(inner)) {

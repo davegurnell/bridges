@@ -27,6 +27,7 @@ object Type {
   final case object Bool                                     extends Type
   final case class Opt(tpe: Type)                            extends Type
   final case class Arr(tpe: Type)                            extends Type
+  final case class Dict(keys: Type, values: Type)            extends Type
   final case class Prod(fields: List[(String, Type)])        extends Type
   final case class Sum(products: List[(String, Prod)])       extends Type
 
@@ -43,16 +44,17 @@ object Type {
         if (id == from) to else id
 
       tpe match {
-        case Ref(id, params) => Ref(renameId(id), params.map(_.rename(from, to)))
-        case tpe @ Str       => tpe
-        case tpe @ Chr       => tpe
-        case tpe @ Intr      => tpe
-        case tpe @ Real      => tpe
-        case tpe @ Bool      => tpe
-        case Opt(tpe)        => Opt(tpe.rename(from, to))
-        case Arr(tpe)        => Arr(tpe.rename(from, to))
-        case Prod(fields)    => Prod(fields.map(_.rename(from, to)))
-        case Sum(products)   => Sum(products.map(_.rename(from, to)))
+        case Ref(id, params)  => Ref(renameId(id), params.map(_.rename(from, to)))
+        case tpe @ Str        => tpe
+        case tpe @ Chr        => tpe
+        case tpe @ Intr       => tpe
+        case tpe @ Real       => tpe
+        case tpe @ Bool       => tpe
+        case Opt(tpe)         => Opt(tpe.rename(from, to))
+        case Arr(tpe)         => Arr(tpe.rename(from, to))
+        case Dict(kTpe, vTpe) => Dict(kTpe.rename(from, to), vTpe.rename(from, to))
+        case Prod(fields)     => Prod(fields.map(_.rename(from, to)))
+        case Sum(products)    => Sum(products.map(_.rename(from, to)))
       }
     }
 }

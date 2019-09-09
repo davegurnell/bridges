@@ -143,4 +143,10 @@ class ElmRendererSpec extends FreeSpec with Matchers {
       """type alias NumericTypes = { int: Int, long: Int, float: Float, double: Float, bigDecimal: Float }"""
     }
   }
+
+  "Dictionary types" in {
+    Elm.render(decl[Map[String, Int]]) shouldBe {
+      """type alias Map = (Dict String Int)"""
+    }
+  }
 }

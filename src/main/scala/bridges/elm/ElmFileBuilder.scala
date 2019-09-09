@@ -72,12 +72,13 @@ trait ElmFileBuilder {
   private def getDeclarationTypes(tpe: Type, parentType: String): List[Ref] = {
     def getIncludeTypes(tpe: Type): List[Ref] =
       tpe match {
-        case r: Ref        => r :: Nil
-        case Opt(optTpe)   => getIncludeTypes(optTpe)
-        case Arr(arrTpe)   => getIncludeTypes(arrTpe)
-        case Prod(fields)  => fields.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
-        case Sum(products) => products.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
-        case _             => Nil
+        case r: Ref           => r :: Nil
+        case Opt(optTpe)      => getIncludeTypes(optTpe)
+        case Arr(arrTpe)      => getIncludeTypes(arrTpe)
+        case Dict(kTpe, vTpe) => Ref("Dict") +: (getIncludeTypes(kTpe) ++ getIncludeTypes(vTpe))
+        case Prod(fields)     => fields.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
+        case Sum(products)    => products.map { case (_, tpe) => tpe }.flatMap(getIncludeTypes)
+        case _                => Nil
       }
 
     val exclude = Ref(parentType)

@@ -169,7 +169,7 @@ class FlowRendererSpec extends FreeSpec with Matchers {
   }
 
   "Generic Decl" in {
-    Flow.render(decl("Pair", "A", "B")(struct("a" -> Ref("A"), "b" -> Ref("B")))) shouldBe {
+    Flow.render(decl("Pair", "A", "B")(struct("a" --> Ref("A"), "b" --> Ref("B")))) shouldBe {
       i"""
       export type Pair<A, B> = { a: A, b: B };
       """
@@ -204,6 +204,27 @@ class FlowRendererSpec extends FreeSpec with Matchers {
     Flow.render(decl("Empty")(tuple())) shouldBe {
       i"""
       export type Empty = [];
+      """
+    }
+  }
+
+  "Structs with rest fields" in {
+    Flow.render(decl("Dict")(dict(Str, Intr))) shouldBe {
+      i"""
+      export type Dict = { [key: string]: number };
+      """
+    }
+
+    Flow.render(
+      decl("Dict")(
+        struct(
+          "a" --> Str,
+          "b" -?> Intr
+        ).withRest(Str, Bool, "c")
+      )
+    ) shouldBe {
+      i"""
+      export type Dict = { a: string, b?: number, [c: string]: boolean };
       """
     }
   }

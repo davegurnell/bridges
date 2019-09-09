@@ -32,6 +32,9 @@ object syntax extends RenamableSyntax {
   def sum(products: (String, Prod)*): Sum =
     Sum(products.toList)
 
+  def dict(keyType: Type, valueType: Type): Type =
+    Dict(keyType, valueType)
+
   implicit class StringDeclOps(str: String) {
     def :=[A](tpe: A): DeclF[A] =
       DeclF(str, tpe)

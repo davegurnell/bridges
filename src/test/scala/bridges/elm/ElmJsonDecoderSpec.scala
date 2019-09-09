@@ -305,4 +305,18 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Dictionary types" in {
+    Elm.decoder(decl[Map[String, Int]]) shouldBe {
+      i"""
+      decoderMap : Decode.Decoder Map
+      decoderMap = decode Map (Decode.dict Decode.int)
+      """
+    }
+
+    // The Elm standard library only provides JSON decoders for dictionaries with string keys:
+    intercept[IllegalArgumentException] {
+      Elm.decoder(decl[Map[Int, Int]])
+    }
+  }
 }
