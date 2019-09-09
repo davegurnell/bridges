@@ -2,7 +2,7 @@
 
 Generate bindings for Scala types in other programming languages.
 
-Copyright 2017-2018 Dave Gurnell. Licensed [Apache 2.0][license].
+Copyright 2017-2019 Dave Gurnell. Licensed [Apache 2.0][license].
 
 Maintainers:
 
