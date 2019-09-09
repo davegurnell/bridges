@@ -38,15 +38,6 @@ class TsEncoderSpec extends FreeSpec with Matchers {
   "TsEncoderConfig.refsUnions" - {
     "render type names in unions by default" in {
       decl[OneOrOther] shouldBe {
-        decl("OneOrOther")(ref("One") | ref("Other"))
-      }
-    }
-
-    "override setting" in {
-      implicit val config: TsEncoderConfig =
-        TsEncoderConfig(refsInUnions = false)
-
-      decl[OneOrOther] shouldBe {
         decl("OneOrOther")(
           struct(
             "type" --> StrLit("One"),
@@ -57,6 +48,15 @@ class TsEncoderSpec extends FreeSpec with Matchers {
             "value" --> Intr
           )
         )
+      }
+    }
+
+    "override setting" in {
+      implicit val config: TsEncoderConfig =
+        TsEncoderConfig(refsInUnions = true)
+
+      decl[OneOrOther] shouldBe {
+        decl("OneOrOther")(ref("One") | ref("Other"))
       }
     }
   }
