@@ -60,7 +60,11 @@ object TsType {
   private def translateSum(products: List[(String, Type.Prod)])(implicit config: TsEncoderConfig): Union =
     Union(products.map {
       case (name, tpe) =>
-        Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
+        if (config.refsInUnions) {
+          Ref(name)
+        } else {
+          Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
+        }
     })
 
   private def keyIsOptional(tpe: Type)(implicit config: TsEncoderConfig): Boolean =
