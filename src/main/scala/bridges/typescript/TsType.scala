@@ -16,13 +16,14 @@ sealed abstract class TsType extends Product with Serializable {
 object TsType {
   final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
 
-  final case object Any  extends TsType
-  final case object Str  extends TsType
-  final case object Chr  extends TsType
-  final case object Intr extends TsType
-  final case object Real extends TsType
-  final case object Bool extends TsType
-  final case object Null extends TsType
+  final case object Any     extends TsType
+  final case object Unknown extends TsType
+  final case object Str     extends TsType
+  final case object Chr     extends TsType
+  final case object Intr    extends TsType
+  final case object Real    extends TsType
+  final case object Bool    extends TsType
+  final case object Null    extends TsType
 
   final case class StrLit(value: String)      extends TsType
   final case class ChrLit(value: Char)        extends TsType
@@ -36,6 +37,7 @@ object TsType {
     def withRest(keyType: TsType, valueType: TsType, keyName: String = "key"): Struct =
       copy(rest = Some(TsRestField(keyName, keyType, valueType)))
   }
+
   final case class Inter(types: List[TsType]) extends TsType
   final case class Union(types: List[TsType]) extends TsType
 
@@ -87,6 +89,7 @@ object TsType {
         case tpe @ Real           => tpe
         case tpe @ Bool           => tpe
         case tpe @ Null           => tpe
+        case tpe @ Unknown        => toe
         case tpe: StrLit          => tpe
         case tpe: ChrLit          => tpe
         case tpe: IntrLit         => tpe

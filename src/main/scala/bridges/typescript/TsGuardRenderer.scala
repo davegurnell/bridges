@@ -56,6 +56,7 @@ abstract class TsGuardRenderer(
         call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
 
       case TsType.Any                  => lit(true)
+      case TsType.Unknown              => lit(true)
       case TsType.Str                  => eql(typeof(arg), lit("string"))
       case TsType.Chr                  => eql(typeof(arg), lit("string"))
       case TsType.Intr                 => eql(typeof(arg), lit("number"))

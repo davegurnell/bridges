@@ -25,6 +25,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case Real                 => "number"
       case Bool                 => "boolean"
       case Null                 => "null"
+      case Unknown              => "unknown"
       case StrLit(value)        => s""""${escape(value)}""""
       case ChrLit(value)        => s""""${escape(value.toString)}""""
       case IntrLit(value)       => value.toString
@@ -76,6 +77,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
     tpe match {
       case _: Ref     => 1000
       case _ @Any     => 1000
+      case _ @Unknown => 1000
       case _ @Str     => 1000
       case _ @Chr     => 1000
       case _ @Intr    => 1000
