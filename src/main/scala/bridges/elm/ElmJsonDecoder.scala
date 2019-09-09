@@ -66,9 +66,9 @@ trait ElmJsonDecoder extends ElmUtils {
       case Arr(arrTpe)     => "(Decode.list " + decodeType(arrTpe, customTypeReplacements) + ")"
       case Dict(Str, vTpe) => "(Decode.dict " + decodeType(vTpe, customTypeReplacements) + ")"
       // The Elm standard library only provides JSON decoders for dictionaries with string keys:
-      case _: Dict         => throw new IllegalArgumentException("Cannot create a JsonDecoder for a Dict with anything other than String keys")
-      case Prod(fields)    => fields.map { case (name, tpe) => decodeField(name, tpe, customTypeReplacements) }.mkString("|> ", " |> ", "")
-      case _: Sum          => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
+      case _: Dict      => throw new IllegalArgumentException("Cannot create a JsonDecoder for a Dict with anything other than String keys")
+      case Prod(fields) => fields.map { case (name, tpe) => decodeField(name, tpe, customTypeReplacements) }.mkString("|> ", " |> ", "")
+      case _: Sum       => throw new IllegalArgumentException("SumOfProducts jsonEncoder: we should never be here")
     }
 
   private def decodeField(name: String, tpe: Type, customTypeReplacements: Map[Ref, TypeReplacement]): String = {
