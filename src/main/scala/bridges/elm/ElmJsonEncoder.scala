@@ -10,11 +10,11 @@ trait ElmJsonEncoder extends ElmUtils {
 
   def encoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String = {
     val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
-    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) ⇒ s"$acc $b")
-    val definitionsForGenerics                    = genericsDefinition.map(s ⇒ s"($s -> Encode.Value) -> ").foldLeft("")((acc, b) ⇒ s"$acc$b")
-    val methodsForGenerics                        = genericsDefinition.map(s ⇒ s"encoder${s.toUpperCase}").foldLeft("")((acc, b) ⇒ s"$acc $b")
+    val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) => s"$acc $b")
+    val definitionsForGenerics                    = genericsDefinition.map(s => s"($s -> Encode.Value) -> ").foldLeft("")((acc, b) => s"$acc$b")
+    val methodsForGenerics                        = genericsDefinition.map(s => s"encoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
     decl.tpe match {
-      case Sum(products) ⇒
+      case Sum(products) =>
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
         val body =
           products.map { case (name, prod) => encodeSumType(name, prod, newTypeReplacements) }.mkString("\n      ")
@@ -25,7 +25,7 @@ trait ElmJsonEncoder extends ElmUtils {
                case tpe of
                   $body
             """
-      case other ⇒
+      case other =>
         val body = encodeType(other, "obj", decl.name, newTypeReplacements)
 
         i"""

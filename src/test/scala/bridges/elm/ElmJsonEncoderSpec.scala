@@ -137,7 +137,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
     "we can provide a map to substitute UUID decoding with a custom encoding logic" in {
       // this is the case when we import Elm specific UUID types we want to use in our decoder, but Scala can't know about them without extra hints
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("UUID") → TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
+        Ref("UUID") -> TypeReplacement("Uuid", "import Uuid exposing (Uuid)", "Uuid.decoder", "Uuid.encode")
       )
 
       Elm.encoder(decl[ClassUUID], customTypeReplacements) shouldBe {
@@ -177,7 +177,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
     "we can provide a map to substitute Date decoding with a custom encoding logic" in {
       // this is the case when we import Elm specific Date types we want to use in our decoder, but Scala can't know about them without extra hints
       val customTypeReplacements: Map[Ref, TypeReplacement] = Map(
-        Ref("Date") → TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
+        Ref("Date") -> TypeReplacement("Date", "import Date exposing (Date)", "Date.decoder", "Date.encode")
       )
 
       Elm.encoder(decl[ClassDate], customTypeReplacements) shouldBe {
@@ -233,7 +233,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ClassWithGeneric" in {
-    val productDef  = prod("first" → Ref("A"), "second" → Ref("B"), "third" → Ref("C"))
+    val productDef  = prod("first" -> Ref("A"), "second" -> Ref("B"), "third" -> Ref("C"))
     val declaration = decl("ClassWithGeneric", "A", "B", "C")(productDef)
     Elm.encoder(declaration) shouldBe {
       i"""
@@ -244,7 +244,7 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
   }
 
   "ClassWithGeneric2" in {
-    val productDef  = prod("first" → Ref("A"))
+    val productDef  = prod("first" -> Ref("A"))
     val declaration = decl("ClassWithGeneric2", "A")(productDef)
     Elm.encoder(declaration) shouldBe {
       i"""
@@ -256,9 +256,9 @@ class ElmJsonEncoderSpec extends FreeSpec with Matchers {
 
   "SumWithGeneric" in {
     val sumDef = sum(
-      "First"  -> prod("f" → Ref("A")),
-      "Second" -> prod("s" → Ref("B")),
-      "Third"  -> prod("t" → Ref("C"))
+      "First"  -> prod("f" -> Ref("A")),
+      "Second" -> prod("s" -> Ref("B")),
+      "Third"  -> prod("t" -> Ref("C"))
     )
     val declaration = decl("SumWithGeneric", "A", "B", "C")(sumDef)
     Elm.encoder(declaration) shouldBe {

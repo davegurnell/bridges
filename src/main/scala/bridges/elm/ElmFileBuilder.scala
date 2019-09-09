@@ -16,15 +16,15 @@ trait ElmFileBuilder {
     val typesInFile      = decls.map(_.name)
     val replacementTypes = customTypeReplacements.keySet
     val typeImports = decls
-      .flatMap(d ⇒ getDeclarationTypes(d.tpe, d.name))
+      .flatMap(d => getDeclarationTypes(d.tpe, d.name))
       .distinct
-      .filterNot(r ⇒ typesInFile.contains(r.id) || replacementTypes.contains(r))
-      .map(r ⇒ s"import $module.${r.id} exposing (..)")
+      .filterNot(r => typesInFile.contains(r.id) || replacementTypes.contains(r))
+      .map(r => s"import $module.${r.id} exposing (..)")
       .mkString("\n")
 
     val (declarations, decoders, encoders) =
       decls.map(getFileComponents(module, customTypeReplacements, _)).foldLeft(foldZero) {
-        case (acc, (t, d, e)) ⇒
+        case (acc, (t, d, e)) =>
           (
             s"${acc._1}\n$t",
             s"${acc._2}\n\n$d",
@@ -37,7 +37,7 @@ trait ElmFileBuilder {
         "import Json.Decode.Pipeline exposing (..)"
       else ""
 
-    val customImports = customTypeReplacements.values.filter(td ⇒ decoders.contains(td.newType)).flatMap(_.imports).mkString("\n")
+    val customImports = customTypeReplacements.values.filter(td => decoders.contains(td.newType)).flatMap(_.imports).mkString("\n")
 
     val imports = typeImports + customImports
 
