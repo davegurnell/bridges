@@ -56,7 +56,10 @@ class TsEncoderSpec extends FreeSpec with Matchers {
         TsEncoderConfig(refsInUnions = true)
 
       decl[OneOrOther] shouldBe {
-        decl("OneOrOther")(ref("One") | ref("Other"))
+        decl("OneOrOther")(
+          (struct("type" --> StrLit("One")) & ref("One")) |
+          (struct("type" --> StrLit("Other")) & ref("Other"))
+        )
       }
     }
   }

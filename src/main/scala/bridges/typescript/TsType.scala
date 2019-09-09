@@ -63,7 +63,7 @@ object TsType {
     Union(products.map {
       case (name, tpe) =>
         if (config.refsInUnions) {
-          Ref(name)
+          Inter(List(Struct(List(Field("type", StrLit(name)))), Ref(name)))
         } else {
           Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
         }
