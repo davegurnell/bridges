@@ -9,10 +9,6 @@ Maintainers:
  - Dave Gurnell (Flow and Typescript support)
  - Pere Villega (Elm support)
 
-Contributors:
-
-- Maciej Kowalski (Scala 2.13 support)
-
 [![Build Status](https://travis-ci.org/davegurnell/bridges.svg?branch=develop)](https://travis-ci.org/davegurnell/bridges)
 [![Coverage status](https://img.shields.io/codecov/c/github/davegurnell/bridges/develop.svg)](https://codecov.io/github/davegurnell/bridges)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.davegurnell/bridges_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.davegurnell/bridges_2.12)
