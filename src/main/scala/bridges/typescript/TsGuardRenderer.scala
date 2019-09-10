@@ -4,8 +4,8 @@ import bridges.core.{ DeclF, Renderer }
 import unindent._
 
 abstract class TsGuardRenderer(
-    predName: String => String = id => s"""is${id}""",
-    guardName: String => String = id => s"""as${id}"""
+  predName: String => String = id => s"""is${id}""",
+  guardName: String => String = id => s"""as${id}"""
 ) extends Renderer[TsType] {
   import TsType._
   import TsGuardExpr._
@@ -78,7 +78,10 @@ abstract class TsGuardRenderer(
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     and(
       call(dot(ref("Array"), "isArray"), expr),
-      call(dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"), func("a", "b")(and(ref("a"), ref("b"))))
+      call(
+        dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"),
+        func("a", "b")(and(ref("a"), ref("b")))
+      )
     )
 
   private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr = {
