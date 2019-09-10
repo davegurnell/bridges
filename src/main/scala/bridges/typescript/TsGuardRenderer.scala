@@ -44,7 +44,7 @@ abstract class TsGuardRenderer(
   def guardFunc(pair: (TsType, Int)): TsGuardExpr = {
     val (tpe, index) = pair
     val arg          = "a" + index
-    func(arg)(isType(ref(arg), tpe))
+    guard(arg, tpe)(isType(ref(arg), tpe))
   }
 
   def isType(arg: TsGuardExpr, tpe: TsType): TsGuardExpr =

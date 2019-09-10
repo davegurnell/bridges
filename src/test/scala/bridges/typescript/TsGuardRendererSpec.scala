@@ -208,7 +208,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl("Cell")(ref("Pair", Str, Intr))) shouldBe {
       i"""
       export const isCell = (v: any): v is Cell => {
-        return isPair((a0: any) => typeof a0 === "string", (a1: any) => typeof a1 === "number")(v);
+        return isPair((a0: any): a0 is string => typeof a0 === "string", (a1: any): a1 is number => typeof a1 === "number")(v);
       }
       """
     }
@@ -216,7 +216,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl("Same", "A")(ref("Pair", ref("A"), ref("A")))) shouldBe {
       i"""
       export const isSame = <A>(isA: (a: any) => a is A) => (v: any): v is Same<A> => {
-        return isPair((a0: any) => isA(a0), (a1: any) => isA(a1))(v);
+        return isPair((a0: any): a0 is A => isA(a0), (a1: any): a1 is A => isA(a1))(v);
       }
       """
     }
@@ -224,7 +224,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl("AnyPair")(ref("Pair", Any, Any))) shouldBe {
       i"""
       export const isAnyPair = (v: any): v is AnyPair => {
-        return isPair((a0: any) => true, (a1: any) => true)(v);
+        return isPair((a0: any): a0 is any => true, (a1: any): a1 is any => true)(v);
       }
       """
     }

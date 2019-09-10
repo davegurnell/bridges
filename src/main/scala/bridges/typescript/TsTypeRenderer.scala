@@ -15,7 +15,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
         s"${if (exportAll) "export type" else "type"} ${renderParams(name, params)} = ${renderType(tpe)};"
     }
 
-  private def renderType(tpe: TsType): String =
+  def renderType(tpe: TsType): String =
     tpe match {
       case Ref(id, params)      => renderRef(id, params)
       case Any                  => "any"
