@@ -18,25 +18,31 @@ object syntax extends RenamableSyntax {
   def decl(name: String, params: String*)(tpe: TsType): TsDecl =
     DeclF(name, params.toList, tpe)
 
-  def struct(fields: Field*): Struct =
+  def struct(fields: TsField*): Struct =
     Struct(fields.toList)
 
-  implicit class StringFieldOps(name: String) {
-    def -->(tpe: TsType): Field =
-      Field(name, tpe, optional = false)
+  def dict(keyType: TsType, valueType: TsType): Struct =
+    Struct(Nil, Some(TsRestField("key", keyType, valueType)))
 
-    def -?>(tpe: TsType): Field =
-      Field(name, tpe, optional = true)
+  implicit class StringFieldOps(name: String) {
+    def -->(tpe: TsType): TsField =
+      TsField(name, tpe, optional = false)
+
+    def -?>(tpe: TsType): TsField =
+      TsField(name, tpe, optional = true)
   }
 
   @deprecated("Use --> instead of ->", "0.16.0")
-  implicit def pairToField(pair: (String, TsType)): Field = {
+  implicit def pairToField(pair: (String, TsType)): TsField = {
     val (name, tpe) = pair
-    Field(name, tpe, optional = false)
+    TsField(name, tpe, optional = false)
   }
 
-  def field(name: String, optional: Boolean = false)(tpe: TsType): Field =
-    Field(name, tpe, optional)
+  def field(name: String, optional: Boolean = false)(tpe: TsType): TsField =
+    TsField(name, tpe, optional)
+
+  def restField(name: String, keyType: TsType)(valueType: TsType): TsRestField =
+    TsRestField(name, keyType, valueType)
 
   def tuple(types: TsType*): Tuple =
     Tuple(types.toList)

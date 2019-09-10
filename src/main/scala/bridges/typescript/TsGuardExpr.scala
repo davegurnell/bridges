@@ -7,7 +7,8 @@ sealed abstract class TsGuardExpr
 object TsGuardExpr {
   final case class Ref(name: String)                                                    extends TsGuardExpr
   final case class Dot(obj: TsGuardExpr, name: String)                                  extends TsGuardExpr
-  final case class Index(arr: TsGuardExpr, index: Int)                                  extends TsGuardExpr
+  final case class Arr(exprs: List[TsGuardExpr])                                        extends TsGuardExpr
+  final case class Index(arr: TsGuardExpr, index: TsGuardExpr)                          extends TsGuardExpr
   final case class Lit(name: String)                                                    extends TsGuardExpr
   final case class Typeof(expr: TsGuardExpr)                                            extends TsGuardExpr
   final case class Call(func: TsGuardExpr, args: List[TsGuardExpr])                     extends TsGuardExpr
@@ -26,7 +27,13 @@ object TsGuardExpr {
   def dot(expr: TsGuardExpr, name: String): TsGuardExpr =
     Dot(expr, name)
 
+  def arr(exprs: List[TsGuardExpr]): TsGuardExpr =
+    Arr(exprs)
+
   def index(expr: TsGuardExpr, index: Int): TsGuardExpr =
+    Index(expr, lit(index))
+
+  def index(expr: TsGuardExpr, index: TsGuardExpr): TsGuardExpr =
     Index(expr, index)
 
   def lit(value: String): TsGuardExpr =
@@ -83,7 +90,8 @@ object TsGuardExpr {
     expr match {
       case Ref(name)         => name
       case Dot(obj, name)    => s"""${r(obj)}.${name}"""
-      case Index(obj, idx)   => s"""${r(obj)}[${idx}]"""
+      case Arr(exprs)        => exprs.map(r).mkString("[", ", ", "]")
+      case Index(obj, idx)   => s"""${r(obj)}[${r(idx)}]"""
       case Lit(value)        => value
       case Typeof(expr)      => s"""typeof ${r(expr)}"""
       case Call(func, args)  => s"""${r(func)}(${args.map(render).mkString(", ")})"""
@@ -110,6 +118,7 @@ object TsGuardExpr {
     tpe match {
       case _: Ref         => 1000
       case _: Dot         => 1000
+      case _: Arr         => 1000
       case _: Index       => 1000
       case _: Lit         => 1000
       case _: Call        => 1000

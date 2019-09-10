@@ -254,4 +254,31 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Structs with rest fields" in {
+    Typescript.render(decl("Dict")(dict(Str, Intr))) shouldBe {
+      i"""
+      export interface Dict {
+        [key: string]: number;
+      }
+      """
+    }
+
+    Typescript.render(
+      decl("Dict")(
+        struct(
+          "a" --> Str,
+          "b" -?> Intr
+        ).withRest(Str, Bool, "c")
+      )
+    ) shouldBe {
+      i"""
+      export interface Dict {
+        a: string;
+        b?: number;
+        [c: string]: boolean;
+      }
+      """
+    }
+  }
 }

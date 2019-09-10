@@ -55,23 +55,23 @@ abstract class TsGuardRenderer(
       case TsType.Ref(id, params) =>
         call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
 
-      case TsType.Any            => lit(true)
-      case TsType.Str            => eql(typeof(arg), lit("string"))
-      case TsType.Chr            => eql(typeof(arg), lit("string"))
-      case TsType.Intr           => eql(typeof(arg), lit("number"))
-      case TsType.Real           => eql(typeof(arg), lit("number"))
-      case TsType.Bool           => eql(typeof(arg), lit("boolean"))
-      case TsType.StrLit(value)  => eql(arg, lit(value))
-      case TsType.ChrLit(value)  => eql(arg, lit(value.toString))
-      case TsType.IntrLit(value) => eql(arg, lit(value))
-      case TsType.RealLit(value) => eql(arg, lit(value))
-      case TsType.BoolLit(value) => eql(arg, lit(value))
-      case TsType.Null           => eql(arg, nullLit)
-      case TsType.Arr(tpe)       => isArray(arg, tpe)
-      case TsType.Tuple(types)   => isTuple(arg, types)
-      case TsType.Struct(fields) => isStruct(arg, fields)
-      case TsType.Inter(types)   => isAll(arg, types)
-      case TsType.Union(types)   => isUnion(arg, types)
+      case TsType.Any                  => lit(true)
+      case TsType.Str                  => eql(typeof(arg), lit("string"))
+      case TsType.Chr                  => eql(typeof(arg), lit("string"))
+      case TsType.Intr                 => eql(typeof(arg), lit("number"))
+      case TsType.Real                 => eql(typeof(arg), lit("number"))
+      case TsType.Bool                 => eql(typeof(arg), lit("boolean"))
+      case TsType.StrLit(value)        => eql(arg, lit(value))
+      case TsType.ChrLit(value)        => eql(arg, lit(value.toString))
+      case TsType.IntrLit(value)       => eql(arg, lit(value))
+      case TsType.RealLit(value)       => eql(arg, lit(value))
+      case TsType.BoolLit(value)       => eql(arg, lit(value))
+      case TsType.Null                 => eql(arg, nullLit)
+      case TsType.Arr(tpe)             => isArray(arg, tpe)
+      case TsType.Tuple(types)         => isTuple(arg, types)
+      case TsType.Struct(fields, rest) => isStruct(arg, fields, rest)
+      case TsType.Inter(types)         => isAll(arg, types)
+      case TsType.Union(types)         => isUnion(arg, types)
     }
 
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
@@ -91,19 +91,60 @@ abstract class TsGuardRenderer(
     (baseChecks ++ itemChecks).reduceLeft(and(_, _))
   }
 
-  private def isStruct(expr: TsGuardExpr, fields: List[TsType.Field]): TsGuardExpr = {
+  private def isStruct(expr: TsGuardExpr, fields: List[TsField], rest: Option[TsRestField]): TsGuardExpr = {
     val seed = and(eql(typeof(expr), lit("object")), not(isnull(expr)))
 
-    fields
-      .map {
-        case Field(name, tpe, optional) =>
-          if (optional) {
-            or(not(in(name, expr)), isType(dot(expr, name), tpe))
-          } else {
-            and(in(name, expr), isType(dot(expr, name), tpe))
-          }
+    // Are all named fields valid?
+    val fieldsExpr: TsGuardExpr = fields
+      .map { field =>
+        val TsField(name, tpe, optional) = field
+
+        if (optional) {
+          or(not(in(name, expr)), isType(dot(expr, name), tpe))
+        } else {
+          and(in(name, expr), isType(dot(expr, name), tpe))
+        }
       }
       .foldLeft(seed)(and(_, _))
+
+    // Is the rest field (if specified) valid?
+    val restExpr: Option[TsGuardExpr] =
+      rest.map { rest =>
+        val fieldNames: List[TsGuardExpr] =
+          fields.map(_.name).map(lit)
+
+        def isField: TsGuardExpr =
+          call(
+            dot(
+              arr(fieldNames),
+              "includes"
+            ),
+            ref("k")
+          )
+
+        def isRest: TsGuardExpr =
+          and(
+            isType(ref("k"), rest.keyType),
+            isType(index(expr, ref("k")), rest.valueType)
+          )
+
+        def isFieldOrRest: TsGuardExpr =
+          if (fieldNames.isEmpty) {
+            func("k")(isRest)
+          } else {
+            func("k")(or(isField, isRest))
+          }
+
+        call(
+          dot(
+            call(dot(ref("Object"), "keys"), expr),
+            "every"
+          ),
+          isFieldOrRest
+        )
+      }
+
+    restExpr.fold(fieldsExpr)(restExpr => and(fieldsExpr, restExpr))
   }
 
   private def isUnion(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
@@ -145,9 +186,9 @@ abstract class TsGuardRenderer(
   private object DiscriminatedBy {
     def unapply(tpe: TsType): Option[(String, TsType.Struct)] =
       tpe match {
-        case TsType.Struct(fields) =>
+        case TsType.Struct(fields, _) =>
           fields.collectFirst {
-            case decl @ Field("type", TsType.StrLit(name), _) =>
+            case decl @ TsField("type", TsType.StrLit(name), _) =>
               (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 

@@ -27,16 +27,17 @@ trait ElmRenderer extends Renderer[Type] with ElmUtils {
 
   private def renderType(tpe: Type, customTypeReplacements: Map[Ref, TypeReplacement]): String =
     tpe match {
-      case r @ Ref(id, _) => customTypeReplacements.get(r).map(_.newType).getOrElse(id)
-      case Str            => "String"
-      case Chr            => "Char"
-      case Intr           => "Int"
-      case Real           => "Float"
-      case Bool           => "Bool"
-      case Opt(optTpe)    => "(Maybe " + renderType(optTpe, customTypeReplacements) + ")"
-      case Arr(arrTpe)    => "(List " + renderType(arrTpe, customTypeReplacements) + ")"
-      case Prod(fields)   => fields.map { case (name, tpe) => renderField(name, tpe, customTypeReplacements) }.mkString("{ ", ", ", " }")
-      case _: Sum         => throw new IllegalArgumentException("SumOfProducts Renderer: we should never be here")
+      case r @ Ref(id, _)   => customTypeReplacements.get(r).map(_.newType).getOrElse(id)
+      case Str              => "String"
+      case Chr              => "Char"
+      case Intr             => "Int"
+      case Real             => "Float"
+      case Bool             => "Bool"
+      case Opt(optTpe)      => "(Maybe " + renderType(optTpe, customTypeReplacements) + ")"
+      case Arr(arrTpe)      => "(List " + renderType(arrTpe, customTypeReplacements) + ")"
+      case Dict(kTpe, vTpe) => "(Dict " + renderType(kTpe, customTypeReplacements) + " " + renderType(vTpe, customTypeReplacements) + ")"
+      case Prod(fields)     => fields.map { case (name, tpe) => renderField(name, tpe, customTypeReplacements) }.mkString("{ ", ", ", " }")
+      case _: Sum           => throw new IllegalArgumentException("SumOfProducts Renderer: we should never be here")
     }
 
   private def renderField(name: String, tpe: Type, customTypeReplacements: Map[Ref, TypeReplacement]): String =
