@@ -56,6 +56,7 @@ abstract class TsGuardRenderer(
         call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
 
       case TsType.Any                  => lit(true)
+      case TsType.Unknown              => lit(true)
       case TsType.Str                  => eql(typeof(arg), lit("string"))
       case TsType.Chr                  => eql(typeof(arg), lit("string"))
       case TsType.Intr                 => eql(typeof(arg), lit("number"))
@@ -77,7 +78,10 @@ abstract class TsGuardRenderer(
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     and(
       call(dot(ref("Array"), "isArray"), expr),
-      call(dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"), func("a", "b")(and(ref("a"), ref("b"))))
+      call(
+        dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"),
+        func("a", "b")(and(ref("a"), ref("b")))
+      )
     )
 
   private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr = {

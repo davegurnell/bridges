@@ -281,4 +281,15 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Unknown and any" in {
+    Typescript.render(decl("UnknownAndAny")(struct("foo" --> Any, "bar" --> Unknown))) shouldBe {
+      i"""
+      export interface UnknownAndAny {
+        foo: any;
+        bar: unknown;
+      }
+      """
+    }
+  }
 }

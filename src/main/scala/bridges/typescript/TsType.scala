@@ -16,13 +16,14 @@ sealed abstract class TsType extends Product with Serializable {
 object TsType {
   final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
 
-  final case object Any  extends TsType
-  final case object Str  extends TsType
-  final case object Chr  extends TsType
-  final case object Intr extends TsType
-  final case object Real extends TsType
-  final case object Bool extends TsType
-  final case object Null extends TsType
+  final case object Any     extends TsType
+  final case object Unknown extends TsType
+  final case object Str     extends TsType
+  final case object Chr     extends TsType
+  final case object Intr    extends TsType
+  final case object Real    extends TsType
+  final case object Bool    extends TsType
+  final case object Null    extends TsType
 
   final case class StrLit(value: String)      extends TsType
   final case class ChrLit(value: Char)        extends TsType
@@ -36,6 +37,7 @@ object TsType {
     def withRest(keyType: TsType, valueType: TsType, keyName: String = "key"): Struct =
       copy(rest = Some(TsRestField(keyName, keyType, valueType)))
   }
+
   final case class Inter(types: List[TsType]) extends TsType
   final case class Union(types: List[TsType]) extends TsType
 
@@ -60,7 +62,11 @@ object TsType {
   private def translateSum(products: List[(String, Type.Prod)])(implicit config: TsEncoderConfig): Union =
     Union(products.map {
       case (name, tpe) =>
-        Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
+        if (config.refsInUnions) {
+          Inter(List(Struct(List(TsField("type", StrLit(name)))), Ref(name)))
+        } else {
+          Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
+        }
     })
 
   private def keyIsOptional(tpe: Type)(implicit config: TsEncoderConfig): Boolean =
@@ -77,6 +83,7 @@ object TsType {
       value match {
         case Ref(id, params)      => Ref(renameId(id), params.map(_.rename(from, to)))
         case Any                  => Any
+        case tpe @ Unknown        => tpe
         case tpe @ Str            => tpe
         case tpe @ Chr            => tpe
         case tpe @ Intr           => tpe

@@ -8,7 +8,7 @@ import org.scalatest._
 import unindent._
 
 class TsEncoderSpec extends FreeSpec with Matchers {
-  "config" - {
+  "TsEncoderConfig.optionalFields" - {
     "render optional fields by default" in {
       decl[Recursive] shouldBe {
         decl("Recursive")(
@@ -20,7 +20,7 @@ class TsEncoderSpec extends FreeSpec with Matchers {
       }
     }
 
-    "override optional fields setting" in {
+    "override setting" in {
       implicit val config: TsEncoderConfig =
         TsEncoderConfig(optionalFields = false)
 
@@ -30,6 +30,35 @@ class TsEncoderSpec extends FreeSpec with Matchers {
             "head" --> Intr,
             "tail" --> union(ref("Recursive"), Null)
           )
+        )
+      }
+    }
+  }
+
+  "TsEncoderConfig.refsUnions" - {
+    "render type names in unions by default" in {
+      decl[OneOrOther] shouldBe {
+        decl("OneOrOther")(
+          struct(
+            "type" --> StrLit("One"),
+            "value" --> Str
+          ) |
+          struct(
+            "type" --> StrLit("Other"),
+            "value" --> Intr
+          )
+        )
+      }
+    }
+
+    "override setting" in {
+      implicit val config: TsEncoderConfig =
+        TsEncoderConfig(refsInUnions = true)
+
+      decl[OneOrOther] shouldBe {
+        decl("OneOrOther")(
+          (struct("type" --> StrLit("One")) & ref("One")) |
+          (struct("type" --> StrLit("Other")) & ref("Other"))
         )
       }
     }
