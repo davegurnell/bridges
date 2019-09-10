@@ -37,7 +37,7 @@ abstract class TsGuardRenderer(
     }
 
   def renderParamPreds(params: List[String]): String =
-    params.map(param => s"${predName(param)}: (${param.toLowerCase}: any) => boolean").mkString(", ")
+    params.map(param => s"${predName(param)}: (${param.toLowerCase}: any) => ${param.toLowerCase} is ${param}").mkString(", ")
 
   import TsGuardExpr._
 
