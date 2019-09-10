@@ -13,6 +13,7 @@ object TsGuardExpr {
   final case class Typeof(expr: TsGuardExpr)                                            extends TsGuardExpr
   final case class Call(func: TsGuardExpr, args: List[TsGuardExpr])                     extends TsGuardExpr
   final case class Func(args: List[String], body: TsGuardExpr)                          extends TsGuardExpr
+  final case class Guard(arg: String, retType: TsType, body: TsGuardExpr)               extends TsGuardExpr
   final case class Cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr) extends TsGuardExpr
   final case class IsNull(expr: TsGuardExpr)                                            extends TsGuardExpr
   final case class Not(expr: TsGuardExpr)                                               extends TsGuardExpr
@@ -63,6 +64,9 @@ object TsGuardExpr {
   def func(args: String*)(body: TsGuardExpr): TsGuardExpr =
     Func(args.toList, body)
 
+  def guard(arg: String, retType: TsType)(body: TsGuardExpr): TsGuardExpr =
+    Guard(arg, retType, body)
+
   def cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr): TsGuardExpr =
     Cond(test, trueArm, falseArm)
 
@@ -88,22 +92,23 @@ object TsGuardExpr {
     val r = renderParens(expr) _
 
     expr match {
-      case Ref(name)         => name
-      case Dot(obj, name)    => s"""${r(obj)}.${name}"""
-      case Arr(exprs)        => exprs.map(r).mkString("[", ", ", "]")
-      case Index(obj, idx)   => s"""${r(obj)}[${r(idx)}]"""
-      case Lit(value)        => value
-      case Typeof(expr)      => s"""typeof ${r(expr)}"""
-      case Call(func, args)  => s"""${r(func)}(${args.map(render).mkString(", ")})"""
-      case Func(args, body)  => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
-      case Cond(c, t, f)     => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
-      case IsNull(expr)      => s"""${r(expr)} == null"""
-      case Not(IsNull(expr)) => s"""${r(expr)} != null"""
-      case Not(expr)         => s"""!${r(expr)}"""
-      case And(lhs, rhs)     => s"""${r(lhs)} && ${r(rhs)}"""
-      case Or(lhs, rhs)      => s"""${r(lhs)} || ${r(rhs)}"""
-      case Eql(lhs, rhs)     => s"""${r(lhs)} === ${r(rhs)}"""
-      case In(key, expr)     => s"""${r(lit(key))} in ${r(expr)}"""
+      case Ref(name)                 => name
+      case Dot(obj, name)            => s"""${r(obj)}.${name}"""
+      case Arr(exprs)                => exprs.map(r).mkString("[", ", ", "]")
+      case Index(obj, idx)           => s"""${r(obj)}[${r(idx)}]"""
+      case Lit(value)                => value
+      case Typeof(expr)              => s"""typeof ${r(expr)}"""
+      case Call(func, args)          => s"""${r(func)}(${args.map(render).mkString(", ")})"""
+      case Func(args, body)          => s"""(${args.map(_ + ": any").mkString(", ")}) => ${r(body)}"""
+      case Guard(arg, retType, body) => s"""(${arg}: any): ${arg} is ${Typescript.renderType(retType)} => ${r(body)}"""
+      case Cond(c, t, f)             => s"""${r(c)} ? ${r(t)} : ${r(f)}"""
+      case IsNull(expr)              => s"""${r(expr)} == null"""
+      case Not(IsNull(expr))         => s"""${r(expr)} != null"""
+      case Not(expr)                 => s"""!${r(expr)}"""
+      case And(lhs, rhs)             => s"""${r(lhs)} && ${r(rhs)}"""
+      case Or(lhs, rhs)              => s"""${r(lhs)} || ${r(rhs)}"""
+      case Eql(lhs, rhs)             => s"""${r(lhs)} === ${r(rhs)}"""
+      case In(key, expr)             => s"""${r(lit(key))} in ${r(expr)}"""
     }
   }
 
@@ -132,5 +137,6 @@ object TsGuardExpr {
       case _: Or          => 500
       case _: Cond        => 400
       case _: Func        => 300
+      case _: Guard       => 300
     }
 }
