@@ -4,8 +4,8 @@ import bridges.core.{ DeclF, Renderer }
 import unindent._
 
 abstract class TsGuardRenderer(
-  predName: String => String = id => s"""is${id}""",
-  guardName: String => String = id => s"""as${id}"""
+    predName: String => String = id => s"""is${id}""",
+    guardName: String => String = id => s"""as${id}"""
 ) extends Renderer[TsType] {
   import TsType._
   import TsGuardExpr._

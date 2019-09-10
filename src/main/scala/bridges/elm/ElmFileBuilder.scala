@@ -58,9 +58,9 @@ trait ElmFileBuilder {
   }
 
   private def getFileComponents(
-    module: String,
-    customTypeReplacements: Map[Ref, TypeReplacement],
-    decl: Decl
+      module: String,
+      customTypeReplacements: Map[Ref, TypeReplacement],
+      decl: Decl
   ): (String, String, String) = {
     val declaration = Elm.render(decl, customTypeReplacements)
     val decoder     = Elm.decoder(decl, customTypeReplacements)

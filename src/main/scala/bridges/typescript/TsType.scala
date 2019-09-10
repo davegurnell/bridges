@@ -63,7 +63,7 @@ object TsType {
     Union(products.map {
       case (name, tpe) =>
         if (config.refsInUnions) {
-          Inter(List(Struct(List(Field("type", StrLit(name)))), Ref(name)))
+          Inter(List(Struct(List(TsField("type", StrLit(name)))), Ref(name)))
         } else {
           Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
         }
@@ -83,13 +83,13 @@ object TsType {
       value match {
         case Ref(id, params)      => Ref(renameId(id), params.map(_.rename(from, to)))
         case Any                  => Any
+        case tpe @ Unknown        => tpe
         case tpe @ Str            => tpe
         case tpe @ Chr            => tpe
         case tpe @ Intr           => tpe
         case tpe @ Real           => tpe
         case tpe @ Bool           => tpe
         case tpe @ Null           => tpe
-        case tpe @ Unknown        => toe
         case tpe: StrLit          => tpe
         case tpe: ChrLit          => tpe
         case tpe: IntrLit         => tpe
