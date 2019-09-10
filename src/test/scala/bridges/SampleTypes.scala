@@ -84,9 +84,9 @@ object SampleTypes {
   // Custom declaration of a intermediate structure
   val customDeclaration: Decl =
     "Message" := sum(
-      "ErrorMessage"   -> prod("error"   -> Ref("ErrorMessage")),
-      "WarningMessage" -> prod("warning" -> Ref("WarningMessage"))
-    )
+        "ErrorMessage"   -> prod("error"   -> Ref("ErrorMessage")),
+        "WarningMessage" -> prod("warning" -> Ref("WarningMessage"))
+      )
 
   final case class ClassWithRefinedType(name: RefinedString)
 
