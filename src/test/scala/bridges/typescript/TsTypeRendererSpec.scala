@@ -86,6 +86,15 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
     }
   }
 
+  "Singleton object" in {
+    Typescript.render(decl[MyObject.type]) shouldBe {
+      i"""
+      export interface MyObject {
+      }
+      """
+    }
+  }
+
   "ClassOrObject" in {
     Typescript.render(decl[ClassOrObject]) shouldBe {
       i"""

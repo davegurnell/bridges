@@ -50,7 +50,8 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
 
   private def renderStructAsInterface(fields: List[TsField], rest: Option[TsRestField]): String =
     (fields.map(renderField) ++ rest.toList.map(renderRestField))
-      .mkString("{\n  ", ";\n  ", ";\n}")
+      .map(str => s"  $str;\n")
+      .mkString("{\n", "", "}")
 
   private def renderField(field: TsField): String =
     field match {
