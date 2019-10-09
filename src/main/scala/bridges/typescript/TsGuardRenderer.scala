@@ -80,7 +80,8 @@ abstract class TsGuardRenderer(
       call(dot(ref("Array"), "isArray"), expr),
       call(
         dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"),
-        func("a", "b")(and(ref("a"), ref("b")))
+        func("a", "b")(and(ref("a"), ref("b"))),
+        lit(true)
       )
     )
 
