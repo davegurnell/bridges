@@ -25,13 +25,14 @@ object TsType {
   final case object Bool    extends TsType
   final case object Null    extends TsType
 
-  final case class StrLit(value: String)      extends TsType
-  final case class ChrLit(value: Char)        extends TsType
-  final case class IntrLit(value: Int)        extends TsType
-  final case class RealLit(value: Double)     extends TsType
-  final case class BoolLit(value: Boolean)    extends TsType
-  final case class Arr(tpe: TsType)           extends TsType
-  final case class Tuple(types: List[TsType]) extends TsType
+  final case class StrLit(value: String)                           extends TsType
+  final case class ChrLit(value: Char)                             extends TsType
+  final case class IntrLit(value: Int)                             extends TsType
+  final case class RealLit(value: Double)                          extends TsType
+  final case class BoolLit(value: Boolean)                         extends TsType
+  final case class Arr(tpe: TsType)                                extends TsType
+  final case class Tuple(types: List[TsType])                      extends TsType
+  final case class Func(args: List[(String, TsType)], ret: TsType) extends TsType
 
   final case class Struct(fields: List[TsField], rest: Option[TsRestField] = None) extends TsType {
     def withRest(keyType: TsType, valueType: TsType, keyName: String = "key"): Struct =
@@ -97,6 +98,7 @@ object TsType {
         case tpe: BoolLit         => tpe
         case Arr(tpe)             => Arr(tpe.rename(from, to))
         case Tuple(types)         => Tuple(types.map(_.rename(from, to)))
+        case Func(args, ret)      => Func(args.map(_.rename(from, to)), ret.rename(from, to))
         case Struct(fields, rest) => Struct(fields.map(_.rename(from, to)), rest.map(_.rename(from, to)))
         case Inter(types)         => Inter(types.map(_.rename(from, to)))
         case Union(types)         => Union(types.map(_.rename(from, to)))

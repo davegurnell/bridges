@@ -70,6 +70,7 @@ abstract class TsGuardRenderer(
       case TsType.Null                 => eql(arg, nullLit)
       case TsType.Arr(tpe)             => isArray(arg, tpe)
       case TsType.Tuple(types)         => isTuple(arg, types)
+      case TsType.Func(_, _)           => eql(typeof(arg), lit("function"))
       case TsType.Struct(fields, rest) => isStruct(arg, fields, rest)
       case TsType.Inter(types)         => isAll(arg, types)
       case TsType.Union(types)         => isUnion(arg, types)

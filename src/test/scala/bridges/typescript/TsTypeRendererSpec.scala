@@ -301,4 +301,28 @@ class TsTypeRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Function types" in {
+    Typescript.render(
+      decl("Rule")(
+        struct(
+          "message" --> Str,
+          "apply" --> func("value" -> Unknown)(Bool)
+        )
+      )
+    ) shouldBe {
+      i"""
+      export interface Rule {
+        message: string;
+        apply: (value: unknown) => boolean;
+      }
+      """
+    }
+
+    Typescript.render(decl("Funcy")(tuple(func("arg" -> tuple(Str))(tuple(Str)), func("arg" -> tuple(Intr))(tuple(Intr))))) shouldBe {
+      i"""
+      export type Funcy = [(arg: [string]) => [string], (arg: [number]) => [number]];
+      """
+    }
+  }
 }
