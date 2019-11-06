@@ -33,6 +33,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case BoolLit(value)       => value.toString
       case tpe @ Arr(arg)       => s"""${renderParens(tpe)(arg)}[]"""
       case Tuple(types)         => types.map(renderType).mkString("[", ", ", "]")
+      case Func(args, ret)      => s"""${renderArgs(args)} => ${renderType(ret)}"""
       case Struct(fields, rest) => renderStruct(fields, rest)
       case tpe @ Inter(types)   => types.map(renderParens(tpe)).mkString(" & ")
       case tpe @ Union(types)   => types.map(renderParens(tpe)).mkString(" | ")
@@ -61,6 +62,11 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case TsField(name, valueType, true) =>
         s"""${name}?: ${renderType(valueType)}"""
     }
+
+  private def renderArgs(args: List[(String, TsType)]): String =
+    args
+      .map { case (name, tpe) => s"""${name}: ${renderType(tpe)}""" }
+      .mkString("(", ", ", ")")
 
   private def renderRestField(field: TsRestField): String = {
     val TsRestField(name, keyType, valueType) = field
@@ -95,5 +101,6 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case _: Struct  => 600
       case _: Union   => 400
       case _: Inter   => 200
+      case _: Func    => 100
     }
 }

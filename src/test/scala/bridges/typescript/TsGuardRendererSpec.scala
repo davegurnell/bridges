@@ -284,4 +284,37 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
       """
     }
   }
+
+  "Function types" in {
+    TypescriptGuard.render(
+      decl("Rule")(
+        struct(
+          "message" --> Str,
+          "apply" --> func("value" -> Unknown)(Bool)
+        )
+      )
+    ) shouldBe {
+      i"""
+      export const isRule = (v: any): v is Rule => {
+        return typeof v === "object" && v != null && "message" in v && typeof v.message === "string" && "apply" in v && typeof v.apply === "function";
+      }
+      """
+    }
+
+    TypescriptGuard.render(
+      decl("Funcy")(
+        tuple(
+          func("arg" -> tuple(Str))(tuple(Str)),
+          func("arg" -> tuple(Intr))(tuple(Intr))
+        )
+      )
+    ) shouldBe {
+      i"""
+      export const isFuncy = (v: any): v is Funcy => {
+        return Array.isArray(v) && v.length === 2 && typeof v[0] === "function" && typeof v[1] === "function";
+      }
+      """
+    }
+  }
+
 }

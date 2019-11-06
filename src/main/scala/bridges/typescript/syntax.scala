@@ -60,4 +60,7 @@ object syntax extends RenamableSyntax {
     def :=[A](tpe: A): DeclF[A] =
       DeclF(str, tpe)
   }
+
+  def func(args: (String, TsType)*)(ret: TsType): Func =
+    Func(args.toList, ret)
 }
