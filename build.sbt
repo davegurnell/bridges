@@ -1,8 +1,8 @@
 name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
 
-scalaVersion       in ThisBuild := "2.13.0"
-crossScalaVersions in ThisBuild := Seq("2.12.9", "2.13.0")
+scalaVersion       in ThisBuild := "2.13.1"
+crossScalaVersions in ThisBuild := Seq("2.12.9", "2.13.1")
 
 val stdOptions = Seq(
   "-feature",
@@ -13,23 +13,21 @@ val stdOptions = Seq(
 
 def extraOptions(scalaVersion: String) =
   CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, 12)) => Seq(
-        "-Ypartial-unification"
-      )
-    case _ => Seq()
+    case Some((2, 12)) =>
+      Seq("-Ypartial-unification")
+    case _ =>
+      Seq()
   }
 
 scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
 
-val refinedVersion = "0.9.9"
-
 libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.3",
-  "com.davegurnell"   %% "unindent"           % "1.1.1" exclude("org.typelevel", "scala-library"),
-  "org.apache.commons" % "commons-lang3"      % "3.5",
+  "com.davegurnell"   %% "unindent"           % "1.2.0" exclude("org.typelevel", "scala-library"),
+  "org.apache.commons" % "commons-lang3"      % "3.9",
   "org.scalatest"     %% "scalatest"          % "3.0.8" % Test,
-  "eu.timepit"        %% "refined"            % refinedVersion % Provided,
-  "eu.timepit"        %% "refined-shapeless"  % refinedVersion % Provided
+  "eu.timepit"        %% "refined"            % "0.9.10" % Provided,
+  "eu.timepit"        %% "refined-shapeless"  % "0.9.10" % Provided
 )
 
 // Versioning
@@ -100,7 +98,7 @@ credentials ++= {
 // Password to the PGP certificate is on Travis in a secret:
 pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 
-addCommandAlias("ci", ";clean ;coverage ;compile ;test ;coverageReport ;package")
+addCommandAlias("ci", ";clean ;coverage ;compile ;+test ;coverageReport ;package")
 addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
 
 // Formatting
