@@ -10,6 +10,7 @@ val stdOptions = Seq(
   "-deprecation",
   "-Xfatal-warnings"
 )
+
 def extraOptions(scalaVersion: String) =
   CrossVersion.partialVersion(scalaVersion) match {
     case Some((2, 12)) => Seq(
@@ -41,7 +42,7 @@ libraryDependencies ++= Seq(
 enablePlugins(GitVersioning)
 enablePlugins(GitBranchPrompt)
 
-// Use "1.2.3-4-aabbccdde-SNAPSHOT" versnining:
+// Use "1.2.3-4-aabbccdde-SNAPSHOT" versioning:
 git.useGitDescribe := true
 
 // Put "-SNAPSHOT" on a commit if it's not a tag:
