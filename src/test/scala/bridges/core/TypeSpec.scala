@@ -2,8 +2,10 @@ package bridges.core
 
 import bridges.core.syntax._
 import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class TypeSpec extends FreeSpec with Matchers {
+class TypeSpec extends AnyFreeSpec with Matchers {
   import Type._
 
   def t[A <: Type](a: A): Type = a

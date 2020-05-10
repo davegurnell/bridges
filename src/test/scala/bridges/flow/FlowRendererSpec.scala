@@ -6,8 +6,10 @@ import bridges.flow.FlowType._
 import bridges.flow.syntax._
 import org.scalatest._
 import unindent._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class FlowRendererSpec extends FreeSpec with Matchers {
+class FlowRendererSpec extends AnyFreeSpec with Matchers {
   "Color" in {
     Flow.render(decl[Color]) shouldBe {
       i"""
