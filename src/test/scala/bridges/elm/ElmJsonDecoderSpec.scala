@@ -12,7 +12,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Color]) shouldBe {
       i"""
       decoderColor : Decode.Decoder Color
-      decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
+      decoderColor = Decode.succeed Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
       """
     }
   }
@@ -21,7 +21,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Circle]) shouldBe {
       i"""
       decoderCircle : Decode.Decoder Circle
-      decoderCircle = decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+      decoderCircle = Decode.succeed Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
       """
     }
   }
@@ -30,7 +30,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Rectangle]) shouldBe {
       i"""
       decoderRectangle : Decode.Decoder Rectangle
-      decoderRectangle = decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+      decoderRectangle = Decode.succeed Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
       """
     }
   }
@@ -44,9 +44,9 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       decoderShapeTpe : String -> Decode.Decoder Shape
       decoderShapeTpe tpe =
          case tpe of
-            "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
-            "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
-            "ShapeGroup" -> decode ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
+            "Circle" -> Decode.succeed Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+            "Rectangle" -> Decode.succeed Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+            "ShapeGroup" -> Decode.succeed ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
             _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
       """
     }
@@ -56,7 +56,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Alpha]) shouldBe {
       i"""
       decoderAlpha : Decode.Decoder Alpha
-      decoderAlpha = decode Alpha |> required "name" Decode.string |> required "char" Decode.string |> required "bool" Decode.bool
+      decoderAlpha = Decode.succeed Alpha |> required "name" Decode.string |> required "char" Decode.string |> required "bool" Decode.bool
       """
     }
   }
@@ -65,7 +65,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[ArrayClass]) shouldBe {
       i"""
       decoderArrayClass : Decode.Decoder ArrayClass
-      decoderArrayClass = decode ArrayClass |> required "aList" (Decode.list Decode.string) |> optional "optField" (Decode.maybe Decode.float) Nothing
+      decoderArrayClass = Decode.succeed ArrayClass |> required "aList" (Decode.list Decode.string) |> optional "optField" (Decode.maybe Decode.float) Nothing
       """
     }
   }
@@ -74,7 +74,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Numeric]) shouldBe {
       i"""
       decoderNumeric : Decode.Decoder Numeric
-      decoderNumeric = decode Numeric |> required "double" Decode.float |> required "float" Decode.float |> required "int" Decode.int
+      decoderNumeric = Decode.succeed Numeric |> required "double" Decode.float |> required "float" Decode.float |> required "int" Decode.int
       """
     }
   }
@@ -88,7 +88,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       decoderClassOrObjectTpe : String -> Decode.Decoder ClassOrObject
       decoderClassOrObjectTpe tpe =
          case tpe of
-            "MyClass" -> decode MyClass |> required "value" Decode.int
+            "MyClass" -> Decode.succeed MyClass |> required "value" Decode.int
             "MyObject" -> Decode.succeed MyObject
             _ -> Decode.fail ("Unexpected type for ClassOrObject: " ++ tpe)
       """
@@ -104,8 +104,8 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       decoderNavigationTpe : String -> Decode.Decoder Navigation
       decoderNavigationTpe tpe =
          case tpe of
-            "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
-            "NodeList" -> decode NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+            "Node" -> Decode.succeed Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+            "NodeList" -> Decode.succeed NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
             _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
       """
     }
@@ -115,7 +115,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[ExternalReferences]) shouldBe {
       i"""
       decoderExternalReferences : Decode.Decoder ExternalReferences
-      decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
+      decoderExternalReferences = Decode.succeed ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
       """
     }
   }
@@ -124,7 +124,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(List(decl[TypeOne], decl[TypeTwo]), Map.empty[Ref, TypeReplacement]) shouldBe {
       i"""
       decoderTypeOne : Decode.Decoder TypeOne
-      decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
+      decoderTypeOne = Decode.succeed TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
 
       decoderTypeTwo : Decode.Decoder TypeTwo
       decoderTypeTwo = Decode.field "type" Decode.string |> Decode.andThen decoderTypeTwoTpe
@@ -132,8 +132,8 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       decoderTypeTwoTpe : String -> Decode.Decoder TypeTwo
       decoderTypeTwoTpe tpe =
          case tpe of
-            "OptionOne" -> decode OptionOne |> required "value" Decode.int
-            "OptionTwo" -> decode OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
+            "OptionOne" -> Decode.succeed OptionOne |> required "value" Decode.int
+            "OptionTwo" -> Decode.succeed OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
             _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
       """
     }
@@ -146,7 +146,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassUUID]) shouldBe {
         i"""
         decoderClassUUID : Decode.Decoder ClassUUID
-        decoderClassUUID = decode ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
+        decoderClassUUID = Decode.succeed ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
         """
       }
     }
@@ -160,12 +160,12 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassUUID], customTypeReplacements) shouldBe {
         i"""
         decoderClassUUID : Decode.Decoder ClassUUID
-        decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
+        decoderClassUUID = Decode.succeed ClassUUID |> required "a" Uuid.decoder
         """
       }
     }
 
-    "we can override the Encoder so we treat UUID as another basic type, like String, and decode it accordingly" in {
+    "we can override the Encoder so we treat UUID as another basic type, like String, and Decode.succeed it accordingly" in {
       // probably not recommended, better to use a mapping as in other tests, but it is supported
       implicit val uuidEncoder: BasicEncoder[java.util.UUID] =
         Encoder.pure(Str)
@@ -173,7 +173,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassUUID]) shouldBe {
         i"""
         decoderClassUUID : Decode.Decoder ClassUUID
-        decoderClassUUID = decode ClassUUID |> required "a" Decode.string
+        decoderClassUUID = Decode.succeed ClassUUID |> required "a" Decode.string
         """
       }
     }
@@ -186,7 +186,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassDate]) shouldBe {
         i"""
         decoderClassDate : Decode.Decoder ClassDate
-        decoderClassDate = decode ClassDate |> required "a" (Decode.lazy (\\_ -> decoderDate))
+        decoderClassDate = Decode.succeed ClassDate |> required "a" (Decode.lazy (\\_ -> decoderDate))
         """
       }
     }
@@ -200,12 +200,12 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassDate], customTypeReplacements) shouldBe {
         i"""
         decoderClassDate : Decode.Decoder ClassDate
-        decoderClassDate = decode ClassDate |> required "a" Date.decoder
+        decoderClassDate = Decode.succeed ClassDate |> required "a" Date.decoder
         """
       }
     }
 
-    "we can override the Encoder so we treat Date as another basic type, like String, and decode it accordingly" in {
+    "we can override the Encoder so we treat Date as another basic type, like String, and Decode.succeed it accordingly" in {
       // probably not recommended, better to use a mapping as in other tests, but it is supported
       implicit val dateEncoder: BasicEncoder[java.util.Date] =
         Encoder.pure(Str)
@@ -213,7 +213,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       Elm.decoder(decl[ClassDate]) shouldBe {
         i"""
         decoderClassDate : Decode.Decoder ClassDate
-        decoderClassDate = decode ClassDate |> required "a" Decode.string
+        decoderClassDate = Decode.succeed ClassDate |> required "a" Decode.string
         """
       }
     }
@@ -223,7 +223,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Recursive]) shouldBe
     i"""
            decoderRecursive : Decode.Decoder Recursive
-           decoderRecursive = decode Recursive |> required "head" Decode.int |> optional "tail" (Decode.maybe (Decode.lazy (\\_ -> decoderRecursive))) Nothing
+           decoderRecursive = Decode.succeed Recursive |> required "head" Decode.int |> optional "tail" (Decode.maybe (Decode.lazy (\\_ -> decoderRecursive))) Nothing
            """
   }
 
@@ -231,7 +231,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Recursive2]) shouldBe {
       i"""
       decoderRecursive2 : Decode.Decoder Recursive2
-      decoderRecursive2 = decode Recursive2 |> required "head" Decode.int |> required "tail" (Decode.list (Decode.lazy (\\_ -> decoderRecursive2)))
+      decoderRecursive2 = Decode.succeed Recursive2 |> required "head" Decode.int |> required "tail" (Decode.list (Decode.lazy (\\_ -> decoderRecursive2)))
       """
     }
   }
@@ -258,7 +258,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(declaration) shouldBe {
       i"""
       decoderClassWithGeneric : (Decode.Decoder a) -> (Decode.Decoder b) -> (Decode.Decoder c) -> Decode.Decoder (ClassWithGeneric a b c)
-      decoderClassWithGeneric decoderA decoderB decoderC = decode ClassWithGeneric |> required "first" (Decode.lazy (\\_ -> decoderA)) |> required "second" (Decode.lazy (\\_ -> decoderB)) |> required "third" (Decode.lazy (\\_ -> decoderC))
+      decoderClassWithGeneric decoderA decoderB decoderC = Decode.succeed ClassWithGeneric |> required "first" (Decode.lazy (\\_ -> decoderA)) |> required "second" (Decode.lazy (\\_ -> decoderB)) |> required "third" (Decode.lazy (\\_ -> decoderC))
       """
     }
   }
@@ -269,7 +269,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(declaration) shouldBe {
       i"""
       decoderClassWithGeneric2 : (Decode.Decoder a) -> Decode.Decoder (ClassWithGeneric2 a)
-      decoderClassWithGeneric2 decoderA = decode ClassWithGeneric2 |> required "first" (Decode.lazy (\\_ -> decoderA))
+      decoderClassWithGeneric2 decoderA = Decode.succeed ClassWithGeneric2 |> required "first" (Decode.lazy (\\_ -> decoderA))
       """
     }
   }
@@ -289,9 +289,9 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
       decoderSumWithGenericTpe : (Decode.Decoder a) -> (Decode.Decoder b) -> (Decode.Decoder c) -> String -> Decode.Decoder (SumWithGeneric a b c)
       decoderSumWithGenericTpe decoderA decoderB decoderC tpe =
          case tpe of
-            "First" -> decode First |> required "f" (Decode.lazy (\\_ -> decoderA))
-            "Second" -> decode Second |> required "s" (Decode.lazy (\\_ -> decoderB))
-            "Third" -> decode Third |> required "t" (Decode.lazy (\\_ -> decoderC))
+            "First" -> Decode.succeed First |> required "f" (Decode.lazy (\\_ -> decoderA))
+            "Second" -> Decode.succeed Second |> required "s" (Decode.lazy (\\_ -> decoderB))
+            "Third" -> Decode.succeed Third |> required "t" (Decode.lazy (\\_ -> decoderC))
             _ -> Decode.fail ("Unexpected type for SumWithGeneric: " ++ tpe)
       """
     }
@@ -301,7 +301,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[NumericTypes]) shouldBe {
       i"""
       decoderNumericTypes : Decode.Decoder NumericTypes
-      decoderNumericTypes = decode NumericTypes |> required "int" Decode.int |> required "long" Decode.int |> required "float" Decode.float |> required "double" Decode.float |> required "bigDecimal" Decode.float
+      decoderNumericTypes = Decode.succeed NumericTypes |> required "int" Decode.int |> required "long" Decode.int |> required "float" Decode.float |> required "double" Decode.float |> required "bigDecimal" Decode.float
       """
     }
   }
@@ -310,7 +310,7 @@ class ElmJsonDecoderSpec extends FreeSpec with Matchers {
     Elm.decoder(decl[Map[String, Int]]) shouldBe {
       i"""
       decoderMap : Decode.Decoder Map
-      decoderMap = decode Map (Decode.dict Decode.int)
+      decoderMap = Decode.succeed Map (Decode.dict Decode.int)
       """
     }
 
