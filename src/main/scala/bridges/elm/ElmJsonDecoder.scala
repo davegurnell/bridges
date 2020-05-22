@@ -34,7 +34,7 @@ trait ElmJsonDecoder extends ElmUtils {
 
         i"""
             decoder${decl.name} : ${definitionsForGenerics}Decode.Decoder $nameWithGenerics
-            decoder${decl.name}$methodsForGenerics = decode ${decl.name} $body
+            decoder${decl.name}$methodsForGenerics = Decode.succeed ${decl.name} $body
             """
     }
   }
