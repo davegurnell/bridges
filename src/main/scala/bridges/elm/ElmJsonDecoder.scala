@@ -49,7 +49,7 @@ trait ElmJsonDecoder extends ElmUtils {
     // consider case objects vs case classes
     val bodyDecoder =
       if (paramsDecoder.isEmpty) s"Decode.succeed $mainType"
-      else s"decode $mainType |> $paramsDecoder"
+      else s"Decode.succeed $mainType |> $paramsDecoder"
 
     s""""$mainType" -> $bodyDecoder"""
   }
