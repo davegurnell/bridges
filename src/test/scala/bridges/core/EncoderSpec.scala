@@ -5,8 +5,10 @@ import bridges.core.Type._
 import bridges.core.syntax._
 import org.scalatest._
 import shapeless.{ Generic, LabelledGeneric, TypeCase, Typeable }
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class EncoderSpec extends FreeSpec with Matchers {
+class EncoderSpec extends AnyFreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
