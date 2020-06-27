@@ -61,7 +61,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[ArrayClass]) shouldBe {
       i"""
       export const isArrayClass = (v: any): v is ArrayClass => {
-        return typeof v === "object" && v != null && "aList" in v && Array.isArray(v.aList) && v.aList.map((i: any) => typeof i === "string").reduce((a: any, b: any) => a && b, true) && (!("optField" in v) || typeof v.optField === "number" || v.optField === null);
+        return typeof v === "object" && v != null && "aList" in v && Array.isArray(v.aList) && v.aList.every((i: any) => typeof i === "string") && (!("optField" in v) || typeof v.optField === "number" || v.optField === null);
       }
       """
     }
@@ -101,7 +101,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Navigation]) shouldBe {
       i"""
       export const isNavigation = (v: any): v is Navigation => {
-        return typeof v === "object" && v != null && "type" in v && (v.type === "Node" ? typeof v === "object" && v != null && "name" in v && typeof v.name === "string" && "children" in v && Array.isArray(v.children) && v.children.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b, true) : v.type === "NodeList" ? typeof v === "object" && v != null && "all" in v && Array.isArray(v.all) && v.all.map((i: any) => isNavigation(i)).reduce((a: any, b: any) => a && b, true) : false);
+        return typeof v === "object" && v != null && "type" in v && (v.type === "Node" ? typeof v === "object" && v != null && "name" in v && typeof v.name === "string" && "children" in v && Array.isArray(v.children) && v.children.every((i: any) => isNavigation(i)) : v.type === "NodeList" ? typeof v === "object" && v != null && "all" in v && Array.isArray(v.all) && v.all.every((i: any) => isNavigation(i)) : false);
       }
       """
     }
@@ -141,7 +141,7 @@ class TsGuardRendererSpec extends FreeSpec with Matchers {
     TypescriptGuard.render(decl[Recursive2]) shouldBe {
       i"""
       export const isRecursive2 = (v: any): v is Recursive2 => {
-        return typeof v === "object" && v != null && "head" in v && typeof v.head === "number" && "tail" in v && Array.isArray(v.tail) && v.tail.map((i: any) => isRecursive2(i)).reduce((a: any, b: any) => a && b, true);
+        return typeof v === "object" && v != null && "head" in v && typeof v.head === "number" && "tail" in v && Array.isArray(v.tail) && v.tail.every((i: any) => isRecursive2(i));
       }
       """
     }
