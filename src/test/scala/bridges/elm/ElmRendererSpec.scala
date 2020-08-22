@@ -5,8 +5,10 @@ import bridges.core.Type._
 import bridges.core._
 import bridges.core.syntax._
 import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class ElmRendererSpec extends FreeSpec with Matchers {
+class ElmRendererSpec extends AnyFreeSpec with Matchers {
   "Color" in {
     Elm.render(decl[Color]) shouldBe "type alias Color = { red: Int, green: Int, blue: Int }"
   }

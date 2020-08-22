@@ -6,8 +6,10 @@ import bridges.core.Type._
 import bridges.core.syntax._
 import org.scalatest._
 import unindent._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class ElmJsonEncoderSpec extends FreeSpec with Matchers {
+class ElmJsonEncoderSpec extends AnyFreeSpec with Matchers {
   "Color" in {
     Elm.encoder(decl[Color]) shouldBe {
       i"""

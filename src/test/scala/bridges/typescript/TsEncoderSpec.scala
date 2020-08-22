@@ -6,8 +6,10 @@ import bridges.typescript.TsType._
 import bridges.typescript.syntax._
 import org.scalatest._
 import unindent._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class TsEncoderSpec extends FreeSpec with Matchers {
+class TsEncoderSpec extends AnyFreeSpec with Matchers {
   "TsEncoderConfig.optionalFields" - {
     "render optional fields by default" in {
       decl[Recursive] shouldBe {
