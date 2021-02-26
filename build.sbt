@@ -2,7 +2,7 @@ name         in ThisBuild := "bridges"
 organization in ThisBuild := "com.davegurnell"
 
 scalaVersion       in ThisBuild := "2.13.0"
-crossScalaVersions in ThisBuild := Seq("2.12.9", "2.13.0")
+crossScalaVersions in ThisBuild := Seq("2.12.13", "2.13.0")
 
 val stdOptions = Seq(
   "-feature",
