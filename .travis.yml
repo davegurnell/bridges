@@ -9,7 +9,7 @@ matrix:
       scala: 2.12.9
       env: COMMAND=ci PUBLISH=true
     - jdk: openjdk8
-      scala: 2.13.0
+      scala: 2.13.5
       env: COMMAND=ci PUBLISH=true
 
 script:
