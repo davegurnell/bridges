@@ -20,7 +20,7 @@ def extraOptions(scalaVersion: String) =
 
 scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
 
-val refinedVersion = "0.9.9"
+val refinedVersion = "0.9.23"
 
 libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.3",
