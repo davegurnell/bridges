@@ -23,7 +23,7 @@ scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
 val refinedVersion = "0.9.9"
 
 libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.3",
+  "com.chuusai"       %% "shapeless"          % "2.3.5",
   "com.davegurnell"   %% "unindent"           % "1.1.1" exclude("org.typelevel", "scala-library"),
   "org.apache.commons" % "commons-lang3"      % "3.5",
   "org.scalatest"     %% "scalatest"          % "3.0.8" % Test,
