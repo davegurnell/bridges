@@ -1,8 +1,8 @@
-name         in ThisBuild := "bridges"
-organization in ThisBuild := "com.davegurnell"
+name         := "bridges"
+organization := "com.davegurnell"
 
-scalaVersion       in ThisBuild := "2.13.0"
-crossScalaVersions in ThisBuild := Seq("2.12.9", "2.13.0")
+ThisBuild / scalaVersion       := "2.13.5"
+ThisBuild / crossScalaVersions := Seq("2.12.13", "2.13.5")
 
 val stdOptions = Seq(
   "-feature",
@@ -20,15 +20,13 @@ def extraOptions(scalaVersion: String) =
 
 scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
 
-val refinedVersion = "0.9.9"
-
 libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.6",
-  "com.davegurnell"   %% "unindent"           % "1.3.1" exclude("org.typelevel", "scala-library"),
-  "org.apache.commons" % "commons-lang3"      % "3.12.0",
+  "com.davegurnell"   %% "unindent"           % "1.5.0",
+  "org.apache.commons" % "commons-text"       % "1.9",
   "org.scalatest"     %% "scalatest"          % "3.2.2" % Test,
-  "eu.timepit"        %% "refined"            % refinedVersion % Provided,
-  "eu.timepit"        %% "refined-shapeless"  % refinedVersion % Provided
+  "eu.timepit"        %% "refined"            % "0.9.24" % Provided,
+  "eu.timepit"        %% "refined-shapeless"  % "0.9.24" % Provided
 )
 
 // Versioning

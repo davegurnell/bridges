@@ -1,7 +1,7 @@
 package bridges.flow
 
 import bridges.core.Renderer
-import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
+import org.apache.commons.text.StringEscapeUtils.{ escapeJava => escape }
 
 trait FlowRenderer extends Renderer[FlowType] {
   import FlowType._

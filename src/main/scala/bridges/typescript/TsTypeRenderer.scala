@@ -1,7 +1,7 @@
 package bridges.typescript
 
 import bridges.core.{ DeclF, Renderer }
-import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
+import org.apache.commons.text.StringEscapeUtils.{ escapeJava => escape }
 
 abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   import TsType._

@@ -274,18 +274,18 @@ class EncoderSpec extends AnyFreeSpec with Matchers {
     "case classes" in {
       decl[Pair] should be(
         "Pair" := prod(
-            "a" -> Str,
-            "b" -> Intr
-          )
+          "a" -> Str,
+          "b" -> Intr
+        )
       )
     }
 
     "sealed types" in {
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-            "One"   -> prod("value" -> Str),
-            "Other" -> prod("value" -> Intr)
-          )
+          "One"   -> prod("value" -> Str),
+          "Other" -> prod("value" -> Intr)
+        )
       )
     }
 
@@ -297,13 +297,13 @@ class EncoderSpec extends AnyFreeSpec with Matchers {
 
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-            "One" -> prod(
-              "value" -> Str
-            ),
-            "Other" -> prod(
-              "value" -> Intr
-            )
+          "One" -> prod(
+            "value" -> Str
+          ),
+          "Other" -> prod(
+            "value" -> Intr
           )
+        )
       )
     }
 
@@ -313,8 +313,8 @@ class EncoderSpec extends AnyFreeSpec with Matchers {
 
       decl[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := prod(
-            "name" -> Str
-          )
+          "name" -> Str
+        )
       )
     }
   }

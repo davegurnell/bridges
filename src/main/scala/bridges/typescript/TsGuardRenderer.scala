@@ -189,9 +189,8 @@ abstract class TsGuardRenderer(
     def unapply(tpe: TsType): Option[(String, TsType.Struct)] =
       tpe match {
         case TsType.Struct(fields, _) =>
-          fields.collectFirst {
-            case decl @ TsField("type", TsType.StrLit(name), _) =>
-              (name, TsType.Struct(fields.filterNot(_ == decl)))
+          fields.collectFirst { case decl @ TsField("type", TsType.StrLit(name), _) =>
+            (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 
         case _ =>
