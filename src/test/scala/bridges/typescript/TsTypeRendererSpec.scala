@@ -6,8 +6,10 @@ import bridges.typescript.TsType._
 import bridges.typescript.syntax._
 import org.scalatest._
 import unindent._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class TsTypeRendererSpec extends FreeSpec with Matchers {
+class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
   "Color" in {
     Typescript.render(decl[Color]) shouldBe {
       i"""
