@@ -57,18 +57,18 @@ Typescript.render(List(
   decl[Shape]
 ))
 // res1: String =
-// export type Color = {
+// export interface Color {
 //   red: number,
 //   green: number,
 //   blue: number
 // };
 //
-// export type Circle = {
+// export interface Circle {
 //   radius: number,
 //   color: Color
 // };
 //
-// export type Rectangle = {
+// export interface Rectangle {
 //   width: number,
 //   height: number,
 //   color: Color
@@ -113,8 +113,8 @@ import bridges.typescript.syntax._
 
 val logMessage: TsDecl =
   decl("LogMessage")(struct(
-    "level" -> union(lit("error"), lit("warning")),
-    text    -> Str
+    "level" --> union(lit("error"), lit("warning")),
+    text    --> Str
   )
 
 Typescript.render(logMessage)
@@ -135,8 +135,8 @@ import bridges.typescript.syntax._
 
 val pair: TsDecl =
   decl("Pair", "A", "B")(struct(
-    "head" -> Ref("A"),
-    "tail" -> Ref("B"),
+    "head" --> Ref("A"),
+    "tail" --> Ref("B"),
   )
 
 Typescript.render(pair)
