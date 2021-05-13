@@ -58,20 +58,20 @@ Typescript.render(List(
 ))
 // res1: String =
 // export interface Color {
-//   red: number,
-//   green: number,
-//   blue: number
+//   red: number;
+//   green: number;
+//   blue: number;
 // };
 //
 // export interface Circle {
-//   radius: number,
-//   color: Color
+//   radius: number;
+//   color: Colo;
 // };
 //
 // export interface Rectangle {
-//   width: number,
-//   height: number,
-//   color: Color
+//   width: number;
+//   height: number;
+//   color: Color;
 // };
 //
 // export type Shape =
