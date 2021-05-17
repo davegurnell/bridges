@@ -23,7 +23,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderColor : Decode.Decoder Color
-      decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
+      decoderColor = Decode.succeed Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
 
 
       encoderColor : Color -> Encode.Value
@@ -49,7 +49,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderExternalReferences : Decode.Decoder ExternalReferences
-      decoderExternalReferences = decode ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
+      decoderExternalReferences = Decode.succeed ExternalReferences |> required "color" (Decode.lazy (\\_ -> decoderColor)) |> required "nav" (Decode.lazy (\\_ -> decoderNavigation))
 
 
       encoderExternalReferences : ExternalReferences -> Encode.Value
@@ -79,9 +79,9 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
       decoderShapeTpe : String -> Decode.Decoder Shape
       decoderShapeTpe tpe =
          case tpe of
-            "Circle" -> decode Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
-            "Rectangle" -> decode Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
-            "ShapeGroup" -> decode ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
+            "Circle" -> Decode.succeed Circle |> required "radius" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+            "Rectangle" -> Decode.succeed Rectangle |> required "width" Decode.float |> required "height" Decode.float |> required "color" (Decode.lazy (\\_ -> decoderColor))
+            "ShapeGroup" -> Decode.succeed ShapeGroup |> required "leftShape" (Decode.lazy (\\_ -> decoderShape)) |> required "rightShape" (Decode.lazy (\\_ -> decoderShape))
             _ -> Decode.fail ("Unexpected type for Shape: " ++ tpe)
 
 
@@ -116,8 +116,8 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
       decoderNavigationTpe : String -> Decode.Decoder Navigation
       decoderNavigationTpe tpe =
          case tpe of
-            "Node" -> decode Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
-            "NodeList" -> decode NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+            "Node" -> Decode.succeed Node |> required "name" Decode.string |> required "children" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
+            "NodeList" -> Decode.succeed NodeList |> required "all" (Decode.list (Decode.lazy (\\_ -> decoderNavigation)))
             _ -> Decode.fail ("Unexpected type for Navigation: " ++ tpe)
 
 
@@ -147,7 +147,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderClassUUID : Decode.Decoder ClassUUID
-      decoderClassUUID = decode ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
+      decoderClassUUID = Decode.succeed ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
 
 
       encoderClassUUID : ClassUUID -> Encode.Value
@@ -176,7 +176,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderClassUUID : Decode.Decoder ClassUUID
-      decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
+      decoderClassUUID = Decode.succeed ClassUUID |> required "a" Uuid.decoder
 
 
       encoderClassUUID : ClassUUID -> Encode.Value
@@ -239,10 +239,10 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderColor : Decode.Decoder Color
-      decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
+      decoderColor = Decode.succeed Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
 
       decoderClassUUID : Decode.Decoder ClassUUID
-      decoderClassUUID = decode ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
+      decoderClassUUID = Decode.succeed ClassUUID |> required "a" (Decode.lazy (\\_ -> decoderUUID))
 
 
       encoderColor : Color -> Encode.Value
@@ -281,10 +281,10 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderColor : Decode.Decoder Color
-      decoderColor = decode Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
+      decoderColor = Decode.succeed Color |> required "red" Decode.int |> required "green" Decode.int |> required "blue" Decode.int
 
       decoderClassUUID : Decode.Decoder ClassUUID
-      decoderClassUUID = decode ClassUUID |> required "a" Uuid.decoder
+      decoderClassUUID = Decode.succeed ClassUUID |> required "a" Uuid.decoder
 
 
       encoderColor : Color -> Encode.Value
@@ -319,7 +319,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       decoderTypeOne : Decode.Decoder TypeOne
-      decoderTypeOne = decode TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
+      decoderTypeOne = Decode.succeed TypeOne |> required "name" Decode.string |> required "values" (Decode.list (Decode.lazy (\\_ -> decoderTypeTwo)))
 
       decoderTypeTwo : Decode.Decoder TypeTwo
       decoderTypeTwo = Decode.field "type" Decode.string |> Decode.andThen decoderTypeTwoTpe
@@ -327,8 +327,8 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
       decoderTypeTwoTpe : String -> Decode.Decoder TypeTwo
       decoderTypeTwoTpe tpe =
          case tpe of
-            "OptionOne" -> decode OptionOne |> required "value" Decode.int
-            "OptionTwo" -> decode OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
+            "OptionOne" -> Decode.succeed OptionOne |> required "value" Decode.int
+            "OptionTwo" -> Decode.succeed OptionTwo |> required "value" (Decode.lazy (\\_ -> decoderTypeOne))
             _ -> Decode.fail ("Unexpected type for TypeTwo: " ++ tpe)
 
 
