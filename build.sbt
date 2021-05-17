@@ -21,7 +21,7 @@ def extraOptions(scalaVersion: String) =
 scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
 
 libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.6",
+  "com.chuusai"       %% "shapeless"          % "2.3.7",
   "com.davegurnell"   %% "unindent"           % "1.6.0",
   "org.apache.commons" % "commons-text"       % "1.9",
   "org.scalatest"     %% "scalatest"          % "3.2.2" % Test,
