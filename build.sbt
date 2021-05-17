@@ -49,13 +49,6 @@ ThisBuild / libraryDependencies ++= Seq(
   "eu.timepit"        %% "refined-shapeless"  % "0.9.24" % Provided
 )
 
-// Versioning
-
-// A lot of the versioning, publishing, and Travis-related code below is adapted from:
-//
-//   - https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
-//   - http://caryrobbins.com/dev/sbt-publishing/
-
 // Versioning -----------------------------------
 
 ThisBuild / versionScheme := Some("early-semver")
@@ -64,13 +57,7 @@ git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty // Put "-SNAPSHOT"
 
 // Github Actions -------------------------------
 
-usePgpKeyHex("2D2E2B8B8BBA48B5")
-
-// Publishing -----------------------------------
-
 ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.11")
-
-ThisBuild / versionScheme := Some("early-semver")
 
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 
@@ -87,6 +74,10 @@ ThisBuild / githubWorkflowPublish := Seq(
     )
   )
 )
+
+// Publishing -----------------------------------
+
+usePgpKeyHex("2D2E2B8B8BBA48B5")
 
 ThisBuild / licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
 
