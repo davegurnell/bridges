@@ -1,26 +1,46 @@
-name         := "bridges"
+enablePlugins(GitVersioning)
+enablePlugins(GitBranchPrompt)
+
+// Basic settings -------------------------------
+
 organization := "com.davegurnell"
+name         := "bridges"
 
 ThisBuild / scalaVersion       := "2.13.5"
-ThisBuild / crossScalaVersions := Seq("2.12.13", "2.13.5")
 
-val stdOptions = Seq(
-  "-feature",
-  "-unchecked",
-  "-deprecation",
-  "-Xfatal-warnings"
-)
-def extraOptions(scalaVersion: String) =
-  CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, 12)) => Seq(
+ThisBuild / crossScalaVersions := Seq("2.13.5", "2.12.13")
+
+ThisBuild / scalacOptions ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 12)) =>
+      Seq(
+        "-feature",
+        "-unchecked",
+        "-deprecation",
+        "-Xfatal-warnings",
         "-Ypartial-unification"
       )
-    case _ => Seq()
+
+    case Some((2, _)) =>
+      Seq(
+        "-feature",
+        "-unchecked",
+        "-deprecation",
+        "-Xfatal-warnings",
+      )
+
+    case _ =>
+      Seq(
+        "-feature",
+        "-unchecked",
+        "-deprecation",
+        "-rewrite",
+        "-new-syntax",
+      )
   }
+}
 
-scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value)
-
-libraryDependencies ++= Seq(
+ThisBuild / libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.7",
   "com.davegurnell"   %% "unindent"           % "1.6.0",
   "org.apache.commons" % "commons-text"       % "1.9",
@@ -36,70 +56,54 @@ libraryDependencies ++= Seq(
 //   - https://alexn.org/blog/2017/08/16/automatic-releases-sbt-travis.html
 //   - http://caryrobbins.com/dev/sbt-publishing/
 
-enablePlugins(GitVersioning)
-enablePlugins(GitBranchPrompt)
+// Versioning -----------------------------------
 
-// Use "1.2.3-4-aabbccdde-SNAPSHOT" versnining:
-git.useGitDescribe := true
+ThisBuild / versionScheme := Some("early-semver")
 
-// Put "-SNAPSHOT" on a commit if it's not a tag:
-git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty
+git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty // Put "-SNAPSHOT" on a commit if it's not a tag
 
-// This is what release tags look like:
-val ReleaseTag = """^([\d\.]+)$""".r
-
-git.gitTagToVersionNumber := {
-  case ReleaseTag(v) => Some(v)
-  case _             => None
-}
-
-// Publishing
-
-publishMavenStyle := true
-
-isSnapshot := version.value endsWith "SNAPSHOT"
-
-publishTo := sonatypePublishTo.value
+// Github Actions -------------------------------
 
 usePgpKeyHex("2D2E2B8B8BBA48B5")
 
-pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg"
-pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg"
+// Publishing -----------------------------------
 
-licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
+ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.11")
 
-homepage := Some(url("https://github.com/davegurnell/bridges"))
+ThisBuild / versionScheme := Some("early-semver")
 
-scmInfo := Some(
+ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
+
+ThisBuild / githubWorkflowPublish := Seq(
+  WorkflowStep.Sbt(
+    List("ci-release"),
+    env = Map(
+      "PGP_PASSPHRASE"    -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET"        -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )
+)
+
+ThisBuild / licenses += ("Apache-2.0", url("http://apache.org/licenses/LICENSE-2.0"))
+
+ThisBuild / homepage := Some(url("https://github.com/davegurnell/bridges"))
+
+ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/davegurnell/bridges.git"),
-    "scm:git@github.com:davegurnell/bridges.git"))
+    "scm:git@github.com:davegurnell/bridges.git"
+  )
+)
 
-developers := List(
+ThisBuild / developers := List(
   Developer(
     id    = "davegurnell",
     name  = "Dave Gurnell",
     email = "dave@underscore.io",
-    url   = url("https://twitter.com/davegurnell")))
-
-// Travis
-
-// Sonatype credentials are on Travis in a secret:
-credentials ++= {
-  val travisCredentials = for {
-    user <- sys.env.get("SONATYPE_USER")
-    pass <- sys.env.get("SONATYPE_PASS")
-  } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass)
-
-  travisCredentials.toSeq
-}
-
-// Password to the PGP certificate is on Travis in a secret:
-pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
-
-addCommandAlias("ci", ";clean ;coverage ;compile ;test ;coverageReport ;package")
-addCommandAlias("release", ";+publishSigned ;sonatypeReleaseAll")
-
-// Formatting
-
-scalafmtOnCompile := true
+    url   = url("https://twitter.com/davegurnell")
+  )
+)
