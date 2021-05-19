@@ -1,138 +1,132 @@
 package bridges.core
 
 import bridges.core.syntax._
-import eu.timepit.refined.api._
+// import eu.timepit.refined.api._
 import scala.language.higherKinds
-import scala.reflect.runtime.universe.WeakTypeTag
-import shapeless._
-import shapeless.labelled.FieldType
+// import scala.reflect.runtime.universe.WeakTypeTag
+// import shapeless._
+// import shapeless.labelled.FieldType
+import scala.compiletime.{constValue, erasedValue, summonInline}
+import scala.deriving.Mirror
 
-trait Encoder[A] {
+trait Encoder[A]:
   def encode: Type
-}
 
-trait ProdEncoder[A] extends Encoder[A] {
+trait ProdEncoder[A] extends Encoder[A]:
   override def encode: Type.Prod
-}
 
-trait SumEncoder[A] extends Encoder[A] {
+trait SumEncoder[A] extends Encoder[A]:
   override def encode: Type.Sum
-}
 
 trait BasicEncoder[A] extends Encoder[A]
 
-object Encoder extends EncoderInstances2
+object Encoder extends EncoderInstances
 
-trait EncoderInstances2 extends EncoderInstances1 {
+trait EncoderInstances extends EncoderDerivation:
   import Type._
 
-  implicit val stringEncoder: BasicEncoder[String] =
+  given BasicEncoder[String] =
     pure(Str)
 
-  implicit val charEncoder: BasicEncoder[Char] =
+  given BasicEncoder[Char] =
     pure(Chr)
 
-  implicit val intEncoder: BasicEncoder[Int] =
+  given BasicEncoder[Int] =
     pure(Intr)
 
-  implicit val longEncoder: BasicEncoder[Long] =
+  given BasicEncoder[Long] =
     pure(Intr)
 
-  implicit val bigDecimalEncoder: BasicEncoder[BigDecimal] =
+  given BasicEncoder[BigDecimal] =
     pure(Real)
 
-  implicit val doubleEncoder: BasicEncoder[Double] =
+  given BasicEncoder[Double] =
     pure(Real)
 
-  implicit val floatEncoder: BasicEncoder[Float] =
+  given BasicEncoder[Float] =
     pure(Real)
 
-  implicit val booleanEncoder: BasicEncoder[Boolean] =
+  given BasicEncoder[Boolean] =
     pure(Bool)
 
-  implicit def optionEncoder[A](implicit enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
+  given BasicEncoder[java.util.UUID] =
+    pure(Str)
+
+  given BasicEncoder[java.util.Date] =
+    pure(Intr)
+
+  given optionEncoder[A](using enc: BasicEncoder[A]): BasicEncoder[Option[A]] =
     pure(Opt(enc.encode))
 
-  implicit def mapEncoder[A, B](implicit aEnc: BasicEncoder[A], bEnc: Encoder[B]): BasicEncoder[Map[A, B]] =
+  given mapEncoder[A, B](using aEnc: BasicEncoder[A], bEnc: Encoder[B]): BasicEncoder[Map[A, B]] =
     pure(Dict(aEnc.encode, bEnc.encode))
 
-  implicit def traversableEncoder[F[_] <: Iterable[_], A](implicit enc: BasicEncoder[A]): BasicEncoder[F[A]] =
+  given traversableEncoder[F[_] <: Iterable[_], A](using enc: BasicEncoder[A]): BasicEncoder[F[A]] =
     pure(Arr(enc.encode))
 
-  implicit def valueClassEncoder[A <: AnyVal, B](implicit unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =
-    pure(encoder.encode)
+  // given valueClassEncoder[A <: AnyVal, B](using unwrapped: Unwrapped.Aux[A, B], encoder: BasicEncoder[B]): BasicEncoder[A] =
+  //   pure(encoder.encode)
 
-  implicit def refinedEncoder[A, B](implicit enc: BasicEncoder[A]): BasicEncoder[Refined[A, B]] =
-    Encoder.pure(enc.encode)
+  // given refinedEncoder[A, B](using enc: BasicEncoder[A]): BasicEncoder[Refined[A, B]] =
+  //   Encoder.pure(enc.encode)
 
-}
-
-trait EncoderInstances1 extends EncoderInstances0 {
+trait EncoderDerivation extends EncoderConstructors:
   import Type._
 
-  implicit val hnilProdEncoder: ProdEncoder[HNil] =
-    pureProd(Prod(Nil))
+  inline def summonEncoders[A <: Tuple]: List[Encoder[_]] =
+    inline erasedValue[A] match
+      case _: EmptyTuple => Nil
+      case _: (h *: t) => summonInline[Encoder[h]] :: summonEncoders[t]
 
-  implicit def hconsProdEncoder[K <: Symbol, H, T <: HList](implicit
-      witness: Witness.Aux[K],
-      hEnc: Lazy[BasicEncoder[H]],
-      tEnc: ProdEncoder[T]
-  ): ProdEncoder[FieldType[K, H] :: T] = {
-    val name = witness.value.name
-    val head = hEnc.value.encode
-    val tail = tEnc.encode
-    pureProd(Prod((name -> head) +: tail.fields))
-  }
+  inline def summonProdEncoders[A <: Tuple]: List[ProdEncoder[_]] =
+    inline erasedValue[A] match
+      case _: EmptyTuple => Nil
+      case _: (h *: t) => summonInline[ProdEncoder[h]] :: summonProdEncoders[t]
 
-  implicit def cnilSumEncoder: SumEncoder[CNil] =
-    pureSum(Sum(Nil))
+  inline def summonLabels[A <: Tuple]: List[String] =
+    inline erasedValue[A] match
+      case _: EmptyTuple => Nil
+      case _: (h *: t)   => constValue[h].toString :: summonLabels[t]
 
-  implicit def cconsSumEncoder[K <: Symbol, H, T <: Coproduct](implicit
-      witness: Witness.Aux[K],
-      hEnc: Lazy[ProdEncoder[H]],
-      tEnc: SumEncoder[T]
-  ): SumEncoder[FieldType[K, H] :+: T] = {
-    val name    = witness.value.name
-    val product = hEnc.value.encode
-    val tail    = tEnc.encode
-    pureSum(Sum((name -> product) +: tail.products))
-  }
+  inline given derived[A](using mirror: Mirror.Of[A]): Encoder[A] =
+    val labels = summonLabels[mirror.MirroredElemLabels]
+    inline mirror match
+      case mirror: Mirror.SumOf[A] =>     sumEncoder(labels, summonProdEncoders[mirror.MirroredElemTypes])
+      case mirror: Mirror.ProductOf[A] => productEncoder(labels, summonEncoders[mirror.MirroredElemTypes])
 
-  implicit def genericProdEncoder[A, R](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      enc: Lazy[ProdEncoder[R]]
-  ): ProdEncoder[A] =
-    pureProd(enc.value.encode)
+  inline given derivedProd[A](using mirror: Mirror.ProductOf[A]): ProdEncoder[A] =
+    val labels = summonLabels[mirror.MirroredElemLabels]
+    productEncoder(labels, summonEncoders[mirror.MirroredElemTypes])
 
-  implicit def genericSumEncoder[A, R](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      enc: Lazy[SumEncoder[R]]
-  ): SumEncoder[A] =
-    pureSum(enc.value.encode)
-}
+  def sumEncoder[A](labels: List[String], encoders: => List[ProdEncoder[_]]): SumEncoder[A] =
+    pureSum(Sum(
+      labels
+        .zip(encoders.iterator)
+        .map { case (label, encoder) => label -> encoder.encode }
+    ))
 
-trait EncoderInstances0 extends EncoderConstructors {
+  def productEncoder[A](labels: List[String], encoders: => List[Encoder[_]]): ProdEncoder[A] =
+    pureProd(Prod(
+      labels
+        .zip(encoders.iterator)
+        .map { case (label, encoder) => label -> encoder.encode }
+    ))
+
+trait EncoderConstructors:
   import Type._
 
-  implicit def genericBasicEncoder[A](implicit
-      low: LowPriority,
-      tpeTag: WeakTypeTag[A]
-  ): BasicEncoder[A] =
-    pure(Ref(getCleanTagName[A]))
-}
-
-trait EncoderConstructors {
-  import Type._
-
-  def apply[A](implicit enc: Encoder[A]): Encoder[A] =
+  def apply[A](using enc: Encoder[A]): Encoder[A] =
     enc
 
   def pure[A](tpe: Type): BasicEncoder[A] =
-    new BasicEncoder[A] { def encode: Type = tpe }
+    new BasicEncoder[A]:
+      def encode: Type = tpe
 
   def pureProd[A](tpe: Prod): ProdEncoder[A] =
-    new ProdEncoder[A] { def encode: Prod = tpe }
+    new ProdEncoder[A]:
+      def encode: Prod = tpe
 
   def pureSum[A](tpe: Sum): SumEncoder[A] =
-    new SumEncoder[A] { def encode: Sum = tpe }
-}
+    new SumEncoder[A]:
+      def encode: Sum = tpe
+

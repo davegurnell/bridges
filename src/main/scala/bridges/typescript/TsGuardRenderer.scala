@@ -6,7 +6,7 @@ import unindent._
 abstract class TsGuardRenderer(
     predName: String => String = id => s"""is${id}""",
     guardName: String => String = id => s"""as${id}"""
-) extends Renderer[TsType] {
+) extends Renderer[TsType]:
   import TsType._
   import TsGuardExpr._
 
@@ -30,7 +30,7 @@ abstract class TsGuardRenderer(
     }
 
   def renderParamTypes(params: List[String]): String =
-    if (params.isEmpty) {
+    if params.isEmpty then {
       ""
     } else {
       params.mkString("<", ", ", ">")
@@ -101,7 +101,7 @@ abstract class TsGuardRenderer(
       .map { field =>
         val TsField(name, tpe, optional) = field
 
-        if (optional) {
+        if optional then {
           or(not(in(name, expr)), isType(dot(expr, name), tpe))
         } else {
           and(in(name, expr), isType(dot(expr, name), tpe))
@@ -131,7 +131,7 @@ abstract class TsGuardRenderer(
           )
 
         def isFieldOrRest: TsGuardExpr =
-          if (fieldNames.isEmpty) {
+          if fieldNames.isEmpty then {
             func("k")(isRest)
           } else {
             func("k")(or(isField, isRest))
@@ -178,12 +178,9 @@ abstract class TsGuardRenderer(
       .reduceLeftOption(and(_, _))
       .getOrElse(lit(true))
 
-  private implicit class ListOps[A](list: List[A]) {
-    def collectAll[B](func: PartialFunction[A, B]): Option[List[B]] = {
-      val temp = list.collect(func)
-      if (temp.length == list.length) Some(temp) else None
-    }
-  }
+  extension [A](list: List[A]) def collectAll[B](func: PartialFunction[A, B]): Option[List[B]] =
+    val temp = list.collect(func)
+    if temp.length == list.length then Some(temp) else None
 
   private object DiscriminatedBy {
     def unapply(tpe: TsType): Option[(String, TsType.Struct)] =
@@ -197,4 +194,3 @@ abstract class TsGuardRenderer(
           None
       }
   }
-}

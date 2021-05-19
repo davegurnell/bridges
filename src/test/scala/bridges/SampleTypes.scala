@@ -5,18 +5,8 @@ import java.util.{ Date, UUID }
 import bridges.core._
 import bridges.core.Type._
 import bridges.core.syntax._
-import eu.timepit.refined.W
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.Size
-import eu.timepit.refined.generic.Equal
-import eu.timepit.refined.numeric.Greater
-import eu.timepit.refined.numeric.Interval.ClosedOpen
 
-object SampleTypes {
-  type RefinedString = String Refined Size[ClosedOpen[W.`1`.T, W.`100`.T]]
-  type RefinedInt    = Int Refined Greater[W.`6`.T]
-  type RefinedChar   = Char Refined Equal[W.`'3'`.T]
-
+object SampleTypes:
   // Sample product
   case class Pair(a: String, b: Int)
 
@@ -78,23 +68,20 @@ object SampleTypes {
   final case class Recursive2(head: Int, tail: List[Recursive2])
 
   sealed trait ObjectsOnly
-  final case object ObjectOne extends ObjectsOnly
-  final case object ObjectTwo extends ObjectsOnly
+  case object ObjectOne extends ObjectsOnly
+  case object ObjectTwo extends ObjectsOnly
 
   // Custom declaration of a intermediate structure
   val customDeclaration: Decl =
-    "Message" := sum(
+    decl("Message")(sum(
       "ErrorMessage"   -> prod("error" -> Ref("ErrorMessage")),
       "WarningMessage" -> prod("warning" -> Ref("WarningMessage"))
-    )
-
-  final case class ClassWithRefinedType(name: RefinedString)
+    ))
 
   final case class NumericTypes(
-      int: Int,
-      long: Long,
-      float: Float,
-      double: Double,
-      bigDecimal: BigDecimal
+    int: Int,
+    long: Long,
+    float: Float,
+    double: Double,
+    bigDecimal: BigDecimal
   )
-}

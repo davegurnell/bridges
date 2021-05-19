@@ -183,7 +183,7 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
   }
 
   "Union of Union" in {
-    Typescript.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
+    Typescript.render(decl("A")(Ref("B") | Ref("C") | Ref("D"))) shouldBe {
       i"""
       export type A = B | C | D;
       """
@@ -191,7 +191,7 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
   }
 
   "Inter of Inter" in {
-    Typescript.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
+    Typescript.render(decl("A")(Ref("B") & Ref("C") & Ref("D"))) shouldBe {
       i"""
       export type A = B & C & D;
       """

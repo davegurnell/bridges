@@ -1,19 +1,19 @@
 package bridges.typescript
 
 import bridges.core.{ DeclF, Encoder, RenamableSyntax }
-import bridges.core.syntax.getCleanTagName
-import shapeless.Lazy
-import scala.reflect.runtime.universe.WeakTypeTag
-import scala.language.implicitConversions
+// import bridges.core.syntax.getCleanTagName
+// import shapeless.Lazy
+import scala.compiletime.constValue
+import scala.deriving.Mirror
 
-object syntax extends RenamableSyntax {
+object syntax extends RenamableSyntax:
   import TsType._
 
-  def encode[A](implicit encoder: TsEncoder[A]): TsType =
+  def encode[A](using encoder: TsEncoder[A]): TsType =
     encoder.encode
 
-  def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[TsEncoder[A]]): TsDecl =
-    DeclF(getCleanTagName[A], encoder.value.encode)
+  inline def decl[A](using mirror: Mirror.Of[A], encoder: => TsEncoder[A]): TsDecl =
+    DeclF(constValue[mirror.MirroredLabel], encoder.encode)
 
   def decl(name: String, params: String*)(tpe: TsType): TsDecl =
     DeclF(name, params.toList, tpe)
@@ -24,19 +24,11 @@ object syntax extends RenamableSyntax {
   def dict(keyType: TsType, valueType: TsType): Struct =
     Struct(Nil, Some(TsRestField("key", keyType, valueType)))
 
-  implicit class StringFieldOps(name: String) {
-    def -->(tpe: TsType): TsField =
-      TsField(name, tpe, optional = false)
-
-    def -?>(tpe: TsType): TsField =
-      TsField(name, tpe, optional = true)
-  }
-
-  @deprecated("Use --> instead of ->", "0.16.0")
-  implicit def pairToField(pair: (String, TsType)): TsField = {
-    val (name, tpe) = pair
+  extension (name: String) def -->(tpe: TsType): TsField =
     TsField(name, tpe, optional = false)
-  }
+
+  extension (name: String) def -?>(tpe: TsType): TsField =
+    TsField(name, tpe, optional = true)
 
   def field(name: String, optional: Boolean = false)(tpe: TsType): TsField =
     TsField(name, tpe, optional)
@@ -56,11 +48,5 @@ object syntax extends RenamableSyntax {
   def ref(name: String, params: TsType*): Ref =
     Ref(name, params.toList)
 
-  implicit class StringDeclOps(str: String) {
-    def :=[A](tpe: A): DeclF[A] =
-      DeclF(str, tpe)
-  }
-
   def func(args: (String, TsType)*)(ret: TsType): Func =
     Func(args.toList, ret)
-}

@@ -11,7 +11,7 @@ object TsField {
       val TsField(name, valueType, optional) = field
 
       TsField(
-        name = if (field.name == from) to else field.name,
+        name = if field.name == from then to else field.name,
         valueType = valueType.rename(from, to),
         optional = optional
       )
@@ -26,7 +26,7 @@ object TsRestField {
       val TsRestField(name, keyType, valueType) = field
 
       TsRestField(
-        name = if (field.name == from) to else field.name,
+        name = if field.name == from then to else field.name,
         keyType = keyType.rename(from, to),
         valueType = valueType.rename(from, to)
       )

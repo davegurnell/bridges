@@ -170,7 +170,7 @@ class TsGuardRendererSpec extends AnyFreeSpec with Matchers {
   }
 
   "Union of Union" in {
-    TypescriptGuard.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
+    TypescriptGuard.render(decl("A")(Ref("B") | Ref("C") | Ref("D"))) shouldBe {
       i"""
       export const isA = (v: any): v is A => {
         return isB(v) || isC(v) || isD(v);
@@ -180,7 +180,7 @@ class TsGuardRendererSpec extends AnyFreeSpec with Matchers {
   }
 
   "Inter of Inter" in {
-    TypescriptGuard.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
+    TypescriptGuard.render(decl("A")(Ref("B") & Ref("C") & Ref("D"))) shouldBe {
       i"""
       export const isA = (v: any): v is A => {
         return isB(v) && isC(v) && isD(v);

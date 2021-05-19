@@ -9,10 +9,10 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   def render(decl: TsDecl): String =
     decl match {
       case DeclF(name, params, TsType.Struct(fields, rest)) =>
-        s"${if (exportAll) "export interface" else "interface"} ${renderParams(name, params)} ${renderStructAsInterface(fields, rest)}"
+        s"${if exportAll then "export interface" else "interface"} ${renderParams(name, params)} ${renderStructAsInterface(fields, rest)}"
 
       case DeclF(name, params, tpe) =>
-        s"${if (exportAll) "export type" else "type"} ${renderParams(name, params)} = ${renderType(tpe)};"
+        s"${if exportAll then "export type" else "type"} ${renderParams(name, params)} = ${renderType(tpe)};"
     }
 
   def renderType(tpe: TsType): String =
@@ -40,10 +40,10 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
     }
 
   private def renderParams(name: String, params: List[String]): String =
-    if (params.isEmpty) name else params.mkString(s"$name<", ", ", ">")
+    if params.isEmpty then name else params.mkString(s"$name<", ", ", ">")
 
   private def renderRef(name: String, params: List[TsType]): String =
-    if (params.isEmpty) name else params.map(renderType).mkString(s"$name<", ", ", ">")
+    if params.isEmpty then name else params.map(renderType).mkString(s"$name<", ", ", ">")
 
   private def renderStruct(fields: List[TsField], rest: Option[TsRestField]): String =
     (fields.map(renderField) ++ rest.toList.map(renderRestField))
@@ -74,7 +74,7 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
   }
 
   private def renderParens(outer: TsType)(inner: TsType): String =
-    if (precedence(outer) > precedence(inner)) {
+    if precedence(outer) > precedence(inner) then {
       s"(${renderType(inner)})"
     } else {
       renderType(inner)

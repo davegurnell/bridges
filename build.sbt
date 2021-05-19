@@ -6,9 +6,9 @@ enablePlugins(GitBranchPrompt)
 organization := "com.davegurnell"
 name         := "bridges"
 
-ThisBuild / scalaVersion       := "2.13.5"
+ThisBuild / scalaVersion       := "3.0.0"
 
-ThisBuild / crossScalaVersions := Seq("2.13.5", "2.12.13")
+ThisBuild / crossScalaVersions := Seq("3.0.0")
 
 ThisBuild / scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -40,14 +40,26 @@ ThisBuild / scalacOptions ++= {
   }
 }
 
-ThisBuild / libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.7",
-  "com.davegurnell"   %% "unindent"           % "1.6.0",
-  "org.apache.commons" % "commons-text"       % "1.9",
-  "org.scalatest"     %% "scalatest"          % "3.2.2" % Test,
-  "eu.timepit"        %% "refined"            % "0.9.24" % Provided,
-  "eu.timepit"        %% "refined-shapeless"  % "0.9.24" % Provided
-)
+ThisBuild / libraryDependencies ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      Seq(
+        "com.chuusai"       %% "shapeless"          % "2.3.7",
+        "com.davegurnell"   %% "unindent"           % "1.6.0",
+        "org.apache.commons" % "commons-text"       % "1.9",
+        "org.scalatest"     %% "scalatest"          % "3.2.2" % Test,
+        "eu.timepit"        %% "refined"            % "0.9.24" % Provided,
+        "eu.timepit"        %% "refined-shapeless"  % "0.9.24" % Provided
+      )
+
+    case _ =>
+      Seq(
+        "com.davegurnell"   %% "unindent"           % "1.6.0",
+        "org.apache.commons" % "commons-text"       % "1.9",
+        "org.scalatest"     %% "scalatest"          % "3.2.9" % Test,
+      )
+  }
+}
 
 // Versioning -----------------------------------
 

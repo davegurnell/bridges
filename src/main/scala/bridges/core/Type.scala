@@ -16,34 +16,32 @@ import bridges.core.syntax._
   * For Flow and Typescript bindings we
   * translate to other intermediate representations.
   */
-sealed abstract class Type extends Product with Serializable
+enum Type:
+  case Ref(id: String, params: List[Type] = Nil)
+  case Str
+  case Chr
+  case Intr
+  case Real
+  case Bool
+  case Opt(tpe: Type)
+  case Arr(tpe: Type)
+  case Dict(keys: Type, values: Type)
+  case Prod(fields: List[(String, Type)])
+  case Sum(products: List[(String, Prod)])
 
-object Type {
-  final case class Ref(id: String, params: List[Type] = Nil) extends Type
-  final case object Str                                      extends Type
-  final case object Chr                                      extends Type
-  final case object Intr                                     extends Type
-  final case object Real                                     extends Type
-  final case object Bool                                     extends Type
-  final case class Opt(tpe: Type)                            extends Type
-  final case class Arr(tpe: Type)                            extends Type
-  final case class Dict(keys: Type, values: Type)            extends Type
-  final case class Prod(fields: List[(String, Type)])        extends Type
-  final case class Sum(products: List[(String, Prod)])       extends Type
-
-  implicit private val prodRename: Rename[Prod] =
+object Type:
+  given Rename[Prod] =
     Rename.pure { (tpe, from, to) =>
-      tpe match {
+      tpe match
         case Prod(fields) => Prod(fields.map(_.rename(from, to)))
-      }
     }
 
-  implicit val rename: Rename[Type] =
+  given Rename[Type] =
     Rename.pure { (tpe, from, to) =>
       def renameId(id: String): String =
-        if (id == from) to else id
+        if id == from then to else id
 
-      tpe match {
+      tpe match
         case Ref(id, params)  => Ref(renameId(id), params.map(_.rename(from, to)))
         case tpe @ Str        => tpe
         case tpe @ Chr        => tpe
@@ -55,6 +53,4 @@ object Type {
         case Dict(kTpe, vTpe) => Dict(kTpe.rename(from, to), vTpe.rename(from, to))
         case Prod(fields)     => Prod(fields.map(_.rename(from, to)))
         case Sum(products)    => Sum(products.map(_.rename(from, to)))
-      }
     }
-}

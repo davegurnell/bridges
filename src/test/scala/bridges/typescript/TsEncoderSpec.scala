@@ -23,7 +23,7 @@ class TsEncoderSpec extends AnyFreeSpec with Matchers {
     }
 
     "override setting" in {
-      implicit val config: TsEncoderConfig =
+      given config: TsEncoderConfig =
         TsEncoderConfig(optionalFields = false)
 
       decl[Recursive] shouldBe {
@@ -54,7 +54,7 @@ class TsEncoderSpec extends AnyFreeSpec with Matchers {
     }
 
     "override setting" in {
-      implicit val config: TsEncoderConfig =
+      given config: TsEncoderConfig =
         TsEncoderConfig(refsInUnions = true)
 
       decl[OneOrOther] shouldBe {

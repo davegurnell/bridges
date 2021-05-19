@@ -113,7 +113,7 @@ object TsGuardExpr {
   }
 
   private def renderParens(outer: TsGuardExpr)(inner: TsGuardExpr): String =
-    if (precedence(outer) > precedence(inner)) {
+    if precedence(outer) > precedence(inner) then {
       s"(${render(inner)})"
     } else {
       render(inner)
