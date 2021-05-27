@@ -1,94 +1,77 @@
-# Run ".create-gitignore.sh > .gitignore" to recreate
+# Created by https://www.gitignore.io
 
-### Custom ###
+### sbt-release-early ###
+local.*
 
+### direnv ###
+.envrc
+
+### macOS ###
+.DS_Store
+
+### Scala ###
+*.class
+*.log
+.bloop
+.metals
 .idea
+.bsp
 
-# Created by https://www.toptal.com/developers/gitignore/api/scala,sbt,bloop,metals
-# Edit at https://www.toptal.com/developers/gitignore?templates=scala,sbt,bloop,metals
-
-### Bloop ###
-.bloop/
-
-### Metals ###
-.metals/
-project/**/metals.sbt
-
-### SBT ###
-# Simple Build Tool
-# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
-
+# sbt specific
+.cache
+.history
+.lib/
 dist/*
 target/
 lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
-.history
-.cache
-.lib/
-.bsp
 
-### Scala ###
-*.class
-*.log
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
 
-# End of https://www.toptal.com/developers/gitignore/api/scala,sbt,bloop,metals
-
-# Created by https://www.toptal.com/developers/gitignore/api/intellij,visualstudiocode,sublimetext
-# Edit at https://www.toptal.com/developers/gitignore?templates=intellij,visualstudiocode,sublimetext
+# ENSIME specific
+.ensime
+.ensime_cache
 
 ### Intellij ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+*.iml
 
-# Generated files
-.idea/**/contentModel.xml
+## Directory-based project format:
+.idea/
+# if you remove the above rule, at least ignore the following:
 
-# Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
+# User-specific stuff:
+# .idea/workspace.xml
+# .idea/tasks.xml
+# .idea/dictionaries
 
-# Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
+# Sensitive or high-churn files:
+# .idea/dataSources.ids
+# .idea/dataSources.xml
+# .idea/sqlDataSources.xml
+# .idea/dynamic.xml
+# .idea/uiDesigner.xml
 
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
+# Gradle:
+# .idea/gradle.xml
+# .idea/libraries
 
-# CMake
-cmake-build-*/
+# Mongo Explorer plugin:
+# .idea/mongoSettings.xml
 
-# Mongo Explorer plugin
-.idea/**/mongoSettings.xml
-
-# File-based project format
+## File-based project format:
+*.ipr
 *.iws
 
+## Plugin-specific files:
+
 # IntelliJ
-out/
+/out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -96,94 +79,26 @@ out/
 # JIRA plugin
 atlassian-ide-plugin.xml
 
-# Cursive Clojure plugin
-.idea/replstate.xml
-
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
-fabric.properties
 
-# Editor-based Rest Client
-.idea/httpRequests
-
-# Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
-
-### Intellij Patch ###
-# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
-
-# *.iml
-# modules.xml
-# .idea/misc.xml
-# *.ipr
-
-# Sonarlint plugin
-# https://plugins.jetbrains.com/plugin/7973-sonarlint
-.idea/**/sonarlint/
-
-# SonarQube Plugin
-# https://plugins.jetbrains.com/plugin/7238-sonarqube-community-plugin
-.idea/**/sonarIssues.xml
-
-# Markdown Navigator plugin
-# https://plugins.jetbrains.com/plugin/7896-markdown-navigator-enhanced
-.idea/**/markdown-navigator.xml
-.idea/**/markdown-navigator-enh.xml
-.idea/**/markdown-navigator/
-
-# Cache file creation bug
-# See https://youtrack.jetbrains.com/issue/JBR-2257
-.idea/$CACHE_FILE$
-
-# CodeStream plugin
-# https://plugins.jetbrains.com/plugin/12206-codestream
-.idea/codestream.xml
 
 ### SublimeText ###
-# Cache files for Sublime Text
+# cache files for sublime text
 *.tmlanguage.cache
 *.tmPreferences.cache
 *.stTheme.cache
 
-# Workspace files are user-specific
+# workspace files are user-specific
 *.sublime-workspace
 
-# Project files should be checked into the repository, unless a significant
-# proportion of contributors will probably not be using Sublime Text
+# project files should be checked into the repository, unless a significant
+# proportion of contributors will probably not be using SublimeText
 # *.sublime-project
 
-# SFTP configuration file
+# sftp configuration file
 sftp-config.json
 
-# Package control specific files
-Package Control.last-run
-Package Control.ca-list
-Package Control.ca-bundle
-Package Control.system-ca-bundle
-Package Control.cache/
-Package Control.ca-certs/
-Package Control.merged-ca-bundle
-Package Control.user-ca-bundle
-oscrypto-ca-bundle.crt
-bh_unicode_properties.cache
-
-# Sublime-github package stores a github token in this file
-# https://packagecontrol.io/packages/sublime-github
-GitHub.sublime-settings
-
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
-.ionide
-
-# End of https://www.toptal.com/developers/gitignore/api/intellij,visualstudiocode,sublimetext
+.vscode
