@@ -8,7 +8,7 @@ name         := "bridges"
 
 ThisBuild / scalaVersion       := "2.13.6"
 
-ThisBuild / crossScalaVersions := Seq("2.13.6", "2.12.14")
+ThisBuild / crossScalaVersions := Seq("2.13.6", "2.12.15")
 
 ThisBuild / scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
