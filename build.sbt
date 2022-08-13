@@ -44,7 +44,7 @@ ThisBuild / libraryDependencies ++= Seq(
   "com.chuusai"       %% "shapeless"          % "2.3.8",
   "com.davegurnell"   %% "unindent"           % "1.8.0",
   "org.apache.commons" % "commons-text"       % "1.9",
-  "org.scalatest"     %% "scalatest"          % "3.2.10" % Test,
+  "org.scalatest"     %% "scalatest"          % "3.2.13" % Test,
   "eu.timepit"        %% "refined"            % "0.9.27" % Provided,
   "eu.timepit"        %% "refined-shapeless"  % "0.9.27" % Provided
 )
