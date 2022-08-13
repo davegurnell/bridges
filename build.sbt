@@ -8,7 +8,7 @@ name         := "bridges"
 
 ThisBuild / scalaVersion       := "2.13.8"
 
-ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.15")
+ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.16")
 
 ThisBuild / scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -41,12 +41,12 @@ ThisBuild / scalacOptions ++= {
 }
 
 ThisBuild / libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.7",
+  "com.chuusai"       %% "shapeless"          % "2.3.9",
   "com.davegurnell"   %% "unindent"           % "1.8.0",
   "org.apache.commons" % "commons-text"       % "1.9",
-  "org.scalatest"     %% "scalatest"          % "3.2.10" % Test,
-  "eu.timepit"        %% "refined"            % "0.9.27" % Provided,
-  "eu.timepit"        %% "refined-shapeless"  % "0.9.27" % Provided
+  "org.scalatest"     %% "scalatest"          % "3.2.13" % Test,
+  "eu.timepit"        %% "refined"            % "0.9.29" % Provided,
+  "eu.timepit"        %% "refined-shapeless"  % "0.9.29" % Provided
 )
 
 // Versioning -----------------------------------
