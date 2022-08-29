@@ -60,14 +60,14 @@ trait ElmJsonEncoder extends ElmUtils {
       case Bool           => s"Encode.bool $fieldName"
       case Opt(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " +
-        encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
+          encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Arr(arrTpe) =>
         "Encode.list (List.map " +
-        encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
+          encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Dict(kTpe, vTpe) =>
         "(Encode.dict " +
-        encodeType(kTpe, objectName, fieldName, customTypeReplacements) + " " +
-        encodeType(vTpe, objectName, fieldName, customTypeReplacements) + ")"
+          encodeType(kTpe, objectName, fieldName, customTypeReplacements) + " " +
+          encodeType(vTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Prod(fields) =>
         fields
           .map { case (name, tpe) => encodeField(name, tpe, objectName, customTypeReplacements) }

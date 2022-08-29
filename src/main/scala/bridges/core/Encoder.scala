@@ -73,8 +73,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
   implicit val hnilProdEncoder: ProdEncoder[HNil] =
     pureProd(Prod(Nil))
 
-  implicit def hconsProdEncoder[K <: Symbol, H, T <: HList](
-      implicit
+  implicit def hconsProdEncoder[K <: Symbol, H, T <: HList](implicit
       witness: Witness.Aux[K],
       hEnc: Lazy[BasicEncoder[H]],
       tEnc: ProdEncoder[T]
@@ -88,8 +87,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
   implicit def cnilSumEncoder: SumEncoder[CNil] =
     pureSum(Sum(Nil))
 
-  implicit def cconsSumEncoder[K <: Symbol, H, T <: Coproduct](
-      implicit
+  implicit def cconsSumEncoder[K <: Symbol, H, T <: Coproduct](implicit
       witness: Witness.Aux[K],
       hEnc: Lazy[ProdEncoder[H]],
       tEnc: SumEncoder[T]
@@ -100,15 +98,13 @@ trait EncoderInstances1 extends EncoderInstances0 {
     pureSum(Sum((name -> product) +: tail.products))
   }
 
-  implicit def genericProdEncoder[A, R](
-      implicit
+  implicit def genericProdEncoder[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       enc: Lazy[ProdEncoder[R]]
   ): ProdEncoder[A] =
     pureProd(enc.value.encode)
 
-  implicit def genericSumEncoder[A, R](
-      implicit
+  implicit def genericSumEncoder[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       enc: Lazy[SumEncoder[R]]
   ): SumEncoder[A] =
@@ -118,8 +114,7 @@ trait EncoderInstances1 extends EncoderInstances0 {
 trait EncoderInstances0 extends EncoderConstructors {
   import Type._
 
-  implicit def genericBasicEncoder[A](
-      implicit
+  implicit def genericBasicEncoder[A](implicit
       low: LowPriority,
       tpeTag: WeakTypeTag[A]
   ): BasicEncoder[A] =

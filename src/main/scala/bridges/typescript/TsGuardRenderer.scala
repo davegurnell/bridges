@@ -79,11 +79,7 @@ abstract class TsGuardRenderer(
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     and(
       call(dot(ref("Array"), "isArray"), expr),
-      call(
-        dot(call(dot(expr, "map"), func("i")(isType(ref("i"), tpe))), "reduce"),
-        func("a", "b")(and(ref("a"), ref("b"))),
-        lit(true)
-      )
+      call(dot(expr, "every"), func("i")(isType(ref("i"), tpe)))
     )
 
   private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr = {
@@ -193,9 +189,8 @@ abstract class TsGuardRenderer(
     def unapply(tpe: TsType): Option[(String, TsType.Struct)] =
       tpe match {
         case TsType.Struct(fields, _) =>
-          fields.collectFirst {
-            case decl @ TsField("type", TsType.StrLit(name), _) =>
-              (name, TsType.Struct(fields.filterNot(_ == decl)))
+          fields.collectFirst { case decl @ TsField("type", TsType.StrLit(name), _) =>
+            (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 
         case _ =>

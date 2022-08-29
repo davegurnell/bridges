@@ -5,8 +5,10 @@ import bridges.core.Type._
 import bridges.core.syntax._
 import org.scalatest._
 import unindent._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class ElmFileBuilderSpec extends FreeSpec with Matchers {
+class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
   "for a single case class" in {
     val fileContent =
       i"""

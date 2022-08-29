@@ -5,8 +5,10 @@ import bridges.core.Type._
 import bridges.core.syntax._
 import org.scalatest._
 import shapeless.{ Generic, LabelledGeneric, TypeCase, Typeable }
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class EncoderSpec extends FreeSpec with Matchers {
+class EncoderSpec extends AnyFreeSpec with Matchers {
   "encode[A]" - {
     "primitive types" in {
       encode[String] should be(Str)
@@ -272,18 +274,18 @@ class EncoderSpec extends FreeSpec with Matchers {
     "case classes" in {
       decl[Pair] should be(
         "Pair" := prod(
-            "a" -> Str,
-            "b" -> Intr
-          )
+          "a" -> Str,
+          "b" -> Intr
+        )
       )
     }
 
     "sealed types" in {
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-            "One"   -> prod("value" -> Str),
-            "Other" -> prod("value" -> Intr)
-          )
+          "One"   -> prod("value" -> Str),
+          "Other" -> prod("value" -> Intr)
+        )
       )
     }
 
@@ -295,13 +297,13 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       decl[OneOrOther] should be(
         "OneOrOther" := sum(
-            "One" -> prod(
-              "value" -> Str
-            ),
-            "Other" -> prod(
-              "value" -> Intr
-            )
+          "One" -> prod(
+            "value" -> Str
+          ),
+          "Other" -> prod(
+            "value" -> Intr
           )
+        )
       )
     }
 
@@ -311,8 +313,8 @@ class EncoderSpec extends FreeSpec with Matchers {
 
       decl[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := prod(
-            "name" -> Str
-          )
+          "name" -> Str
+        )
       )
     }
   }

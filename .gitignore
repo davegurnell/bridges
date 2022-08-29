@@ -1,8 +1,21 @@
 # Created by https://www.gitignore.io
 
+### sbt-release-early ###
+local.*
+
+### direnv ###
+.envrc
+
+### macOS ###
+.DS_Store
+
 ### Scala ###
 *.class
 *.log
+.bloop
+.metals
+.idea
+.bsp
 
 # sbt specific
 .cache
@@ -22,10 +35,6 @@ project/plugins/project/
 # ENSIME specific
 .ensime
 .ensime_cache
-
-# Metals specific
-.metals
-.bloop
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
@@ -92,3 +101,4 @@ crashlytics-build.properties
 # sftp configuration file
 sftp-config.json
 
+.vscode

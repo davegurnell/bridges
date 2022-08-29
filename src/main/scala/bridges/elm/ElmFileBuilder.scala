@@ -23,13 +23,12 @@ trait ElmFileBuilder {
       .mkString("\n")
 
     val (declarations, decoders, encoders) =
-      decls.map(getFileComponents(module, customTypeReplacements, _)).foldLeft(foldZero) {
-        case (acc, (t, d, e)) =>
-          (
-            s"${acc._1}\n$t",
-            s"${acc._2}\n\n$d",
-            s"${acc._3}\n\n$e"
-          )
+      decls.map(getFileComponents(module, customTypeReplacements, _)).foldLeft(foldZero) { case (acc, (t, d, e)) =>
+        (
+          s"${acc._1}\n$t",
+          s"${acc._2}\n\n$d",
+          s"${acc._3}\n\n$e"
+        )
       }
 
     val pipelineImport =

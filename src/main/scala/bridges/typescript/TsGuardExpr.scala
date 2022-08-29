@@ -1,6 +1,6 @@
 package bridges.typescript
 
-import org.apache.commons.lang3.StringEscapeUtils.{ escapeJava => escape }
+import org.apache.commons.text.StringEscapeUtils.{ escapeJava => escape }
 
 sealed abstract class TsGuardExpr
 

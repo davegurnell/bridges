@@ -62,9 +62,8 @@ object FlowType {
     Struct(fields.map { case (name, tpe) => FlowField(name, from(tpe), keyIsOptional(tpe)) })
 
   private def translateSum(products: List[(String, Type.Prod)])(implicit config: FlowEncoderConfig): Union =
-    Union(products.map {
-      case (name, prod) =>
-        Struct(FlowField("type", StrLit(name)) +: translateProd(prod.fields).fields)
+    Union(products.map { case (name, prod) =>
+      Struct(FlowField("type", StrLit(name)) +: translateProd(prod.fields).fields)
     })
 
   private def keyIsOptional(tpe: Type)(implicit config: FlowEncoderConfig): Boolean =
