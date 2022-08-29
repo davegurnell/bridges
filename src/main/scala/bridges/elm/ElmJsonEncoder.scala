@@ -62,8 +62,8 @@ trait ElmJsonEncoder extends ElmUtils {
         "Maybe.withDefault Encode.null (Maybe.map " +
           encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Arr(arrTpe) =>
-        "Encode.list (List.map " +
-          encodeType(arrTpe, objectName, fieldName, customTypeReplacements) + ")"
+        "Encode.list " +
+          encodeType(arrTpe, objectName, fieldName, customTypeReplacements)
       case Dict(kTpe, vTpe) =>
         "(Encode.dict " +
           encodeType(kTpe, objectName, fieldName, customTypeReplacements) + " " +
