@@ -6,9 +6,9 @@ enablePlugins(GitBranchPrompt)
 organization := "com.davegurnell"
 name         := "bridges"
 
-ThisBuild / scalaVersion       := "2.13.8"
+ThisBuild / scalaVersion       := "2.13.12"
 
-ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.17")
+ThisBuild / crossScalaVersions := Seq("2.13.12", "2.12.17")
 
 ThisBuild / scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
