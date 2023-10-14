@@ -124,8 +124,8 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
       encoderNavigation : Navigation -> Encode.Value
       encoderNavigation tpe =
          case tpe of
-            Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map encoderNavigation children)), ("type", Encode.string "Node") ]
-            NodeList all -> Encode.object [ ("all", Encode.list (List.map encoderNavigation all)), ("type", Encode.string "NodeList") ]
+            Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list encoderNavigation children), ("type", Encode.string "Node") ]
+            NodeList all -> Encode.object [ ("all", Encode.list encoderNavigation all), ("type", Encode.string "NodeList") ]
       """
     val expected = ("Navigation.elm", fileContent)
 
@@ -333,7 +333,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
 
 
       encoderTypeOne : TypeOne -> Encode.Value
-      encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
+      encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list encoderTypeTwo obj.values) ]
 
       encoderTypeTwo : TypeTwo -> Encode.Value
       encoderTypeTwo tpe =

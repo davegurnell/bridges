@@ -63,7 +63,7 @@ class ElmJsonEncoderSpec extends AnyFreeSpec with Matchers {
     Elm.encoder(decl[ArrayClass]) shouldBe {
       i"""
       encoderArrayClass : ArrayClass -> Encode.Value
-      encoderArrayClass obj = Encode.object [ ("aList", Encode.list (List.map Encode.string obj.aList)), ("optField", Maybe.withDefault Encode.null (Maybe.map Encode.float obj.optField)) ]
+      encoderArrayClass obj = Encode.object [ ("aList", Encode.list Encode.string obj.aList), ("optField", Maybe.withDefault Encode.null (Maybe.map Encode.float obj.optField)) ]
       """
     }
   }
@@ -94,8 +94,8 @@ class ElmJsonEncoderSpec extends AnyFreeSpec with Matchers {
       encoderNavigation : Navigation -> Encode.Value
       encoderNavigation tpe =
          case tpe of
-            Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list (List.map encoderNavigation children)), ("type", Encode.string "Node") ]
-            NodeList all -> Encode.object [ ("all", Encode.list (List.map encoderNavigation all)), ("type", Encode.string "NodeList") ]
+            Node name children -> Encode.object [ ("name", Encode.string name), ("children", Encode.list encoderNavigation children), ("type", Encode.string "Node") ]
+            NodeList all -> Encode.object [ ("all", Encode.list encoderNavigation all), ("type", Encode.string "NodeList") ]
       """
     }
   }
@@ -113,7 +113,7 @@ class ElmJsonEncoderSpec extends AnyFreeSpec with Matchers {
     Elm.encoder(List(decl[TypeOne], decl[TypeTwo]), Map.empty[Ref, TypeReplacement]) shouldBe {
       i"""
       encoderTypeOne : TypeOne -> Encode.Value
-      encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list (List.map encoderTypeTwo obj.values)) ]
+      encoderTypeOne obj = Encode.object [ ("name", Encode.string obj.name), ("values", Encode.list encoderTypeTwo obj.values) ]
 
       encoderTypeTwo : TypeTwo -> Encode.Value
       encoderTypeTwo tpe =
@@ -217,7 +217,7 @@ class ElmJsonEncoderSpec extends AnyFreeSpec with Matchers {
     Elm.encoder(decl[Recursive2]) shouldBe {
       i"""
       encoderRecursive2 : Recursive2 -> Encode.Value
-      encoderRecursive2 obj = Encode.object [ ("head", Encode.int obj.head), ("tail", Encode.list (List.map encoderRecursive2 obj.tail)) ]
+      encoderRecursive2 obj = Encode.object [ ("head", Encode.int obj.head), ("tail", Encode.list encoderRecursive2 obj.tail) ]
       """
     }
   }
