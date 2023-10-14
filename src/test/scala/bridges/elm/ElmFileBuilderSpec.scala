@@ -194,7 +194,7 @@ class ElmFileBuilderSpec extends AnyFreeSpec with Matchers {
       module CustomModule2.ObjectsOnly exposing (..)
 
       import Json.Decode as Decode
-
+      import Json.Decode.Pipeline exposing (..)
       import Json.Encode as Encode
 
 

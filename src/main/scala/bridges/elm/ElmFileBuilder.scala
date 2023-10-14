@@ -32,9 +32,7 @@ trait ElmFileBuilder {
       }
 
     val pipelineImport =
-      if (decoders.contains("required"))
         "import Json.Decode.Pipeline exposing (..)"
-      else ""
 
     val customImports = customTypeReplacements.values.filter(td => decoders.contains(td.newType)).flatMap(_.imports).mkString("\n")
 
