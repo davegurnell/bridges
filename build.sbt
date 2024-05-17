@@ -41,7 +41,7 @@ ThisBuild / scalacOptions ++= {
 }
 
 ThisBuild / libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.10",
+  "com.chuusai"       %% "shapeless"          % "2.3.11",
   "com.davegurnell"   %% "unindent"           % "1.8.0",
   "org.apache.commons" % "commons-text"       % "1.9",
   "org.scalatest"     %% "scalatest"          % "3.2.13" % Test,
