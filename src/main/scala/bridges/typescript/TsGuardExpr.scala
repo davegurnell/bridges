@@ -89,7 +89,7 @@ object TsGuardExpr {
     In(key, expr)
 
   def render(expr: TsGuardExpr): String = {
-    val r = renderParens(expr) _
+    val r = renderParens(expr)(_)
 
     expr match {
       case Ref(name)                 => name

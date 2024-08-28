@@ -6,9 +6,9 @@ enablePlugins(GitBranchPrompt)
 organization := "com.davegurnell"
 name         := "bridges"
 
-ThisBuild / scalaVersion       := "2.13.8"
+ThisBuild / scalaVersion       := "3.5.0"
 
-ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.17")
+ThisBuild / crossScalaVersions := Seq("2.13.13", "3.5.0")
 
 ThisBuild / scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -29,6 +29,15 @@ ThisBuild / scalacOptions ++= {
         "-Xfatal-warnings",
       )
 
+    case Some((3, _)) =>
+      Seq(
+        "-feature",
+        "-unchecked",
+        "-deprecation",
+        "-Xfatal-warnings",
+        "-old-syntax",
+      )
+
     case _ =>
       Seq(
         "-feature",
@@ -41,13 +50,24 @@ ThisBuild / scalacOptions ++= {
 }
 
 ThisBuild / libraryDependencies ++= Seq(
-  "com.chuusai"       %% "shapeless"          % "2.3.10",
   "com.davegurnell"   %% "unindent"           % "1.8.0",
   "org.apache.commons" % "commons-text"       % "1.9",
   "org.scalatest"     %% "scalatest"          % "3.2.13" % Test,
   "eu.timepit"        %% "refined"            % "0.10.1" % Provided,
-  "eu.timepit"        %% "refined-shapeless"  % "0.10.1" % Provided
 )
+
+ThisBuild / libraryDependencies ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      Seq(
+        "com.chuusai" %% "shapeless"         % "2.3.10",
+        "eu.timepit"  %% "refined-shapeless" % "0.10.1" % Provided
+      )
+
+    case _ =>
+      Seq.empty
+  }
+}
 
 // Versioning -----------------------------------
 

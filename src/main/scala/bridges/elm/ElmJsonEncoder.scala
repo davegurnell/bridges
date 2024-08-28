@@ -11,8 +11,8 @@ trait ElmJsonEncoder extends ElmUtils {
   def encoder(decl: Decl, customTypeReplacements: Map[Ref, TypeReplacement] = Map.empty): String = {
     val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
     val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) => s"$acc $b")
-    val definitionsForGenerics                    = genericsDefinition.map(s => s"($s -> Encode.Value) -> ").foldLeft("")((acc, b) => s"$acc$b")
-    val methodsForGenerics                        = genericsDefinition.map(s => s"encoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
+    val definitionsForGenerics = genericsDefinition.map(s => s"($s -> Encode.Value) -> ").foldLeft("")((acc, b) => s"$acc$b")
+    val methodsForGenerics     = genericsDefinition.map(s => s"encoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
     decl.tpe match {
       case Sum(products) =>
         // DO NOT REMOVE SPACE AT END - needed for Elm compiler and to pass tests. Yup, dirty, I know!
@@ -60,14 +60,14 @@ trait ElmJsonEncoder extends ElmUtils {
       case Bool           => s"Encode.bool $fieldName"
       case Opt(optTpe) =>
         "Maybe.withDefault Encode.null (Maybe.map " +
-          encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
+        encodeType(optTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Arr(arrTpe) =>
         "Encode.list " +
-          encodeType(arrTpe, objectName, fieldName, customTypeReplacements)
+        encodeType(arrTpe, objectName, fieldName, customTypeReplacements)
       case Dict(kTpe, vTpe) =>
         "(Encode.dict " +
-          encodeType(kTpe, objectName, fieldName, customTypeReplacements) + " " +
-          encodeType(vTpe, objectName, fieldName, customTypeReplacements) + ")"
+        encodeType(kTpe, objectName, fieldName, customTypeReplacements) + " " +
+        encodeType(vTpe, objectName, fieldName, customTypeReplacements) + ")"
       case Prod(fields) =>
         fields
           .map { case (name, tpe) => encodeField(name, tpe, objectName, customTypeReplacements) }

@@ -4,7 +4,6 @@ import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.core._
 import bridges.core.syntax._
-import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -113,7 +112,7 @@ class ElmRendererSpec extends AnyFreeSpec with Matchers {
   }
 
   "ClassWithRefinedType" in {
-    import eu.timepit.refined.shapeless.typeable._
+    // import eu.timepit.refined.shapeless.typeable._
 
     Elm.render(decl[ClassWithRefinedType]) shouldBe """type alias ClassWithRefinedType = { name: String }"""
   }

@@ -45,10 +45,10 @@ class TsEncoderSpec extends AnyFreeSpec with Matchers {
             "type" --> StrLit("One"),
             "value" --> Str
           ) |
-          struct(
-            "type" --> StrLit("Other"),
-            "value" --> Intr
-          )
+            struct(
+              "type" --> StrLit("Other"),
+              "value" --> Intr
+            )
         )
       }
     }
@@ -60,7 +60,7 @@ class TsEncoderSpec extends AnyFreeSpec with Matchers {
       decl[OneOrOther] shouldBe {
         decl("OneOrOther")(
           (struct("type" --> StrLit("One")) & ref("One")) |
-          (struct("type" --> StrLit("Other")) & ref("Other"))
+            (struct("type" --> StrLit("Other")) & ref("Other"))
         )
       }
     }

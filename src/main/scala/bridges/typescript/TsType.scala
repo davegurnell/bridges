@@ -16,14 +16,14 @@ sealed abstract class TsType extends Product with Serializable {
 object TsType {
   final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
 
-  final case object Any     extends TsType
-  final case object Unknown extends TsType
-  final case object Str     extends TsType
-  final case object Chr     extends TsType
-  final case object Intr    extends TsType
-  final case object Real    extends TsType
-  final case object Bool    extends TsType
-  final case object Null    extends TsType
+  case object Any     extends TsType
+  case object Unknown extends TsType
+  case object Str     extends TsType
+  case object Chr     extends TsType
+  case object Intr    extends TsType
+  case object Real    extends TsType
+  case object Bool    extends TsType
+  case object Null    extends TsType
 
   final case class StrLit(value: String)                           extends TsType
   final case class ChrLit(value: Char)                             extends TsType

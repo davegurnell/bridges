@@ -3,8 +3,6 @@ package bridges.core
 import bridges.SampleTypes._
 import bridges.core.Type._
 import bridges.core.syntax._
-import org.scalatest._
-import shapeless.{ Generic, LabelledGeneric, TypeCase, Typeable }
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -247,8 +245,9 @@ class EncoderSpec extends AnyFreeSpec with Matchers {
       encode[RefinedInt] should be(Intr)
       encode[RefinedChar] should be(Chr)
 
-      //Note that the import is required or it fails!
-      import eu.timepit.refined.shapeless.typeable._
+      // Note that the import is required or it fails!
+      // import eu.timepit.refined.shapeless.typeable._
+
       encode[ClassWithRefinedType] should be(
         prod("name" -> Str)
       )
@@ -309,7 +308,7 @@ class EncoderSpec extends AnyFreeSpec with Matchers {
 
     "class with refined type" in {
       // Note that the import is required or it fails!
-      import eu.timepit.refined.shapeless.typeable._
+      // import eu.timepit.refined.shapeless.typeable._
 
       decl[ClassWithRefinedType] should be(
         "ClassWithRefinedType" := prod(

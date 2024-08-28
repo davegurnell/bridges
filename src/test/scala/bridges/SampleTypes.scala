@@ -5,7 +5,6 @@ import java.util.{ Date, UUID }
 import bridges.core._
 import bridges.core.Type._
 import bridges.core.syntax._
-import eu.timepit.refined.W
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.Size
 import eu.timepit.refined.generic.Equal
@@ -13,9 +12,9 @@ import eu.timepit.refined.numeric.Greater
 import eu.timepit.refined.numeric.Interval.ClosedOpen
 
 object SampleTypes {
-  type RefinedString = String Refined Size[ClosedOpen[W.`1`.T, W.`100`.T]]
-  type RefinedInt    = Int Refined Greater[W.`6`.T]
-  type RefinedChar   = Char Refined Equal[W.`'3'`.T]
+  type RefinedString = String Refined Size[ClosedOpen[1, 100]]
+  type RefinedInt    = Int Refined Greater[6]
+  type RefinedChar   = Char Refined Equal['3']
 
   // Sample product
   case class Pair(a: String, b: Int)
@@ -78,8 +77,8 @@ object SampleTypes {
   final case class Recursive2(head: Int, tail: List[Recursive2])
 
   sealed trait ObjectsOnly
-  final case object ObjectOne extends ObjectsOnly
-  final case object ObjectTwo extends ObjectsOnly
+  case object ObjectOne extends ObjectsOnly
+  case object ObjectTwo extends ObjectsOnly
 
   // Custom declaration of a intermediate structure
   val customDeclaration: Decl =

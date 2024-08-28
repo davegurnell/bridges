@@ -12,8 +12,8 @@ trait ElmJsonDecoder extends ElmUtils {
     val (newTypeReplacements, genericsDefinition) = mergeGenericsAndTypes(decl, customTypeReplacements)
     val genericsInType                            = genericsDefinition.foldLeft("")((acc, b) => s"$acc $b")
     val nameWithGenerics                          = if (genericsInType.isEmpty) decl.name else s"(${decl.name}$genericsInType)"
-    val definitionsForGenerics                    = genericsDefinition.map(s => s"(Decode.Decoder $s) -> ").foldLeft("")((acc, b) => s"$acc$b")
-    val methodsForGenerics                        = genericsDefinition.map(s => s"decoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
+    val definitionsForGenerics = genericsDefinition.map(s => s"(Decode.Decoder $s) -> ").foldLeft("")((acc, b) => s"$acc$b")
+    val methodsForGenerics     = genericsDefinition.map(s => s"decoder${s.toUpperCase}").foldLeft("")((acc, b) => s"$acc $b")
 
     decl.tpe match {
       case Sum(products) =>

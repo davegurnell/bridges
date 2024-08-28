@@ -6,25 +6,24 @@ import bridges.core.syntax._
   *
   * We can encode Scala ADTs to this representation:
   *
-  *  - sealed traits become instances of Sum;
-  *  - case classes become instances of Prod;
-  *  - references to other types in the body of a Sum or Prod become Refs;
-  *  - we have special encodings for Options and sequences
+  *   - sealed traits become instances of Sum;
+  *   - case classes become instances of Prod;
+  *   - references to other types in the body of a Sum or Prod become Refs;
+  *   - we have special encodings for Options and sequences
   * (which are normally handled specially in the target language).
   *
-  * We can generate Elm bindings directly from this representation.
-  * For Flow and Typescript bindings we
-  * translate to other intermediate representations.
+  * We can generate Elm bindings directly from this representation. For Flow and Typescript bindings we translate to other intermediate
+  * representations.
   */
 sealed abstract class Type extends Product with Serializable
 
 object Type {
   final case class Ref(id: String, params: List[Type] = Nil) extends Type
-  final case object Str                                      extends Type
-  final case object Chr                                      extends Type
-  final case object Intr                                     extends Type
-  final case object Real                                     extends Type
-  final case object Bool                                     extends Type
+  case object Str                                            extends Type
+  case object Chr                                            extends Type
+  case object Intr                                           extends Type
+  case object Real                                           extends Type
+  case object Bool                                           extends Type
   final case class Opt(tpe: Type)                            extends Type
   final case class Arr(tpe: Type)                            extends Type
   final case class Dict(keys: Type, values: Type)            extends Type

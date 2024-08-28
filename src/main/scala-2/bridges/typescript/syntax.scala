@@ -1,10 +1,10 @@
 package bridges.typescript
 
-import bridges.core.{ DeclF, Encoder, RenamableSyntax }
-import bridges.core.syntax.getCleanTagName
+import bridges.core.{ DeclF, RenamableSyntax, TypeName }
 import shapeless.Lazy
-import scala.reflect.runtime.universe.WeakTypeTag
+
 import scala.language.implicitConversions
+import scala.reflect.runtime.universe.WeakTypeTag
 
 object syntax extends RenamableSyntax {
   import TsType._
@@ -13,7 +13,7 @@ object syntax extends RenamableSyntax {
     encoder.encode
 
   def decl[A](implicit tpeTag: WeakTypeTag[A], encoder: Lazy[TsEncoder[A]]): TsDecl =
-    DeclF(getCleanTagName[A], encoder.value.encode)
+    DeclF(TypeName.getTypeName[A], encoder.value.encode)
 
   def decl(name: String, params: String*)(tpe: TsType): TsDecl =
     DeclF(name, params.toList, tpe)

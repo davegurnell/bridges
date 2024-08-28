@@ -19,13 +19,13 @@ sealed abstract class FlowType extends Product with Serializable {
 object FlowType {
   final case class Ref(id: String, params: List[FlowType] = Nil) extends FlowType
 
-  final case object Str       extends FlowType
-  final case object Chr       extends FlowType
-  final case object Intr      extends FlowType
-  final case object Real      extends FlowType
-  final case object Bool      extends FlowType
-  final case object Null      extends FlowType
-  final case object Undefined extends FlowType
+  case object Str       extends FlowType
+  case object Chr       extends FlowType
+  case object Intr      extends FlowType
+  case object Real      extends FlowType
+  case object Bool      extends FlowType
+  case object Null      extends FlowType
+  case object Undefined extends FlowType
 
   final case class StrLit(value: String)        extends FlowType
   final case class ChrLit(value: Char)          extends FlowType
