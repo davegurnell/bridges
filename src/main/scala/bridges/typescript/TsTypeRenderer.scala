@@ -1,22 +1,23 @@
 package bridges.typescript
 
-import bridges.core.{ DeclF, Renderer }
 import org.apache.commons.text.StringEscapeUtils.{ escapeJava => escape }
 
-abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
+abstract class TsTypeRenderer(exportAll: Boolean):
   import TsType._
 
-  def render(decl: TsDecl): String =
-    decl match {
-      case DeclF(name, params, TsType.Struct(fields, rest)) =>
+  def render(decls: List[Decl]): String =
+    decls.map(render).mkString("\n\n")
+
+  def render(decl: Decl): String =
+    decl match
+      case Decl(name, params, TsType.Struct(fields, rest)) =>
         s"${if (exportAll) "export interface" else "interface"} ${renderParams(name, params)} ${renderStructAsInterface(fields, rest)}"
 
-      case DeclF(name, params, tpe) =>
+      case Decl(name, params, tpe) =>
         s"${if (exportAll) "export type" else "type"} ${renderParams(name, params)} = ${renderType(tpe)};"
-    }
 
   def renderType(tpe: TsType): String =
-    tpe match {
+    tpe match
       case Ref(id, params)      => renderRef(id, params)
       case Any                  => "any"
       case Str                  => "string"
@@ -37,7 +38,6 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case Struct(fields, rest) => renderStruct(fields, rest)
       case tpe @ Inter(types)   => types.map(renderParens(tpe)).mkString(" & ")
       case tpe @ Union(types)   => types.map(renderParens(tpe)).mkString(" | ")
-    }
 
   private def renderParams(name: String, params: List[String]): String =
     if (params.isEmpty) name else params.mkString(s"$name<", ", ", ">")
@@ -55,33 +55,29 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       .mkString("{\n", "", "}")
 
   private def renderField(field: TsField): String =
-    field match {
+    field match
       case TsField(name, valueType, false) =>
-        s"""${name}: ${renderType(valueType)}"""
+        s"""$name: ${renderType(valueType)}"""
 
       case TsField(name, valueType, true) =>
-        s"""${name}?: ${renderType(valueType)}"""
-    }
+        s"""$name?: ${renderType(valueType)}"""
 
   private def renderArgs(args: List[(String, TsType)]): String =
     args
-      .map { case (name, tpe) => s"""${name}: ${renderType(tpe)}""" }
+      .map { case (name, tpe) => s"""$name: ${renderType(tpe)}""" }
       .mkString("(", ", ", ")")
 
-  private def renderRestField(field: TsRestField): String = {
+  private def renderRestField(field: TsRestField): String =
     val TsRestField(name, keyType, valueType) = field
-    s"""[${name}: ${renderType(keyType)}]: ${renderType(valueType)}"""
-  }
+    s"""[$name: ${renderType(keyType)}]: ${renderType(valueType)}"""
 
   private def renderParens(outer: TsType)(inner: TsType): String =
-    if (precedence(outer) > precedence(inner)) {
-      s"(${renderType(inner)})"
-    } else {
-      renderType(inner)
-    }
+    if precedence(outer) > precedence(inner)
+    then s"(${renderType(inner)})"
+    else renderType(inner)
 
   private def precedence(tpe: TsType): Int =
-    tpe match {
+    tpe match
       case _: Ref     => 1000
       case _ @Any     => 1000
       case _ @Unknown => 1000
@@ -102,5 +98,3 @@ abstract class TsTypeRenderer(exportAll: Boolean) extends Renderer[TsType] {
       case _: Union   => 400
       case _: Inter   => 200
       case _: Func    => 100
-    }
-}

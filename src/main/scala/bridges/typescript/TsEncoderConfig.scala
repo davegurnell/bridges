@@ -6,6 +6,6 @@ case class TsEncoderConfig(
 )
 
 object TsEncoderConfig {
-  implicit val default: TsEncoderConfig =
+  given default: TsEncoderConfig =
     TsEncoderConfig()
 }

@@ -6,68 +6,20 @@ enablePlugins(GitBranchPrompt)
 organization := "com.davegurnell"
 name         := "bridges"
 
-ThisBuild / scalaVersion       := "3.5.0"
+ThisBuild / scalaVersion := "3.5.0"
 
-ThisBuild / crossScalaVersions := Seq("2.13.13", "3.5.0")
-
-ThisBuild / scalacOptions ++= {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) =>
-      Seq(
-        "-feature",
-        "-unchecked",
-        "-deprecation",
-        "-Xfatal-warnings",
-        "-Ypartial-unification"
-      )
-
-    case Some((2, _)) =>
-      Seq(
-        "-feature",
-        "-unchecked",
-        "-deprecation",
-        "-Xfatal-warnings",
-      )
-
-    case Some((3, _)) =>
-      Seq(
-        "-feature",
-        "-unchecked",
-        "-deprecation",
-        "-Xfatal-warnings",
-        "-old-syntax",
-      )
-
-    case _ =>
-      Seq(
-        "-feature",
-        "-unchecked",
-        "-deprecation",
-        "-rewrite",
-        "-new-syntax",
-      )
-  }
-}
-
-ThisBuild / libraryDependencies ++= Seq(
-  "com.davegurnell"   %% "unindent"           % "1.8.0",
-  "org.apache.commons" % "commons-text"       % "1.9",
-  "org.scalatest"     %% "scalatest"          % "3.2.13" % Test,
-  "eu.timepit"        %% "refined"            % "0.10.1" % Provided,
+ThisBuild / scalacOptions ++= Seq(
+  "-feature",
+  "-unchecked",
+  "-deprecation",
+  "-Xfatal-warnings",
 )
 
-ThisBuild / libraryDependencies ++= {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, _)) =>
-      Seq(
-        "com.chuusai" %% "shapeless"         % "2.3.10",
-        "eu.timepit"  %% "refined-shapeless" % "0.10.1" % Provided
-      )
-
-    case _ =>
-      Seq.empty
-  }
-}
+ThisBuild / libraryDependencies ++= Seq(
+  "com.davegurnell"   %% "unindent"     % "1.8.0",
+  "org.apache.commons" % "commons-text" % "1.9",
+  "org.scalameta"     %% "munit"        % "1.0.1"  % Test,
+)
 
 // Versioning -----------------------------------
 

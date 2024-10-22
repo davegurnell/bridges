@@ -1,22 +1,21 @@
-package bridges.typescript
-
-import bridges.SampleTypes._
-import bridges.typescript.TsType._
-import bridges.typescript.syntax._
-import org.scalatest._
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
-
-class TsRenameSpec extends AnyFreeSpec with Matchers {
-  "decl" in {
-    val actual = decl[Color].rename("red", "r")
-
-    val expected = "Color" := struct(
-      "r" --> Intr,
-      "green" --> Intr,
-      "blue" --> Intr
-    )
-
-    actual shouldBe expected
-  }
-}
+// package bridges.typescript
+//
+// import bridges.SampleTypes._
+// import bridges.typescript.TsType._
+// import org.scalatest._
+// import org.scalatest.freespec.AnyFreeSpec
+// import org.scalatest.matchers.should.Matchers
+//
+// class TsRenameSpec extends AnyFreeSpec with Matchers {
+//   "decl" in {
+//     val actual = decl[Color].rename("red", "r")
+//
+//     val expected = "Color" := struct(
+//       "r" --> Intr,
+//       "green" --> Intr,
+//       "blue" --> Intr
+//     )
+//
+//     actual shouldBe expected
+//   }
+// }

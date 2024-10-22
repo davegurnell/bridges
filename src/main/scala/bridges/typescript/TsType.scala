@@ -1,106 +1,98 @@
 package bridges.typescript
 
-import bridges.core._
-import bridges.typescript.syntax._
-
-sealed abstract class TsType extends Product with Serializable {
+enum TsType:
   import TsType._
 
-  def |(that: TsType): TsType =
-    Union(List(this, that))
+  case Any
+  case Unknown
+  case Str
+  case Chr
+  case Intr
+  case Real
+  case Bool
+  case Null
 
-  def &(that: TsType): TsType =
-    Inter(List(this, that))
-}
+  case Ref(id: String, params: List[TsType] = Nil)
+  case StrLit(value: String)
+  case ChrLit(value: Char)
+  case IntrLit(value: Int)
+  case RealLit(value: Double)
+  case BoolLit(value: Boolean)
+  case Arr(tpe: TsType)
+  case Tuple(types: List[TsType])
+  case Func(args: List[(String, TsType)], ret: TsType)
 
-object TsType {
-  final case class Ref(id: String, params: List[TsType] = Nil) extends TsType
+  case Struct(fields: List[TsField], rest: Option[TsRestField] = None)
 
-  case object Any     extends TsType
-  case object Unknown extends TsType
-  case object Str     extends TsType
-  case object Chr     extends TsType
-  case object Intr    extends TsType
-  case object Real    extends TsType
-  case object Bool    extends TsType
-  case object Null    extends TsType
+  case Inter(types: List[TsType])
+  case Union(types: List[TsType])
 
-  final case class StrLit(value: String)                           extends TsType
-  final case class ChrLit(value: Char)                             extends TsType
-  final case class IntrLit(value: Int)                             extends TsType
-  final case class RealLit(value: Double)                          extends TsType
-  final case class BoolLit(value: Boolean)                         extends TsType
-  final case class Arr(tpe: TsType)                                extends TsType
-  final case class Tuple(types: List[TsType])                      extends TsType
-  final case class Func(args: List[(String, TsType)], ret: TsType) extends TsType
+  def isNullable: Boolean =
+    this match
+      case Null         => true
+      case Union(types) => types.exists(_.isNullable)
+      case _            => false
 
-  final case class Struct(fields: List[TsField], rest: Option[TsRestField] = None) extends TsType {
-    def withRest(keyType: TsType, valueType: TsType, keyName: String = "key"): Struct =
-      copy(rest = Some(TsRestField(keyName, keyType, valueType)))
-  }
+  def rename(from: String, to: String): TsType =
+    def renameId(id: String): String =
+      if (id == from) to else id
 
-  final case class Inter(types: List[TsType]) extends TsType
-  final case class Union(types: List[TsType]) extends TsType
+    this match
+      case Ref(id, params)      => Ref(renameId(id), params.map(_.rename(from, to)))
+      case Any                  => Any
+      case tpe @ Unknown        => tpe
+      case tpe @ Str            => tpe
+      case tpe @ Chr            => tpe
+      case tpe @ Intr           => tpe
+      case tpe @ Real           => tpe
+      case tpe @ Bool           => tpe
+      case tpe @ Null           => tpe
+      case tpe: StrLit          => tpe
+      case tpe: ChrLit          => tpe
+      case tpe: IntrLit         => tpe
+      case tpe: RealLit         => tpe
+      case tpe: BoolLit         => tpe
+      case Arr(tpe)             => Arr(tpe.rename(from, to))
+      case Tuple(types)         => Tuple(types.map(_.rename(from, to)))
+      case Func(args, ret)      => Func(args.map((name, tpe) => (name, tpe.rename(from, to))), ret.rename(from, to))
+      case Struct(fields, rest) => Struct(fields.map(_.rename(from, to)), rest.map(_.rename(from, to)))
+      case Inter(types)         => Inter(types.map(_.rename(from, to)))
+      case Union(types)         => Union(types.map(_.rename(from, to)))
 
-  def from(tpe: Type)(implicit config: TsEncoderConfig): TsType =
-    tpe match {
-      case Type.Ref(id, params)  => Ref(id, params.map(from))
-      case Type.Str              => Str
-      case Type.Chr              => Chr
-      case Type.Intr             => Intr
-      case Type.Real             => Real
-      case Type.Bool             => Bool
-      case Type.Opt(tpe)         => from(tpe) | Null
-      case Type.Arr(tpe)         => Arr(from(tpe))
-      case Type.Dict(kTpe, vTpe) => Struct(Nil, Some(TsRestField("key", from(kTpe), from(vTpe))))
-      case Type.Prod(fields)     => translateProd(fields)
-      case Type.Sum(products)    => translateSum(products)
-    }
+object TsType:
+  def ref(name: String, params: TsType*): Ref =
+    Ref(name, params.toList)
 
-  private def translateProd(fields: List[(String, Type)])(implicit config: TsEncoderConfig): Struct =
-    Struct(fields.map { case (name, tpe) => TsField(name, from(tpe), keyIsOptional(tpe)) })
+  def tuple(types: TsType*): Tuple =
+    Tuple(types.toList)
 
-  private def translateSum(products: List[(String, Type.Prod)])(implicit config: TsEncoderConfig): Union =
-    Union(products.map { case (name, tpe) =>
-      if (config.refsInUnions) {
-        Inter(List(Struct(List(TsField("type", StrLit(name)))), Ref(name)))
-      } else {
-        Struct(TsField("type", StrLit(name)) +: translateProd(tpe.fields).fields)
-      }
-    })
+  def union(types: TsType*): Union =
+    Union(types.toList)
 
-  private def keyIsOptional(tpe: Type)(implicit config: TsEncoderConfig): Boolean =
-    tpe match {
-      case _: Type.Opt if config.optionalFields => true
-      case _                                    => false
-    }
+  def intersect(types: TsType*): TsType =
+    Inter(types.toList)
 
-  implicit val rename: Rename[TsType] =
-    Rename.pure { (value, from, to) =>
-      def renameId(id: String): String =
-        if (id == from) to else id
+  def nullable(tpe: TsType): TsType =
+    union(tpe, Null)
 
-      value match {
-        case Ref(id, params)      => Ref(renameId(id), params.map(_.rename(from, to)))
-        case Any                  => Any
-        case tpe @ Unknown        => tpe
-        case tpe @ Str            => tpe
-        case tpe @ Chr            => tpe
-        case tpe @ Intr           => tpe
-        case tpe @ Real           => tpe
-        case tpe @ Bool           => tpe
-        case tpe @ Null           => tpe
-        case tpe: StrLit          => tpe
-        case tpe: ChrLit          => tpe
-        case tpe: IntrLit         => tpe
-        case tpe: RealLit         => tpe
-        case tpe: BoolLit         => tpe
-        case Arr(tpe)             => Arr(tpe.rename(from, to))
-        case Tuple(types)         => Tuple(types.map(_.rename(from, to)))
-        case Func(args, ret)      => Func(args.map(_.rename(from, to)), ret.rename(from, to))
-        case Struct(fields, rest) => Struct(fields.map(_.rename(from, to)), rest.map(_.rename(from, to)))
-        case Inter(types)         => Inter(types.map(_.rename(from, to)))
-        case Union(types)         => Union(types.map(_.rename(from, to)))
-      }
-    }
-}
+  def dict(keyType: TsType, valueType: TsType): Struct =
+    Struct(Nil, Some(TsRestField("key", keyType, valueType)))
+
+  def struct(fields: TsField*): Struct =
+    Struct(fields.toList)
+
+  def labelled(name: String, tpe: TsType): TsType =
+    val discriminator = TsField("type", StrLit(name))
+    tpe match
+      case Struct(fields, rest) => Struct(discriminator :: fields, rest)
+      case tpe                  => intersect(struct(discriminator), tpe)
+
+  def discriminated(cases: (String, TsType)*): Union =
+    union(cases.map(labelled)*)
+
+  def func(args: (String, TsType)*)(ret: TsType): Func =
+    Func(args.toList, ret)
+
+extension (struct: TsType.Struct)
+  def withRest(keyType: TsType, valueType: TsType, keyName: String = "key"): TsType.Struct =
+    struct.copy(rest = Some(TsRestField(keyName, keyType, valueType)))

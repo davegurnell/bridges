@@ -1,20 +1,9 @@
-package bridges
+package bridges.typescript
 
 import java.util.{ Date, UUID }
 
-import bridges.core._
-import bridges.core.Type._
-import bridges.core.syntax._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.Size
-import eu.timepit.refined.generic.Equal
-import eu.timepit.refined.numeric.Greater
-import eu.timepit.refined.numeric.Interval.ClosedOpen
-
 object SampleTypes {
-  type RefinedString = String Refined Size[ClosedOpen[1, 100]]
-  type RefinedInt    = Int Refined Greater[6]
-  type RefinedChar   = Char Refined Equal['3']
+  import syntax.*
 
   // Sample product
   case class Pair(a: String, b: Int)
@@ -54,8 +43,8 @@ object SampleTypes {
 
   // Recursive structure
   sealed trait Navigation
-  final case class NodeList(all: List[Navigation])                extends Navigation
   final case class Node(name: String, children: List[Navigation]) extends Navigation
+  final case class NodeList(all: List[Navigation])                extends Navigation
 
   // case classes with specific values (list, Float, Option, Char, etc)
   final case class Alpha(name: String, char: Char, bool: Boolean)
@@ -82,12 +71,13 @@ object SampleTypes {
 
   // Custom declaration of a intermediate structure
   val customDeclaration: Decl =
-    "Message" := sum(
-      "ErrorMessage"   -> prod("error" -> Ref("ErrorMessage")),
-      "WarningMessage" -> prod("warning" -> Ref("WarningMessage"))
+    Decl(
+      "Message",
+      TsType.discriminated(
+        "ErrorMessage"   -> TsType.struct("error" --> TsType.Ref("ErrorMessage")),
+        "WarningMessage" -> TsType.struct("warning" --> TsType.Ref("WarningMessage"))
+      )
     )
-
-  final case class ClassWithRefinedType(name: RefinedString)
 
   final case class NumericTypes(
       int: Int,

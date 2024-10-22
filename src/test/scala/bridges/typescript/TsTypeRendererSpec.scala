@@ -1,17 +1,16 @@
 package bridges.typescript
 
-import bridges.SampleTypes._
-import bridges.core.DeclF
-import bridges.typescript.TsType._
-import bridges.typescript.syntax._
-import org.scalatest._
-import unindent._
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
+import munit.FunSuite
+import unindent.*
 
-class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
-  "Color" in {
-    Typescript.render(decl[Color]) shouldBe {
+class TsTypeRendererSpec extends FunSuite:
+  import SampleTypes.*
+  import TsType.*
+  import syntax.*
+
+  test("Color") {
+    assertEquals(
+      Typescript.render(decl[Color]),
       i"""
       export interface Color {
         red: number;
@@ -19,22 +18,24 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         blue: number;
       }
       """
-    }
+    )
   }
 
-  "Circle" in {
-    Typescript.render(decl[Circle]) shouldBe {
+  test("Circle") {
+    assertEquals(
+      Typescript.render(decl[Circle]),
       i"""
       export interface Circle {
         radius: number;
         color: Color;
       }
       """
-    }
+    )
   }
 
-  "Rectangle" in {
-    Typescript.render(decl[Rectangle]) shouldBe {
+  test("Rectangle") {
+    assertEquals(
+      Typescript.render(decl[Rectangle]),
       i"""
       export interface Rectangle {
         width: number;
@@ -42,19 +43,21 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         color: Color;
       }
       """
-    }
+    )
   }
 
-  "Shape" in {
-    Typescript.render(decl[Shape]) shouldBe {
+  test("Shape") {
+    assertEquals(
+      Typescript.render(decl[Shape]),
       i"""
       export type Shape = { type: "Circle", radius: number, color: Color } | { type: "Rectangle", width: number, height: number, color: Color } | { type: "ShapeGroup", leftShape: Shape, rightShape: Shape };
       """
-    }
+    )
   }
 
-  "Alpha" in {
-    Typescript.render(decl[Alpha]) shouldBe {
+  test("Alpha") {
+    assertEquals(
+      Typescript.render(decl[Alpha]),
       i"""
       export interface Alpha {
         name: string;
@@ -62,22 +65,24 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         bool: boolean;
       }
       """
-    }
+    )
   }
 
-  "ArrayClass" in {
-    Typescript.render(decl[ArrayClass]) shouldBe {
+  test("ArrayClass") {
+    assertEquals(
+      Typescript.render(decl[ArrayClass]),
       i"""
       export interface ArrayClass {
         aList: string[];
         optField?: number | null;
       }
       """
-    }
+    )
   }
 
-  "Numeric" in {
-    Typescript.render(decl[Numeric]) shouldBe {
+  test("Numeric") {
+    assertEquals(
+      Typescript.render(decl[Numeric]),
       i"""
       export interface Numeric {
         double: number;
@@ -85,159 +90,176 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         int: number;
       }
       """
-    }
+    )
   }
 
-  "Singleton object" in {
-    Typescript.render(decl[MyObject.type]) shouldBe {
+  test("Singleton object") {
+    assertEquals(
+      Typescript.render(decl[MyObject.type]),
       i"""
       export interface MyObject {
       }
       """
-    }
+    )
   }
 
-  "ClassOrObject" in {
-    Typescript.render(decl[ClassOrObject]) shouldBe {
+  test("ClassOrObject") {
+    assertEquals(
+      Typescript.render(decl[ClassOrObject]),
       i"""
       export type ClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };
       """
-    }
+    )
   }
 
-  "NestedClassOrObject" in {
-    Typescript.render(decl[NestedClassOrObject]) shouldBe {
+  test("NestedClassOrObject") {
+    assertEquals(
+      Typescript.render(decl[NestedClassOrObject]),
       i"""
       export type NestedClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };
       """
-    }
+    )
   }
 
-  "Navigation" in {
-    Typescript.render(decl[Navigation]) shouldBe {
+  test("Navigation") {
+    assertEquals(
+      Typescript.render(decl[Navigation]),
       i"""
       export type Navigation = { type: "Node", name: string, children: Navigation[] } | { type: "NodeList", all: Navigation[] };
       """
-    }
+    )
   }
 
-  "ClassUUID" in {
-    Typescript.render(decl[ClassUUID]) shouldBe {
+  test("ClassUUID") {
+    assertEquals(
+      Typescript.render(decl[ClassUUID]),
       i"""
       export interface ClassUUID {
         a: UUID;
       }
       """
-    }
+    )
   }
 
-  "ClassDate" in {
-    Typescript.render(decl[ClassDate]) shouldBe {
+  test("ClassDate") {
+    assertEquals(
+      Typescript.render(decl[ClassDate]),
       i"""
       export interface ClassDate {
         a: Date;
       }
       """
-    }
+    )
   }
 
-  "Recursive" in {
-    Typescript.render(decl[Recursive]) shouldBe {
+  test("Recursive") {
+    assertEquals(
+      Typescript.render(decl[Recursive]),
       i"""
       export interface Recursive {
         head: number;
         tail?: Recursive | null;
       }
       """
-    }
+    )
   }
 
-  "Recursive2" in {
-    Typescript.render(decl[Recursive2]) shouldBe {
+  test("Recursive2") {
+    assertEquals(
+      Typescript.render(decl[Recursive2]),
       i"""
       export interface Recursive2 {
         head: number;
         tail: Recursive2[];
       }
       """
-    }
+    )
   }
 
-  "ExternalReferences" in {
-    Typescript.render(decl[ExternalReferences]) shouldBe {
+  test("ExternalReferences") {
+    assertEquals(
+      Typescript.render(decl[ExternalReferences]),
       i"""
       export interface ExternalReferences {
         color: Color;
         nav: Navigation;
       }
       """
-    }
+    )
   }
 
-  "ObjectsOnly" in {
-    Typescript.render(decl[ObjectsOnly]) shouldBe {
+  test("ObjectsOnly") {
+    assertEquals(
+      Typescript.render(decl[ObjectsOnly]),
       i"""
       export type ObjectsOnly = { type: "ObjectOne" } | { type: "ObjectTwo" };
       """
-    }
+    )
   }
 
-  "Union of Union" in {
-    Typescript.render("A" := Ref("B") | Ref("C") | Ref("D")) shouldBe {
+  test("Union of Union") {
+    assertEquals(
+      Typescript.render(decl("A")(union(Ref("B"), Ref("C"), Ref("D")))),
       i"""
       export type A = B | C | D;
       """
-    }
+    )
   }
 
-  "Inter of Inter" in {
-    Typescript.render("A" := Ref("B") & Ref("C") & Ref("D")) shouldBe {
+  test("Inter of Inter") {
+    assertEquals(
+      Typescript.render(decl("A")(intersect(Ref("B"), Ref("C"), Ref("D")))),
       i"""
       export type A = B & C & D;
       """
-    }
+    )
   }
 
-  "Generic Decl" in {
-    Typescript.render(
-      decl("Pair", "A", "B")(
-        struct(
-          "a" --> Ref("A"),
-          "b" -?> Ref("B")
+  test("Generic Decl") {
+    assertEquals(
+      Typescript.render(
+        decl("Pair", "A", "B")(
+          struct(
+            "a" --> Ref("A"),
+            "b" -?> Ref("B")
+          )
         )
-      )
-    ) shouldBe {
+      ),
       i"""
       export interface Pair<A, B> {
         a: A;
         b?: B;
       }
       """
-    }
+    )
   }
 
-  "Applications of Generics" in {
-    Typescript.render(decl("Cell")(ref("Pair", Str, Intr))) shouldBe {
+  test("Applications of Generics") {
+    assertEquals(
+      Typescript.render(decl("Cell")(ref("Pair", Str, Intr))),
       i"""
       export type Cell = Pair<string, number>;
       """
-    }
+    )
 
-    Typescript.render(decl("Same", "A")(ref("Pair", ref("A"), ref("A")))) shouldBe {
+    assertEquals(
+      Typescript.render(decl("Same", "A")(ref("Pair", ref("A"), ref("A")))),
       i"""
       export type Same<A> = Pair<A, A>;
       """
-    }
+    )
 
-    Typescript.render(decl("AnyPair")(ref("Pair", Any, Any))) shouldBe {
+    assertEquals(
+      Typescript.render(decl("AnyPair")(ref("Pair", Any, Any))),
       i"""
       export type AnyPair = Pair<any, any>;
       """
-    }
+    )
   }
 
-  "Numeric types" in {
-    Typescript.render(decl[NumericTypes]) shouldBe {
+  test("Numeric types") {
+    assertEquals(
+      Typescript.render(decl[NumericTypes]),
       i"""
       export interface NumericTypes {
         int: number;
@@ -247,42 +269,46 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         bigDecimal: number;
       }
       """
-    }
+    )
   }
 
-  "Tuple" in {
-    Typescript.render(decl("Cell")(tuple(Str, Intr))) shouldBe {
+  test("Tuple") {
+    assertEquals(
+      Typescript.render(decl("Cell")(tuple(Str, Intr))),
       i"""
       export type Cell = [string, number];
       """
-    }
+    )
   }
 
-  "Empty tuple" in {
-    Typescript.render(decl("Empty")(tuple())) shouldBe {
+  test("Empty tuple") {
+    assertEquals(
+      Typescript.render(decl("Empty")(tuple())),
       i"""
       export type Empty = [];
       """
-    }
+    )
   }
 
-  "Structs with rest fields" in {
-    Typescript.render(decl("Dict")(dict(Str, Intr))) shouldBe {
+  test("Structs with rest fields") {
+    assertEquals(
+      Typescript.render(decl("Dict")(dict(Str, Intr))),
       i"""
       export interface Dict {
         [key: string]: number;
       }
       """
-    }
+    )
 
-    Typescript.render(
-      decl("Dict")(
-        struct(
-          "a" --> Str,
-          "b" -?> Intr
-        ).withRest(Str, Bool, "c")
-      )
-    ) shouldBe {
+    assertEquals(
+      Typescript.render(
+        decl("Dict")(
+          struct(
+            "a" --> Str,
+            "b" -?> Intr
+          ).withRest(Str, Bool, "c")
+        )
+      ),
       i"""
       export interface Dict {
         a: string;
@@ -290,41 +316,43 @@ class TsTypeRendererSpec extends AnyFreeSpec with Matchers {
         [c: string]: boolean;
       }
       """
-    }
+    )
   }
 
-  "Unknown and any" in {
-    Typescript.render(decl("UnknownAndAny")(struct("foo" --> Any, "bar" --> Unknown))) shouldBe {
+  test("Unknown and any") {
+    assertEquals(
+      Typescript.render(decl("UnknownAndAny")(struct("foo" --> Any, "bar" --> Unknown))),
       i"""
       export interface UnknownAndAny {
         foo: any;
         bar: unknown;
       }
       """
-    }
+    )
   }
 
-  "Function types" in {
-    Typescript.render(
-      decl("Rule")(
-        struct(
-          "message" --> Str,
-          "apply" --> func("value" -> Unknown)(Bool)
+  test("Function types") {
+    assertEquals(
+      Typescript.render(
+        decl("Rule")(
+          struct(
+            "message" --> Str,
+            "apply" --> func("value" -> Unknown)(Bool)
+          )
         )
-      )
-    ) shouldBe {
+      ),
       i"""
       export interface Rule {
         message: string;
         apply: (value: unknown) => boolean;
       }
       """
-    }
+    )
 
-    Typescript.render(decl("Funcy")(tuple(func("arg" -> tuple(Str))(tuple(Str)), func("arg" -> tuple(Intr))(tuple(Intr))))) shouldBe {
+    assertEquals(
+      Typescript.render(decl("Funcy")(tuple(func("arg" -> tuple(Str))(tuple(Str)), func("arg" -> tuple(Intr))(tuple(Intr))))),
       i"""
       export type Funcy = [(arg: [string]) => [string], (arg: [number]) => [number]];
       """
-    }
+    )
   }
-}

@@ -2,26 +2,25 @@ package bridges.typescript
 
 import org.apache.commons.text.StringEscapeUtils.{ escapeJava => escape }
 
-sealed abstract class TsGuardExpr
+enum TsGuardExpr:
+  case Ref(name: String)
+  case Dot(obj: TsGuardExpr, name: String)
+  case Arr(exprs: List[TsGuardExpr])
+  case Index(arr: TsGuardExpr, index: TsGuardExpr)
+  case Lit(name: String)
+  case Typeof(expr: TsGuardExpr)
+  case Call(func: TsGuardExpr, args: List[TsGuardExpr])
+  case Func(args: List[String], body: TsGuardExpr)
+  case Guard(arg: String, retType: TsType, body: TsGuardExpr)
+  case Cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr)
+  case IsNull(expr: TsGuardExpr)
+  case Not(expr: TsGuardExpr)
+  case And(lhs: TsGuardExpr, rhs: TsGuardExpr)
+  case Or(lhs: TsGuardExpr, rhs: TsGuardExpr)
+  case Eql(lhs: TsGuardExpr, rhs: TsGuardExpr)
+  case In(key: String, expr: TsGuardExpr)
 
-object TsGuardExpr {
-  final case class Ref(name: String)                                                    extends TsGuardExpr
-  final case class Dot(obj: TsGuardExpr, name: String)                                  extends TsGuardExpr
-  final case class Arr(exprs: List[TsGuardExpr])                                        extends TsGuardExpr
-  final case class Index(arr: TsGuardExpr, index: TsGuardExpr)                          extends TsGuardExpr
-  final case class Lit(name: String)                                                    extends TsGuardExpr
-  final case class Typeof(expr: TsGuardExpr)                                            extends TsGuardExpr
-  final case class Call(func: TsGuardExpr, args: List[TsGuardExpr])                     extends TsGuardExpr
-  final case class Func(args: List[String], body: TsGuardExpr)                          extends TsGuardExpr
-  final case class Guard(arg: String, retType: TsType, body: TsGuardExpr)               extends TsGuardExpr
-  final case class Cond(test: TsGuardExpr, trueArm: TsGuardExpr, falseArm: TsGuardExpr) extends TsGuardExpr
-  final case class IsNull(expr: TsGuardExpr)                                            extends TsGuardExpr
-  final case class Not(expr: TsGuardExpr)                                               extends TsGuardExpr
-  final case class And(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
-  final case class Or(lhs: TsGuardExpr, rhs: TsGuardExpr)                               extends TsGuardExpr
-  final case class Eql(lhs: TsGuardExpr, rhs: TsGuardExpr)                              extends TsGuardExpr
-  final case class In(key: String, expr: TsGuardExpr)                                   extends TsGuardExpr
-
+object TsGuardExpr:
   def ref(name: String): TsGuardExpr =
     Ref(name)
 
@@ -88,10 +87,9 @@ object TsGuardExpr {
   def in(key: String, expr: TsGuardExpr): TsGuardExpr =
     In(key, expr)
 
-  def render(expr: TsGuardExpr): String = {
-    val r = renderParens(expr)(_)
-
-    expr match {
+  def render(expr: TsGuardExpr): String =
+    val r = renderParens(expr)
+    expr match
       case Ref(name)                 => name
       case Dot(obj, name)            => s"""${r(obj)}.${name}"""
       case Arr(exprs)                => exprs.map(r).mkString("[", ", ", "]")
@@ -109,18 +107,14 @@ object TsGuardExpr {
       case Or(lhs, rhs)              => s"""${r(lhs)} || ${r(rhs)}"""
       case Eql(lhs, rhs)             => s"""${r(lhs)} === ${r(rhs)}"""
       case In(key, expr)             => s"""${r(lit(key))} in ${r(expr)}"""
-    }
-  }
 
   private def renderParens(outer: TsGuardExpr)(inner: TsGuardExpr): String =
-    if (precedence(outer) > precedence(inner)) {
-      s"(${render(inner)})"
-    } else {
-      render(inner)
-    }
+    if precedence(outer) > precedence(inner)
+    then s"(${render(inner)})"
+    else render(inner)
 
   private def precedence(tpe: TsGuardExpr): Int =
-    tpe match {
+    tpe match
       case _: Ref         => 1000
       case _: Dot         => 1000
       case _: Arr         => 1000
@@ -138,5 +132,3 @@ object TsGuardExpr {
       case _: Cond        => 400
       case _: Func        => 300
       case _: Guard       => 300
-    }
-}

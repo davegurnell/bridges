@@ -48,7 +48,6 @@ Here's an example for Typescript:
 
 ~~~scala
 import bridges.typescript._
-import bridges.typescript.syntax._
 
 Typescript.render(List(
   decl[Color],
@@ -109,15 +108,14 @@ for defining structural types directly:
 ~~~scala
 import bridges.typescript._
 import bridges.typescript.TsType._
-import bridges.typescript.syntax._
 
 val logMessage: TsDecl =
   decl("LogMessage")(struct(
     "level" --> union(lit("error"), lit("warning")),
-    text    --> Str
+    text --> Str
   )
 
-Typescript.render(logMessage)
+    Typescript.render(logMessage)
 // res0: String =
 // export interface LogMessage {
 //   level: "error" | "warning";
@@ -131,7 +129,6 @@ which is something the shapeless derivation currently can't handle:
 ~~~scala
 import bridges.typescript._
 import bridges.typescript.TsType._
-import bridges.typescript.syntax._
 
 val pair: TsDecl =
   decl("Pair", "A", "B")(struct(
@@ -139,7 +136,7 @@ val pair: TsDecl =
     "tail" --> Ref("B"),
   )
 
-Typescript.render(pair)
+    Typescript.render(pair)
 // res0: String =
 // export interface Pair<A, B> {
 //   head: A;
