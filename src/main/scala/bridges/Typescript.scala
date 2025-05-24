@@ -1,4 +1,4 @@
-package bridges.typescript
+package bridges
 
 object Typescript extends TsTypeRenderer(true)
 

@@ -6,19 +6,19 @@ enablePlugins(GitBranchPrompt)
 organization := "com.davegurnell"
 name         := "bridges"
 
-ThisBuild / scalaVersion := "3.5.0"
+ThisBuild / scalaVersion := "3.6.4"
 
 ThisBuild / scalacOptions ++= Seq(
   "-feature",
   "-unchecked",
   "-deprecation",
-  "-Xfatal-warnings",
+  "-Xmax-inlines:64",
 )
 
 ThisBuild / libraryDependencies ++= Seq(
   "com.davegurnell"   %% "unindent"     % "1.8.0",
-  "org.apache.commons" % "commons-text" % "1.9",
-  "org.scalameta"     %% "munit"        % "1.0.1"  % Test,
+  "org.apache.commons" % "commons-text" % "1.12.0",
+  "org.scalameta"     %% "munit"        % "1.1.0"  % Test,
 )
 
 // Versioning -----------------------------------
@@ -65,8 +65,8 @@ ThisBuild / scmInfo := Some(
 ThisBuild / developers := List(
   Developer(
     id    = "davegurnell",
-    name  = "Dave Gurnell",
-    email = "dave@underscore.io",
+    name  = "Dave Pereira-Gurnell",
+    email = "dave@spacecat.io",
     url   = url("https://twitter.com/davegurnell")
   )
 )

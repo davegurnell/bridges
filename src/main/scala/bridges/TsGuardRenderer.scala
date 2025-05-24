@@ -1,24 +1,23 @@
-package bridges.typescript
+package bridges
 
-import unindent.*
+import unindent._
 
-abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""):
-  import TsGuardExpr.*
-  import TsType.{ func => _, ref => _, * }
+abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}""") {
+  import TsGuardExpr._
 
-  def render(decls: List[Decl]): String =
+  def render(decls: List[TsDecl]): String =
     decls.map(render).mkString("\n\n")
 
-  def render(decl: Decl): String =
+  def render(decl: TsDecl): String =
     decl match {
-      case Decl(name, Nil, tpe) =>
+      case TsDecl(name, Nil, tpe) =>
         i"""
         export const ${predName(decl.name)} = (v: any): v is ${name} => {
           return ${TsGuardExpr.render(isType(ref("v"), decl.tpe))};
         }
         """
 
-      case Decl(name, params, tpe) =>
+      case TsDecl(name, params, tpe) =>
         val tparams = renderParamTypes(params)
         val vparams = renderParamPreds(params)
         i"""
@@ -29,43 +28,46 @@ abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""
     }
 
   def renderParamTypes(params: List[String]): String =
-    if params.isEmpty
-    then ""
-    else params.mkString("<", ", ", ">")
+    if (params.isEmpty) {
+      ""
+    } else {
+      params.mkString("<", ", ", ">")
+    }
 
   def renderParamPreds(params: List[String]): String =
     params.map(param => s"${predName(param)}: (${param.toLowerCase}: any) => ${param.toLowerCase} is ${param}").mkString(", ")
 
-  import TsGuardExpr.*
-
-  def guardFunc(pair: (TsType, Int)): TsGuardExpr =
+  def guardFunc(pair: (TsType, Int)): TsGuardExpr = {
     val (tpe, index) = pair
-    val arg          = "a" + index
+    val arg = "a" + index
     guard(arg, tpe)(isType(ref(arg), tpe))
+  }
 
   def isType(arg: TsGuardExpr, tpe: TsType): TsGuardExpr =
-    tpe match
-      case TsType.Ref(id, Nil)         => call(ref(predName(id)), arg)
-      case TsType.Ref(id, params)      => call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
+    tpe match {
+      case TsType.Ref(id, Nil) =>
+        call(ref(predName(id)), arg)
+
+      case TsType.Ref(id, params) =>
+        call(Call(ref(predName(id)), params.zipWithIndex.map(guardFunc)), arg)
+
       case TsType.Any                  => lit(true)
       case TsType.Unknown              => lit(true)
       case TsType.Str                  => eql(typeof(arg), lit("string"))
-      case TsType.Chr                  => eql(typeof(arg), lit("string"))
-      case TsType.Intr                 => eql(typeof(arg), lit("number"))
-      case TsType.Real                 => eql(typeof(arg), lit("number"))
+      case TsType.Num                  => eql(typeof(arg), lit("number"))
       case TsType.Bool                 => eql(typeof(arg), lit("boolean"))
       case TsType.StrLit(value)        => eql(arg, lit(value))
-      case TsType.ChrLit(value)        => eql(arg, lit(value.toString))
-      case TsType.IntrLit(value)       => eql(arg, lit(value))
-      case TsType.RealLit(value)       => eql(arg, lit(value))
+      case TsType.NumLit(value)        => eql(arg, lit(value))
       case TsType.BoolLit(value)       => eql(arg, lit(value))
       case TsType.Null                 => eql(arg, nullLit)
       case TsType.Arr(tpe)             => isArray(arg, tpe)
       case TsType.Tuple(types)         => isTuple(arg, types)
       case TsType.Func(_, _)           => eql(typeof(arg), lit("function"))
       case TsType.Struct(fields, rest) => isStruct(arg, fields, rest)
+      case TsType.Record(key, value)   => isRecord(arg, key, value)
       case TsType.Inter(types)         => isAll(arg, types)
-      case TsType.Union(types)         => isUnion(arg, types)
+      case TsType.Union(cases)         => isUnion(arg, cases)
+    }
 
   private def isArray(expr: TsGuardExpr, tpe: TsType): TsGuardExpr =
     and(
@@ -73,16 +75,16 @@ abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""
       call(dot(expr, "every"), func("i")(isType(ref("i"), tpe)))
     )
 
-  private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
+  private def isTuple(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr = {
     val baseChecks = List(
       call(dot(ref("Array"), "isArray"), expr),
       eql(dot(expr, "length"), lit(types.length))
     )
 
-    val itemChecks: List[TsGuardExpr] =
-      types.zipWithIndex.map((tpe, idx) => isType(index(expr, idx), tpe))
+    val itemChecks = types.zipWithIndex.map { case (tpe, idx) => isType(index(expr, idx), tpe) }
 
     (baseChecks ++ itemChecks).reduceLeft(and(_, _))
+  }
 
   private def isStruct(expr: TsGuardExpr, fields: List[TsField], rest: Option[TsRestField]): TsGuardExpr = {
     val seed = and(eql(typeof(expr), lit("object")), not(isnull(expr)))
@@ -92,9 +94,11 @@ abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""
       .map { field =>
         val TsField(name, tpe, optional) = field
 
-        if optional
-        then or(not(in(name, expr)), isType(dot(expr, name), tpe))
-        else and(in(name, expr), isType(dot(expr, name), tpe))
+        if (optional) {
+          or(not(in(name, expr)), isType(dot(expr, name), tpe))
+        } else {
+          and(in(name, expr), isType(dot(expr, name), tpe))
+        }
       }
       .foldLeft(seed)(and(_, _))
 
@@ -138,30 +142,32 @@ abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""
     restExpr.fold(fieldsExpr)(restExpr => and(fieldsExpr, restExpr))
   }
 
+  private def isRecord(expr: TsGuardExpr, key: TsType, value: TsType): TsGuardExpr =
+    and(
+      eql(typeof(expr), lit("object")),
+      not(isnull(expr)),
+      call(
+        dot(call(dot(ref("Object"), "keys"), expr), "every"),
+        func("k")(
+          and(
+            isType(ref("k"), key),
+            isType(index(expr, ref("k")), value)
+          )
+        )
+      ),
+    )
+
   private def isUnion(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
-    types.collectAll { case tpe @ DiscriminatedBy(name, rest) => name -> rest } match
-      case Some(pairs) =>
-        and(
-          eql(typeof(expr), lit("object")),
-          not(isnull(expr)),
-          in("type", expr),
-          isDiscriminated(expr, pairs)
-        )
+    types.collectAll { case DiscriminatedBy(name, rest) => name -> rest } match {
+      case Some(pairs) => and(eql(typeof(expr), lit("object")), not(isnull(expr)), in("type", expr), isDiscriminated(expr, pairs))
+      case None        => isAny(expr, types)
+    }
 
-      case None =>
-        isAny(expr, types)
-
-  private def isDiscriminated(expr: TsGuardExpr, types: List[(String, TsType.Struct)]): TsGuardExpr =
-    types match
-      case Nil =>
-        lit(false)
-
-      case (name, head) :: tail =>
-        cond(
-          eql(dot(expr, "type"), lit(name)),
-          isType(expr, head),
-          isDiscriminated(expr, tail)
-        )
+  private def isDiscriminated(expr: TsGuardExpr, types: List[(String, TsType)]): TsGuardExpr =
+    types.map {
+      case (name, head) =>
+        and(eql(dot(expr, "type"), lit(name)), isType(expr, head))
+    }.reduceLeftOption(or(_, _)).getOrElse(lit(false))
 
   private def isAny(expr: TsGuardExpr, types: List[TsType]): TsGuardExpr =
     types
@@ -175,20 +181,31 @@ abstract class TsGuardRenderer(predName: String => String = id => s"""is${id}"""
       .reduceLeftOption(and(_, _))
       .getOrElse(lit(true))
 
-  extension [A](list: List[A])
-    def collectAll[B](func: PartialFunction[A, B]): Option[List[B]] =
+  // private def labelledToPair(labelled: TsLabelled): (String, TsType) =
+  //   (labelled.name, labelled.tpe)
+
+  implicit private class ListOps[A](list: List[A]) {
+    def collectAll[B](func: PartialFunction[A, B]): Option[List[B]] = {
       val temp = list.collect(func)
       if (temp.length == list.length) Some(temp) else None
+    }
+  }
 
-  private object DiscriminatedBy:
-    def unapply(tpe: TsType): Option[(String, TsType.Struct)] =
-      tpe match
+  private object DiscriminatedBy {
+    def unapply(tpe: TsType): Option[(String, TsType)] =
+      tpe match {
         case TsType.Struct(fields, _) =>
           fields.collectFirst { case decl @ TsField("type", TsType.StrLit(name), _) =>
             (name, TsType.Struct(fields.filterNot(_ == decl)))
           }
 
+        case TsType.Inter(cases) =>
+          cases.collectFirst { case decl @ TsType.Struct(List(TsField("type", TsType.StrLit(name), _)), _) =>
+            (name, TsType.Union(cases.filterNot(_ == decl)))
+          }
+
         case _ =>
           None
-  end DiscriminatedBy
-end TsGuardRenderer
+      }
+  }
+}

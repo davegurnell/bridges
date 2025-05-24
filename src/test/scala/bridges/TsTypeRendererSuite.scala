@@ -1,13 +1,12 @@
-package bridges.typescript
+package bridges
 
+import bridges.TsType._
+import bridges.syntax._
+import bridges.SampleTypes._
 import munit.FunSuite
-import unindent.*
+import unindent._
 
-class TsTypeRendererSpec extends FunSuite:
-  import SampleTypes.*
-  import TsType.*
-  import syntax.*
-
+class TsTypeRendererSuite extends FunSuite {
   test("Color") {
     assertEquals(
       Typescript.render(decl[Color]),
@@ -50,7 +49,7 @@ class TsTypeRendererSpec extends FunSuite:
     assertEquals(
       Typescript.render(decl[Shape]),
       i"""
-      export type Shape = { type: "Circle", radius: number, color: Color } | { type: "Rectangle", width: number, height: number, color: Color } | { type: "ShapeGroup", leftShape: Shape, rightShape: Shape };
+      export type Shape = ({ type: "Circle" } & Circle) | ({ type: "Rectangle" } & Rectangle) | ({ type: "ShapeGroup" } & ShapeGroup);
       """
     )
   }
@@ -107,7 +106,7 @@ class TsTypeRendererSpec extends FunSuite:
     assertEquals(
       Typescript.render(decl[ClassOrObject]),
       i"""
-      export type ClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };
+      export type ClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);
       """
     )
   }
@@ -116,7 +115,7 @@ class TsTypeRendererSpec extends FunSuite:
     assertEquals(
       Typescript.render(decl[NestedClassOrObject]),
       i"""
-      export type NestedClassOrObject = { type: "MyClass", value: number } | { type: "MyObject" };
+      export type NestedClassOrObject = ({ type: "MyClass" } & MyClass) | ({ type: "MyObject" } & MyObject);
       """
     )
   }
@@ -125,7 +124,7 @@ class TsTypeRendererSpec extends FunSuite:
     assertEquals(
       Typescript.render(decl[Navigation]),
       i"""
-      export type Navigation = { type: "Node", name: string, children: Navigation[] } | { type: "NodeList", all: Navigation[] };
+      export type Navigation = ({ type: "NodeList" } & NodeList) | ({ type: "Node" } & Node);
       """
     )
   }
@@ -192,14 +191,14 @@ class TsTypeRendererSpec extends FunSuite:
     assertEquals(
       Typescript.render(decl[ObjectsOnly]),
       i"""
-      export type ObjectsOnly = { type: "ObjectOne" } | { type: "ObjectTwo" };
+      export type ObjectsOnly = ({ type: "ObjectOne" } & ObjectOne) | ({ type: "ObjectTwo" } & ObjectTwo);
       """
     )
   }
 
   test("Union of Union") {
     assertEquals(
-      Typescript.render(decl("A")(union(Ref("B"), Ref("C"), Ref("D")))),
+      Typescript.render(decl("A")(Ref("B") | Ref("C") | Ref("D"))),
       i"""
       export type A = B | C | D;
       """
@@ -208,7 +207,7 @@ class TsTypeRendererSpec extends FunSuite:
 
   test("Inter of Inter") {
     assertEquals(
-      Typescript.render(decl("A")(intersect(Ref("B"), Ref("C"), Ref("D")))),
+      Typescript.render(decl("A")(Ref("B") & Ref("C") & Ref("D"))),
       i"""
       export type A = B & C & D;
       """
@@ -220,8 +219,8 @@ class TsTypeRendererSpec extends FunSuite:
       Typescript.render(
         decl("Pair", "A", "B")(
           struct(
-            "a" --> Ref("A"),
-            "b" -?> Ref("B")
+            "a" ---> Ref("A"),
+            "b" --?> Ref("B")
           )
         )
       ),
@@ -236,7 +235,7 @@ class TsTypeRendererSpec extends FunSuite:
 
   test("Applications of Generics") {
     assertEquals(
-      Typescript.render(decl("Cell")(ref("Pair", Str, Intr))),
+      Typescript.render(decl("Cell")(ref("Pair", Str, Num))),
       i"""
       export type Cell = Pair<string, number>;
       """
@@ -274,7 +273,7 @@ class TsTypeRendererSpec extends FunSuite:
 
   test("Tuple") {
     assertEquals(
-      Typescript.render(decl("Cell")(tuple(Str, Intr))),
+      Typescript.render(decl("Cell")(tuple(Str, Num))),
       i"""
       export type Cell = [string, number];
       """
@@ -292,11 +291,9 @@ class TsTypeRendererSpec extends FunSuite:
 
   test("Structs with rest fields") {
     assertEquals(
-      Typescript.render(decl("Dict")(dict(Str, Intr))),
+      Typescript.render(decl("Dict")(record(Str, Num))),
       i"""
-      export interface Dict {
-        [key: string]: number;
-      }
+      export type Dict = Record<string, number>;
       """
     )
 
@@ -304,8 +301,8 @@ class TsTypeRendererSpec extends FunSuite:
       Typescript.render(
         decl("Dict")(
           struct(
-            "a" --> Str,
-            "b" -?> Intr
+            "a" ---> Str,
+            "b" --?> Num
           ).withRest(Str, Bool, "c")
         )
       ),
@@ -321,7 +318,7 @@ class TsTypeRendererSpec extends FunSuite:
 
   test("Unknown and any") {
     assertEquals(
-      Typescript.render(decl("UnknownAndAny")(struct("foo" --> Any, "bar" --> Unknown))),
+      Typescript.render(decl("UnknownAndAny")(struct("foo" ---> Any, "bar" ---> Unknown))),
       i"""
       export interface UnknownAndAny {
         foo: any;
@@ -336,8 +333,8 @@ class TsTypeRendererSpec extends FunSuite:
       Typescript.render(
         decl("Rule")(
           struct(
-            "message" --> Str,
-            "apply" --> func("value" -> Unknown)(Bool)
+            "message" ---> Str,
+            "apply"   ---> func("value" -> Unknown)(Bool)
           )
         )
       ),
@@ -350,9 +347,10 @@ class TsTypeRendererSpec extends FunSuite:
     )
 
     assertEquals(
-      Typescript.render(decl("Funcy")(tuple(func("arg" -> tuple(Str))(tuple(Str)), func("arg" -> tuple(Intr))(tuple(Intr))))),
+      Typescript.render(decl("Funcy")(tuple(func("arg" -> tuple(Str))(tuple(Str)), func("arg" -> tuple(Num))(tuple(Num))))),
       i"""
       export type Funcy = [(arg: [string]) => [string], (arg: [number]) => [number]];
       """
     )
   }
+}
